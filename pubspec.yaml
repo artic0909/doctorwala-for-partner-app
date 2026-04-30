@@ -39,6 +39,7 @@ dependencies:
   lottie: ^3.3.1
   glassmorphism_ui: ^0.3.0
   flutter_svg: ^2.2.2
+  carousel_slider: ^5.1.2
 
 dev_dependencies:
   flutter_test:
@@ -65,8 +66,12 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/logo.png
-    - assets/images/illustration.png
+    - assets/images/splash.png
+    - assets/images/splasbottom.png
     - assets/images/growth.png
+    - assets/images/carousel_lab.png
+    - assets/images/carousel_opd.png
+    - assets/images/illustration.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

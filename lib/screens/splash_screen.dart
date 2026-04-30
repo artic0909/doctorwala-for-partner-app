@@ -12,241 +12,297 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  int _currentBenefitIndex = 0;
-  final List<Map<String, String>> _benefits = [
-    {
-      'title': 'Expand Your Reach',
-      'desc': 'Connect with 10,000+ patients in your locality effortlessly.',
-      'icon': '🚀'
-    },
-    {
-      'title': 'Smart Management',
-      'desc': 'Digitalize appointments, records, and reports in one click.',
-      'icon': '📊'
-    },
-    {
-      'title': 'Trusted Partnership',
-      'desc': 'Join India\'s fastest growing healthcare network for partners.',
-      'icon': '🤝'
-    },
-  ];
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _floatController;
 
   @override
   void initState() {
     super.initState();
-    _startBenefitCycle();
-    _navigateToLogin();
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
   }
 
-  _startBenefitCycle() async {
-    for (int i = 0; i < _benefits.length; i++) {
-      await Future.delayed(const Duration(milliseconds: 2500));
-      if (mounted) {
-        setState(() {
-          _currentBenefitIndex = (i + 1) % _benefits.length;
-        });
-      }
-    }
-  }
-
-  _navigateToLogin() async {
-    await Future.delayed(const Duration(seconds: 8)); // Longer splash to show benefits
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 1000),
-        ),
-      );
-    }
+  @override
+  void dispose() {
+    _floatController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Background Gradient with subtle pattern
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: AppColors.splashGradient,
+          // 1. MATCHING COLOR BACKGROUND FOR THE BOTTOM WAVE AREA
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 100, // Sufficient height to fill the bottom area
+              color: AppColors.waveBlue.withOpacity(0.4), // Light blue matching the asset
+            ),
+          ),
+
+          // 2. BOTTOM WAVY IMAGE - LOCKED AT ABSOLUTE BOTTOM
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              AppAssets.splashBottom,
+              width: MediaQuery.of(context).size.width,
+              fit: BoxFit.fitWidth,
+              alignment: Alignment.bottomCenter,
             ),
           ),
           
-          // Subtle background circles for depth
+          // FLOATING LOGO - TOP RIGHT
           Positioned(
-            top: -100,
-            right: -100,
-            child: _buildBackgroundCircle(300, Colors.white.withOpacity(0.05)),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -50,
-            child: _buildBackgroundCircle(200, Colors.white.withOpacity(0.05)),
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 25,
+            child: AnimatedBuilder(
+              animation: _floatController,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, 10 * _floatController.value),
+                  child: child,
+                );
+              },
+              child: FadeInRight(
+                child: Image.asset(
+                  AppAssets.logo,
+                  height: 55,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
           ),
 
+          // CONTENT SECTION
           SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                
-                // Logo Section
-                ZoomIn(
-                  duration: const Duration(milliseconds: 1000),
-                  child: Container(
-                    padding: const EdgeInsets.all(25),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      AppAssets.logo,
-                      height: 100,
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                children: [
+                  const SizedBox(height: 5),
+                  
+                  // HERO IMAGE
+                  FadeInDown(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Image.asset(
+                        AppAssets.splash,
+                        height: 280,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // Brand Name
-                FadeInDown(
-                  delay: const Duration(milliseconds: 500),
-                  child: Column(
-                    children: [
-                      Text(
-                        'DOCTORWALA',
-                        style: GoogleFonts.outfit(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 4,
-                        ),
-                      ),
-                      Container(
-                        height: 2,
-                        width: 100,
-                        margin: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.transparent, Colors.white.withOpacity(0.5), Colors.transparent],
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'P A R T N E R   P A N E L',
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w300,
-                          color: Colors.white.withOpacity(0.8),
-                          letterSpacing: 6,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const Spacer(),
-                
-                // Marketing / Benefits Section
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  height: 180,
-                  child: FadeInUp(
-                    key: ValueKey(_currentBenefitIndex),
-                    duration: const Duration(milliseconds: 800),
+                  
+                  // Marketing Content
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _benefits[_currentBenefitIndex]['icon']!,
-                          style: const TextStyle(fontSize: 40),
+                        FadeInLeft(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Welcome to',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                'Doctorwala',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 42,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.navy,
+                                  height: 1.0,
+                                ),
+                              ),
+                              Text(
+                                'Medical Ecosystem Partner Portal',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        
                         const SizedBox(height: 15),
-                        Text(
-                          _benefits[_currentBenefitIndex]['title']!,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.outfit(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        
+                        // BLUE PORTAL BOX
+                        FadeInLeft(
+                          delay: const Duration(milliseconds: 200),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppColors.navy,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.navy.withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.apartment_rounded, color: Colors.white, size: 24),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'OPD & Pathology Clinics',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 6),
+                                  child: Row(
+                                    children: [
+                                      Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        child: Text(
+                                          'OR',
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 12,
+                                            color: AppColors.teal,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.person_pin_rounded, color: Colors.white, size: 24),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Individual Doctors Portal',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          _benefits[_currentBenefitIndex]['desc']!,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.outfit(
-                            fontSize: 15,
-                            color: Colors.white.withOpacity(0.7),
-                            height: 1.4,
+                        
+                        const SizedBox(height: 15),
+                        
+                        // TAGLINE
+                        FadeInLeft(
+                          delay: const Duration(milliseconds: 400),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Manage your practice. Serve better.',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                'Grow together with us.',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.teal,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                        
+                        const SizedBox(height: 30),
+                        
+                        // GET STARTED BUTTON
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 600),
+                          child: Container(
+                            width: double.infinity,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.getStartedGradient,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.teal.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Get Started',
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 22),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 100), 
                       ],
                     ),
                   ),
-                ),
-                
-                // Indicator
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    _benefits.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: _currentBenefitIndex == index ? 20 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _currentBenefitIndex == index ? AppColors.accent : Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 50),
-                
-                // Bottom loading text
-                FadeIn(
-                  delay: const Duration(milliseconds: 1500),
-                  child: Text(
-                    'Initializing Premium Partner Tools...',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.5),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ],
+                ],
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBackgroundCircle(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
       ),
     );
   }

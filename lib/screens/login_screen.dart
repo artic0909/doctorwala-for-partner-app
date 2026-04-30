@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:glassmorphism_ui/glassmorphism_ui.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../core/app_colors.dart';
 import '../core/app_assets.dart';
 
@@ -12,278 +12,402 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isObscure = true;
+  int _currentCarouselIndex = 0;
+  late AnimationController _floatController;
+
+  final List<Map<String, dynamic>> _carouselItems = [
+    {
+      'title': 'Manage Your\nPractice Smartly',
+      'subtitle': 'Appointments, Patients,\nReports & More',
+      'image': AppAssets.illustration, 
+      'color': const Color(0xFFF0F9F8), 
+    },
+    {
+      'title': 'Grow Your\nPractice With Us',
+      'subtitle': 'Reach More Patients,\nBuild Trust',
+      'image': AppAssets.growth,
+      'color': const Color(0xFFF0F7FF),
+    },
+    {
+      'title': 'Lab Automation\nMade Easy',
+      'subtitle': 'Digitalize Pathology &\nLab reports',
+      'image': AppAssets.carouselLab,
+      'color': const Color(0xFFF9F0FF),
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header with Marketing Illustration
-            Stack(
-              children: [
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.45,
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(60),
-                      bottomRight: Radius.circular(60),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 50,
-                  left: 20,
-                  right: 20,
-                  child: Column(
-                    children: [
-                      FadeInDown(
-                        child: Image.asset(
-                          AppAssets.growth, // New marketing illustration
-                          height: 220,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      FadeInDown(
-                        delay: const Duration(milliseconds: 300),
-                        child: Text(
-                          'Grow Your Practice Today',
-                          style: GoogleFonts.outfit(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      FadeInDown(
-                        delay: const Duration(milliseconds: 500),
-                        child: Text(
-                          'Manage your clinic with Doctorwala Intelligence',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      backgroundColor: Colors.white,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // BOTTOM FIXED DESIGN
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 100,
+              color: AppColors.waveBlue.withOpacity(0.4),
             ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              AppAssets.splashBottom,
+              width: MediaQuery.of(context).size.width,
+              fit: BoxFit.fitWidth,
+              alignment: Alignment.bottomCenter,
+            ),
+          ),
 
-            const SizedBox(height: 20),
+          // FLOATING LOGO - TOP RIGHT (Same as Splash)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 25,
+            child: AnimatedBuilder(
+              animation: _floatController,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, 10 * _floatController.value),
+                  child: child,
+                );
+              },
+              child: FadeInRight(
+                child: Image.asset(
+                  AppAssets.logo,
+                  height: 50,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
 
-            // Login Form
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: FadeInUp(
-                duration: const Duration(milliseconds: 1000),
-                child: GlassContainer(
-                  blur: 15,
-                  opacity: 0.1,
-                  shadowStrength: 8,
-                  borderRadius: BorderRadius.circular(30),
-                  child: Padding(
-                    padding: const EdgeInsets.all(30.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Partner Login',
-                          style: GoogleFonts.outfit(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark,
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: screenHeight - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    
+                    // HEADER
+                    FadeInDown(
+                      child: Column(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.manrope(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.navy,
+                              ),
+                              children: [
+                                const TextSpan(text: 'Partner '),
+                                TextSpan(
+                                  text: 'Portal',
+                                  style: TextStyle(color: AppColors.teal),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          'Access your dashboard to manage everything.',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: Colors.grey,
+                          const SizedBox(height: 4),
+                          Text(
+                            'OPD & Pathology Clinics OR Individual Doctors',
+                            style: GoogleFonts.manrope(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 30),
-                        _buildTextField(
-                          controller: _emailController,
-                          hint: 'Registered Email',
-                          icon: Icons.alternate_email,
-                        ),
-                        const SizedBox(height: 20),
-                        _buildTextField(
-                          controller: _passwordController,
-                          hint: 'Secure Password',
-                          icon: Icons.lock_person_outlined,
-                          isPassword: true,
-                          isObscure: _isObscure,
-                          onToggle: () {
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // CAROUSEL
+                    FadeIn(
+                      delay: const Duration(milliseconds: 300),
+                      child: CarouselSlider(
+                        options: CarouselOptions(
+                          height: 150,
+                          viewportFraction: 0.88,
+                          enlargeCenterPage: true,
+                          autoPlay: true,
+                          onPageChanged: (index, reason) {
                             setState(() {
-                              _isObscure = !_isObscure;
+                              _currentCarouselIndex = index;
                             });
                           },
                         ),
-                        const SizedBox(height: 15),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Recovery Password?',
-                              style: GoogleFonts.outfit(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
+                        items: _carouselItems.map((item) {
+                          return Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: item['color'],
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            padding: const EdgeInsets.all(15),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        item['title'],
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.navy,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item['subtitle'],
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 10,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Image.asset(item['image'], fit: BoxFit.contain),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // INDICATORS
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _carouselItems.length,
+                        (index) => Container(
+                          width: 6,
+                          height: 6,
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentCarouselIndex == index
+                                ? AppColors.navy
+                                : Colors.grey[300],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // FORM SECTION
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome Back!',
+                            style: GoogleFonts.manrope(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.navy,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildInputField(
+                            controller: _emailController,
+                            label: 'Mobile Number / Email ID',
+                            hint: 'Enter mobile number or email',
+                            icon: Icons.alternate_email_rounded,
+                          ),
+                          const SizedBox(height: 15),
+                          _buildInputField(
+                            controller: _passwordController,
+                            label: 'Password',
+                            hint: 'Enter your password',
+                            icon: Icons.lock_person_outlined,
+                            isPassword: true,
+                            isObscure: _isObscure,
+                            onToggle: () => setState(() => _isObscure = !_isObscure),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                'Forgot Password?',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.navy,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        _buildLoginButton(),
-                      ],
+                          const SizedBox(height: 5),
+                          _buildLoginButton(),
+                          
+                          const SizedBox(height: 20),
+                          
+                          // REGISTER CTA - Moved right after Login button
+                          FadeInUp(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account? ",
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {},
+                                  child: Text(
+                                    "Register Now",
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.teal,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 120), // Bottom padding for footer
+                  ],
                 ),
               ),
             ),
-
-            const SizedBox(height: 25),
-
-            // Registration CTA
-            FadeInUp(
-              delay: const Duration(milliseconds: 600),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "New to Doctorwala? ",
-                    style: GoogleFonts.outfit(color: Colors.grey[700]),
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Text(
-                      "Apply for Partnership",
-                      style: GoogleFonts.outfit(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Trust Indicators
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildTrustItem('500+', 'Active Clinics'),
-                      _buildTrustItem('10k+', 'Patients/mo'),
-                      _buildTrustItem('4.8/5', 'Partner Rating'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTrustItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: GoogleFonts.outfit(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-        Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 10,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField({
+  Widget _buildInputField({
     required TextEditingController controller,
+    required String label,
     required String hint,
     required IconData icon,
     bool isPassword = false,
     bool isObscure = false,
     VoidCallback? onToggle,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          child: Text(
+            label,
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.navy,
+            ),
           ),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: isObscure,
-        style: GoogleFonts.outfit(),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: GoogleFonts.outfit(color: Colors.grey[400], fontSize: 14),
-          prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(
-                    isObscure ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey[400],
-                    size: 20,
-                  ),
-                  onPressed: onToggle,
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         ),
-      ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(color: Colors.grey[100]!, width: 1.5),
+          ),
+          child: TextField(
+            controller: controller,
+            obscureText: isObscure,
+            style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w600),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: GoogleFonts.manrope(color: Colors.grey[400], fontSize: 13),
+              prefixIcon: Icon(icon, color: AppColors.teal, size: 20),
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        isObscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                        color: Colors.grey[400],
+                        size: 20,
+                      ),
+                      onPressed: onToggle,
+                    )
+                  : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildLoginButton() {
     return Container(
       width: double.infinity,
-      height: 60,
+      height: 58,
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(18),
+        gradient: AppColors.getStartedGradient,
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.4),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: AppColors.teal.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -292,24 +416,22 @@ class _LoginScreenState extends State<LoginScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'SIGN IN TO DASHBOARD',
-              style: GoogleFonts.outfit(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              'Login',
+              style: GoogleFonts.manrope(
+                fontSize: 17,
+                fontWeight: FontWeight.w900,
                 color: Colors.white,
-                letterSpacing: 1,
+                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(width: 10),
-            const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
           ],
         ),
       ),
