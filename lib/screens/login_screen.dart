@@ -4,7 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../core/app_colors.dart';
 import '../core/app_assets.dart';
+import '../core/api_service.dart';
+import '../core/session_manager.dart';
 import 'register_screen.dart';
+import 'dashboard/dashboard.dart';
+import 'coupon_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isClinic;
@@ -18,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isObscure = true;
+  bool _isLoading = false;
   int _currentCarouselIndex = 0;
   late AnimationController _floatController;
 
@@ -437,6 +442,107 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 
+  void _handleLogin() async {
+    final emailOrMobile = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (emailOrMobile.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please fill in both mobile/email and password.',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await ApiService.login(
+        emailOrMobile: emailOrMobile,
+        password: password,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (!mounted) return;
+
+      if (response['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response['message'] ?? 'Login successful!',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: AppColors.teal,
+          ),
+        );
+        final partnerData = response['partner'] as Map<String, dynamic>;
+        final String status = partnerData['status']?.toString() ?? 'Pending';
+        final String token = response['token'] ?? '';
+
+        // Save persistent session locally
+        await SessionManager.saveSession(
+          token: token,
+          partnerData: partnerData,
+        );
+
+        if (!mounted) return;
+
+        if (status.toLowerCase() == 'pending') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CouponScreen(
+                partnerData: partnerData,
+                token: token,
+              ),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardScreen(partnerData: partnerData),
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response['message'] ?? 'Incorrect credentials.',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to authenticate. Please check your internet connection.',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
   Widget _buildLoginButton() {
     return Container(
       width: double.infinity,
@@ -458,7 +564,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: _isLoading ? null : _handleLogin,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
@@ -466,22 +572,31 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             borderRadius: BorderRadius.circular(18),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Login',
-              style: GoogleFonts.manrope(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 0.5,
+        child: _isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Login',
+                    style: GoogleFonts.manrope(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                ],
               ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-          ],
-        ),
       ),
     );
   }

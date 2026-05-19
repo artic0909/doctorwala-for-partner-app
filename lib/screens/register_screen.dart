@@ -4,7 +4,10 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/app_assets.dart';
+import '../core/api_service.dart';
+import '../core/session_manager.dart';
 import 'login_screen.dart';
+import 'coupon_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -31,6 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   final _captchaInputController = TextEditingController();
 
   bool _isObscure = true;
+  bool _isLoading = false;
   String? _selectedState;
   String _captchaText = '';
 
@@ -79,7 +83,30 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     });
   }
 
-  void _submitRegistration() {
+  void _submitRegistration() async {
+    // Basic field validation
+    if (_clinicNameController.text.trim().isEmpty ||
+        _contactPersonController.text.trim().isEmpty ||
+        _mobileController.text.trim().isEmpty ||
+        _emailController.text.trim().isEmpty ||
+        _selectedState == null ||
+        _cityController.text.trim().isEmpty ||
+        _pinCodeController.text.trim().isEmpty ||
+        _landmarkController.text.trim().isEmpty ||
+        _addressController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please fill in all required fields marked with *',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+      return;
+    }
+
     // Validate Captcha
     if (_captchaInputController.text.trim() != _captchaText) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -95,22 +122,93 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       return;
     }
 
-    // Success Simulation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Registration request submitted successfully!',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: AppColors.teal,
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Return to Login
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+    try {
+      final response = await ApiService.register(
+        clinicName: _clinicNameController.text.trim(),
+        contactPerson: _contactPersonController.text.trim(),
+        mobileNumber: _mobileController.text.trim(),
+        email: _emailController.text.trim(),
+        state: _selectedState!,
+        city: _cityController.text.trim(),
+        pincode: _pinCodeController.text.trim(),
+        landmark: _landmarkController.text.trim(),
+        address: _addressController.text.trim(),
+        password: _passwordController.text.trim(),
+        clientCategory: _selectedType,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (!mounted) return;
+
+      if (response['success'] == true) {
+        // Save persistent session locally
+        await SessionManager.saveSession(
+          token: response['token'] ?? '',
+          partnerData: response['partner'] as Map<String, dynamic>,
+        );
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response['message'] ?? 'Registration successful!',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: AppColors.teal,
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CouponScreen(
+              partnerData: response['partner'],
+              token: response['token'] ?? '',
+            ),
+          ),
+        );
+      } else {
+        // Handle validation errors from backend
+        String errorMessage = response['message'] ?? 'Registration failed.';
+        if (response['errors'] != null && response['errors'] is Map) {
+          final errors = response['errors'] as Map;
+          final firstErrorList = errors.values.first;
+          if (firstErrorList is List && firstErrorList.isNotEmpty) {
+            errorMessage = firstErrorList.first.toString();
+          }
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              errorMessage,
+              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'An unexpected error occurred. Please try again.',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   Widget _buildStepIndicator() {
@@ -962,7 +1060,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   ],
                 ),
                 child: ElevatedButton(
-                  onPressed: _submitRegistration,
+                  onPressed: _isLoading ? null : _submitRegistration,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
@@ -970,22 +1068,31 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       borderRadius: BorderRadius.circular(18),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Register Now',
-                        style: GoogleFonts.manrope(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Register Now',
+                              style: GoogleFonts.manrope(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                    ],
-                  ),
                 ),
               ),
             ],

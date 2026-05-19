@@ -3,7 +3,10 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/app_assets.dart';
+import '../core/session_manager.dart';
 import 'login_screen.dart';
+import 'coupon_screen.dart';
+import 'dashboard/dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,6 +26,45 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+    
+    _checkActiveSession();
+  }
+
+  void _checkActiveSession() async {
+    // Elegant delay to allow the beautiful brand animations to initialize
+    await Future.delayed(const Duration(milliseconds: 1200));
+    
+    final bool hasSession = await SessionManager.hasSession();
+    
+    if (hasSession) {
+      final token = await SessionManager.getToken();
+      final partnerData = await SessionManager.getPartnerData();
+      
+      if (!mounted) return;
+      
+      if (token != null && partnerData != null) {
+        final String status = partnerData['status']?.toString() ?? 'Pending';
+        
+        if (status.toLowerCase() == 'pending') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CouponScreen(
+                partnerData: partnerData,
+                token: token,
+              ),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardScreen(partnerData: partnerData),
+            ),
+          );
+        }
+      }
+    }
   }
 
   @override
