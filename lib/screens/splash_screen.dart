@@ -12,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _floatController;
 
   @override
@@ -44,7 +45,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             right: 0,
             child: Container(
               height: 100, // Sufficient height to fill the bottom area
-              color: AppColors.waveBlue.withOpacity(0.4), // Light blue matching the asset
+              color: AppColors.waveBlue.withOpacity(
+                0.4,
+              ), // Light blue matching the asset
             ),
           ),
 
@@ -60,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               alignment: Alignment.bottomCenter,
             ),
           ),
-          
+
           // FLOATING LOGO - TOP RIGHT
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
@@ -90,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               child: Column(
                 children: [
                   const SizedBox(height: 5),
-                  
+
                   // HERO IMAGE
                   FadeInDown(
                     child: Padding(
@@ -102,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       ),
                     ),
                   ),
-                  
+
                   // Marketing Content
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -114,111 +117,241 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Welcome to',
+                                'WELCOME TO',
                                 style: GoogleFonts.manrope(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.teal,
+                                  letterSpacing: 2.0,
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 'Doctorwala',
                                 style: GoogleFonts.manrope(
-                                  fontSize: 42,
+                                  fontSize: 44,
                                   fontWeight: FontWeight.w900,
                                   color: AppColors.navy,
-                                  height: 1.0,
+                                  height: 1.1,
+                                  letterSpacing: -1.0,
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 'Medical Ecosystem Partner Portal',
                                 style: GoogleFonts.manrope(
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                   color: AppColors.textSecondary,
+                                  letterSpacing: -0.2,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        
-                        const SizedBox(height: 15),
-                        
-                        // BLUE PORTAL BOX
+
+                        const SizedBox(height: 20),
+
+                        // REDESIGNED PREMIUM PORTAL BOX
                         FadeInLeft(
                           delay: const Duration(milliseconds: 200),
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: AppColors.navy,
-                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.navy,
+                                  AppColors.navy.withBlue(100), // Elegant slate-sapphire gradient
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.navy.withOpacity(0.3),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 8),
+                                  color: AppColors.navy.withOpacity(0.25),
+                                  blurRadius: 25,
+                                  offset: const Offset(0, 12),
+                                ),
+                                BoxShadow(
+                                  color: AppColors.teal.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, -2),
                                 ),
                               ],
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.12),
+                                width: 1.5,
+                              ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.apartment_rounded, color: Colors.white, size: 24),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'OPD & Pathology Clinics',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
-                                  child: Row(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
-                                      Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                                        child: Text(
-                                          'OR',
-                                          style: GoogleFonts.manrope(
-                                            fontSize: 12,
-                                            color: AppColors.teal,
-                                            fontWeight: FontWeight.w900,
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.08),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.15),
+                                            width: 1,
                                           ),
                                         ),
+                                        child: const Icon(
+                                          Icons.apartment_rounded,
+                                          color: AppColors.teal,
+                                          size: 24,
+                                        ),
                                       ),
-                                      Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Doctor Chamber & Pathology Clinics',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                                letterSpacing: -0.2,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'OPD, diagnostic labs & chambers',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.white.withOpacity(0.5),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.person_pin_rounded, color: Colors.white, size: 24),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'Individual Doctors Portal',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
                                     ),
-                                  ],
-                                ),
-                              ],
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            height: 1,
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  Colors.white.withOpacity(0.01),
+                                                  Colors.white.withOpacity(0.15),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                          ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(0.08),
+                                              borderRadius: BorderRadius.circular(100),
+                                              border: Border.all(
+                                                color: Colors.white.withOpacity(0.15),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'OR',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 10,
+                                                color: AppColors.teal,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 1.0,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            height: 1,
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  Colors.white.withOpacity(0.15),
+                                                  Colors.white.withOpacity(0.01),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.08),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.15),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.person_pin_rounded,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Individual Doctors Portal',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                                letterSpacing: -0.2,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Private practitioners & consultants',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.white.withOpacity(0.5),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        
-                        const SizedBox(height: 15),
-                        
+
+                        const SizedBox(height: 20),
+
                         // TAGLINE
                         FadeInLeft(
                           delay: const Duration(milliseconds: 400),
@@ -243,9 +376,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             ],
                           ),
                         ),
-                        
-                        const SizedBox(height: 30),
-                        
+
+                        const SizedBox(height: 25),
+
                         // GET STARTED BUTTON
                         FadeInUp(
                           delay: const Duration(milliseconds: 600),
@@ -254,12 +387,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             height: 60,
                             decoration: BoxDecoration(
                               gradient: AppColors.getStartedGradient,
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColors.teal.withOpacity(0.3),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 8),
+                                ),
+                                BoxShadow(
+                                  color: AppColors.navy.withOpacity(0.15),
                                   blurRadius: 10,
-                                  offset: const Offset(0, 5),
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -267,13 +405,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                               onPressed: () {
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
                                 );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -282,19 +424,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                                     'Get Started',
                                     style: GoogleFonts.manrope(
                                       fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w800,
                                       color: Colors.white,
+                                      letterSpacing: 0.5,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 22),
+                                  const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
                                 ],
                               ),
                             ),
                           ),
                         ),
-                        
-                        const SizedBox(height: 100), 
+
+                        const SizedBox(height: 100),
                       ],
                     ),
                   ),

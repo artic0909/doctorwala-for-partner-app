@@ -6,7 +6,8 @@ import '../core/app_colors.dart';
 import '../core/app_assets.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final bool isClinic;
+  const LoginScreen({super.key, this.isClinic = true});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -131,37 +132,41 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 fontSize: 28,
                                 fontWeight: FontWeight.w900,
                                 color: AppColors.navy,
+                                letterSpacing: -0.8,
                               ),
                               children: [
-                                const TextSpan(text: 'Partner '),
+                                TextSpan(text: widget.isClinic ? 'Clinic ' : 'Doctor '),
                                 TextSpan(
-                                  text: 'Portal',
+                                  text: 'Partner',
                                   style: TextStyle(color: AppColors.teal),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
-                            'OPD & Pathology Clinics OR Individual Doctors',
+                            widget.isClinic
+                                ? 'DOCTOR CHAMBER & PATHOLOGY CLINICS PORTAL'
+                                : 'INDIVIDUAL DOCTORS CONSULTATION PORTAL',
                             style: GoogleFonts.manrope(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
                               color: AppColors.textSecondary,
+                              letterSpacing: 1.0,
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 20),
 
                     // CAROUSEL
                     FadeIn(
                       delay: const Duration(milliseconds: 300),
                       child: CarouselSlider(
                         options: CarouselOptions(
-                          height: 150,
+                          height: 155,
                           viewportFraction: 0.88,
                           enlargeCenterPage: true,
                           autoPlay: true,
@@ -175,11 +180,25 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           return Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: item['color'],
-                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                colors: [
+                                  item['color'],
+                                  (item['color'] as Color).withOpacity(0.55),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
                               border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.navy.withOpacity(0.04),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
                             ),
-                            padding: const EdgeInsets.all(15),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                             child: Row(
                               children: [
                                 Expanded(
@@ -194,20 +213,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           fontSize: 16,
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.navy,
-                                          height: 1.2,
+                                          height: 1.25,
+                                          letterSpacing: -0.3,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: 5),
                                       Text(
                                         item['subtitle'],
                                         style: GoogleFonts.manrope(
-                                          fontSize: 10,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
                                           color: AppColors.textSecondary,
+                                          height: 1.3,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   flex: 2,
                                   child: Image.asset(item['image'], fit: BoxFit.contain),
@@ -219,28 +242,29 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
 
                     // INDICATORS
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
                         _carouselItems.length,
-                        (index) => Container(
-                          width: 6,
+                        (index) => AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: _currentCarouselIndex == index ? 16 : 6,
                           height: 6,
                           margin: const EdgeInsets.symmetric(horizontal: 3),
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(100),
                             color: _currentCarouselIndex == index
-                                ? AppColors.navy
+                                ? AppColors.teal
                                 : Colors.grey[300],
                           ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 25),
 
                     // FORM SECTION
                     Padding(
@@ -251,19 +275,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           Text(
                             'Welcome Back!',
                             style: GoogleFonts.manrope(
-                              fontSize: 18,
+                              fontSize: 22,
                               fontWeight: FontWeight.w900,
                               color: AppColors.navy,
+                              letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 15),
                           _buildInputField(
                             controller: _emailController,
                             label: 'Mobile Number / Email ID',
                             hint: 'Enter mobile number or email',
                             icon: Icons.alternate_email_rounded,
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 18),
                           _buildInputField(
                             controller: _passwordController,
                             label: 'Password',
@@ -290,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           const SizedBox(height: 5),
                           _buildLoginButton(),
                           
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 25),
                           
                           // REGISTER CTA - Moved right after Login button
                           FadeInUp(
@@ -351,31 +376,39 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             label,
             style: GoogleFonts.manrope(
               fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: AppColors.navy,
+              fontWeight: FontWeight.w700,
+              color: AppColors.navy.withOpacity(0.85),
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: AppColors.navy.withOpacity(0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
-            border: Border.all(color: Colors.grey[100]!, width: 1.5),
+            border: Border.all(color: Colors.grey[200]!, width: 1.5),
           ),
           child: TextField(
             controller: controller,
             obscureText: isObscure,
-            style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w600),
+            style: GoogleFonts.manrope(
+              fontSize: 15, 
+              fontWeight: FontWeight.w600,
+              color: AppColors.navy,
+            ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.manrope(color: Colors.grey[400], fontSize: 13),
+              hintStyle: GoogleFonts.manrope(
+                color: Colors.grey[400], 
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
               prefixIcon: Icon(icon, color: AppColors.teal, size: 20),
               suffixIcon: isPassword
                   ? IconButton(
@@ -402,12 +435,17 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       height: 58,
       decoration: BoxDecoration(
         gradient: AppColors.getStartedGradient,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: AppColors.teal.withOpacity(0.3),
-            blurRadius: 12,
+            color: AppColors.teal.withOpacity(0.35),
+            blurRadius: 15,
             offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppColors.navy.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -416,7 +454,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -425,12 +465,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               'Login',
               style: GoogleFonts.manrope(
                 fontSize: 17,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w800,
                 color: Colors.white,
                 letterSpacing: 0.5,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
           ],
         ),
