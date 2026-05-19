@@ -756,20 +756,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     ),
                   ),
                 ),
-                AnimatedBuilder(
-                  animation: _floatController,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 8 * _floatController.value),
-                      child: child,
-                    );
-                  },
-                  child: Image.asset(
-                    AppAssets.logo,
-                    height: 48,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+                const SizedBox(),
               ],
             ),
           ),
