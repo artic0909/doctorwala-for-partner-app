@@ -187,10 +187,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       Container(
                                         padding: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.08),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.08,
+                                          ),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: Colors.white.withValues(alpha: 0.15),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.15,
+                                            ),
                                             width: 1,
                                           ),
                                         ),
@@ -203,7 +207,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'Doctor Chamber & Pathology Clinics',
@@ -220,7 +225,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                               style: GoogleFonts.manrope(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w500,
-                                                color: Colors.white.withValues(alpha: 0.5),
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.5,
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -240,8 +247,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                             decoration: BoxDecoration(
                                               gradient: LinearGradient(
                                                 colors: [
-                                                  Colors.white.withValues(alpha: 0.01),
-                                                  Colors.white.withValues(alpha: 0.15),
+                                                  Colors.white.withValues(
+                                                    alpha: 0.01,
+                                                  ),
+                                                  Colors.white.withValues(
+                                                    alpha: 0.15,
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -257,10 +268,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                               vertical: 4,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withValues(alpha: 0.08),
-                                              borderRadius: BorderRadius.circular(100),
+                                              color: Colors.white.withValues(
+                                                alpha: 0.08,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
                                               border: Border.all(
-                                                color: Colors.white.withValues(alpha: 0.15),
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.15,
+                                                ),
                                                 width: 1,
                                               ),
                                             ),
@@ -281,8 +297,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                             decoration: BoxDecoration(
                                               gradient: LinearGradient(
                                                 colors: [
-                                                  Colors.white.withValues(alpha: 0.15),
-                                                  Colors.white.withValues(alpha: 0.01),
+                                                  Colors.white.withValues(
+                                                    alpha: 0.15,
+                                                  ),
+                                                  Colors.white.withValues(
+                                                    alpha: 0.01,
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -296,10 +316,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       Container(
                                         padding: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.08),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.08,
+                                          ),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: Colors.white.withValues(alpha: 0.15),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.15,
+                                            ),
                                             width: 1,
                                           ),
                                         ),
@@ -312,7 +336,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'Individual Doctors Portal',
@@ -329,7 +354,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                               style: GoogleFonts.manrope(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w500,
-                                                color: Colors.white.withValues(alpha: 0.5),
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.5,
+                                                ),
                                               ),
                                             ),
                                           ],
