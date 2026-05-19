@@ -245,4 +245,20 @@ class ApiService {
           'Authorization': 'Bearer $token',
         },
         body: body,
-we
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to activate coupon. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+}
