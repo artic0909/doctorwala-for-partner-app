@@ -9,6 +9,7 @@ import '../core/session_manager.dart';
 import 'register_screen.dart';
 import 'dashboard/dashboard.dart';
 import 'coupon_screen.dart';
+import 'welcome_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isClinic;
@@ -92,6 +93,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               width: MediaQuery.of(context).size.width,
               fit: BoxFit.fitWidth,
               alignment: Alignment.bottomCenter,
+            ),
+          ),
+
+          // BACK BUTTON - TOP LEFT
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 20,
+            child: CircleAvatar(
+              backgroundColor: Colors.white.withValues(alpha: 0.9),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.navy, size: 18),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                  );
+                },
+              ),
             ),
           ),
 
