@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../core/app_colors.dart';
 import '../core/app_assets.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isClinic;
@@ -331,9 +332,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const RegisterScreen(),
+                                      ),
+                                    );
+                                  },
                                   child: Text(
-                                    "Register Now",
+                                    "Create Account",
                                     style: GoogleFonts.manrope(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w900,
