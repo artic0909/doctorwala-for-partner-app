@@ -20,7 +20,7 @@ class ApiService {
     }
   }
 
-  /// Handles Partner Register requests
+  /// Handles Partner Register requests (URL Encoded Form POST)
   static Future<Map<String, dynamic>> register({
     required String clinicName,
     required String contactPerson,
@@ -39,7 +39,7 @@ class ApiService {
     // Map category selection to standard JSON array values expected by Laravel backend
     final List<String> dbCategories = mapCategoryToDbValues(clientCategory);
 
-    final Map<String, dynamic> body = {
+    final Map<String, String> body = {
       'partner_clinic_name': clinicName,
       'partner_contact_person_name': contactPerson,
       'partner_mobile_number': mobileNumber,
@@ -50,17 +50,20 @@ class ApiService {
       'partner_landmark': landmark,
       'partner_address': address,
       'partner_password': password,
-      'registration_type': dbCategories,
     };
+
+    // Encode PHP-compliant arrays for form url-encoded format
+    for (int i = 0; i < dbCategories.length; i++) {
+      body['registration_type[$i]'] = dbCategories[i];
+    }
 
     try {
       final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(body),
+        body: body,
       );
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -78,13 +81,13 @@ class ApiService {
     }
   }
 
-  /// Handles Partner Login requests (supports both Email and Mobile Number)
+  /// Handles Partner Login requests (supports both Email and Mobile Number, URL Encoded Form POST)
   static Future<Map<String, dynamic>> login({
     required String emailOrMobile,
     required String password,
   }) async {
     final url = Uri.parse('$baseUrl/login');
-    final Map<String, dynamic> body = {
+    final Map<String, String> body = {
       'partner_email': emailOrMobile,
       'partner_password': password,
     };
@@ -93,10 +96,9 @@ class ApiService {
       final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(body),
+        body: body,
       );
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -114,12 +116,12 @@ class ApiService {
     }
   }
 
-  /// Sends an OTP to the partner's registered email address
+  /// Sends an OTP to the partner's registered email address (URL Encoded Form POST)
   static Future<Map<String, dynamic>> sendOtp({
     required String email,
   }) async {
     final url = Uri.parse('$baseUrl/send-otp');
-    final Map<String, dynamic> body = {
+    final Map<String, String> body = {
       'partner_email': email,
     };
 
@@ -127,10 +129,9 @@ class ApiService {
       final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(body),
+        body: body,
       );
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -148,13 +149,13 @@ class ApiService {
     }
   }
 
-  /// Verifies an OTP and logs in the partner
+  /// Verifies an OTP and logs in the partner (URL Encoded Form POST)
   static Future<Map<String, dynamic>> verifyOtp({
     required String email,
     required String otp,
   }) async {
     final url = Uri.parse('$baseUrl/verify-otp');
-    final Map<String, dynamic> body = {
+    final Map<String, String> body = {
       'partner_email': email,
       'otp': otp,
     };
@@ -163,10 +164,9 @@ class ApiService {
       final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(body),
+        body: body,
       );
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -184,13 +184,13 @@ class ApiService {
     }
   }
 
-  /// Retrieves coupon information from the backend database (Sanctum protected)
+  /// Retrieves coupon information from the backend database (Sanctum protected, URL Encoded Form POST)
   static Future<Map<String, dynamic>> getCouponDetails({
     required String couponCode,
     required String token,
   }) async {
     final url = Uri.parse('$baseUrl/get-coupon-details');
-    final Map<String, dynamic> body = {
+    final Map<String, String> body = {
       'coupon_code': couponCode,
     };
 
@@ -198,11 +198,10 @@ class ApiService {
       final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(body),
+        body: body,
       );
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -220,7 +219,7 @@ class ApiService {
     }
   }
 
-  /// Registers / adds the verified coupon association to the partner's account (Sanctum protected)
+  /// Registers / adds the verified coupon association to the partner's account (Sanctum protected, URL Encoded Form POST)
   static Future<Map<String, dynamic>> addPartnerCoupon({
     required String partnerId,
     required String couponCode,
@@ -230,7 +229,7 @@ class ApiService {
     required String token,
   }) async {
     final url = Uri.parse('$baseUrl/add-partner-coupon');
-    final Map<String, dynamic> body = {
+    final Map<String, String> body = {
       'currently_loggedin_partner_id': partnerId,
       'coupon_code': couponCode,
       'coupon_amount': amount,
@@ -242,25 +241,8 @@ class ApiService {
       final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(body),
-      );
-
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      return {
-        'statusCode': response.statusCode,
-        'success': response.statusCode == 200,
-        ...responseData,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Failed to activate coupon. Please check your internet connection.',
-        'error': e.toString(),
-      };
-    }
-  }
-}
+        body: body,
+we
