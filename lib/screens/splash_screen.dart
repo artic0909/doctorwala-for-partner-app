@@ -45,8 +45,8 @@ class _SplashScreenState extends State<SplashScreen>
             right: 0,
             child: Container(
               height: 100, // Sufficient height to fill the bottom area
-              color: AppColors.waveBlue.withOpacity(
-                0.4,
+              color: AppColors.waveBlue.withValues(
+                alpha: 0.4,
               ), // Light blue matching the asset
             ),
           ),
@@ -169,18 +169,18 @@ class _SplashScreenState extends State<SplashScreen>
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.navy.withOpacity(0.25),
+                                  color: AppColors.navy.withValues(alpha: 0.25),
                                   blurRadius: 25,
                                   offset: const Offset(0, 12),
                                 ),
                                 BoxShadow(
-                                  color: AppColors.teal.withOpacity(0.1),
+                                  color: AppColors.teal.withValues(alpha: 0.1),
                                   blurRadius: 10,
                                   offset: const Offset(0, -2),
                                 ),
                               ],
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.12),
+                                color: Colors.white.withValues(alpha: 0.12),
                                 width: 1.5,
                               ),
                             ),
@@ -194,10 +194,10 @@ class _SplashScreenState extends State<SplashScreen>
                                       Container(
                                         padding: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.08),
+                                          color: Colors.white.withValues(alpha: 0.08),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: Colors.white.withOpacity(0.15),
+                                            color: Colors.white.withValues(alpha: 0.15),
                                             width: 1,
                                           ),
                                         ),
@@ -227,7 +227,7 @@ class _SplashScreenState extends State<SplashScreen>
                                               style: GoogleFonts.manrope(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w500,
-                                                color: Colors.white.withOpacity(0.5),
+                                                color: Colors.white.withValues(alpha: 0.5),
                                               ),
                                             ),
                                           ],
@@ -247,8 +247,8 @@ class _SplashScreenState extends State<SplashScreen>
                                             decoration: BoxDecoration(
                                               gradient: LinearGradient(
                                                 colors: [
-                                                  Colors.white.withOpacity(0.01),
-                                                  Colors.white.withOpacity(0.15),
+                                                  Colors.white.withValues(alpha: 0.01),
+                                                  Colors.white.withValues(alpha: 0.15),
                                                 ],
                                               ),
                                             ),
@@ -264,10 +264,10 @@ class _SplashScreenState extends State<SplashScreen>
                                               vertical: 4,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.08),
+                                              color: Colors.white.withValues(alpha: 0.08),
                                               borderRadius: BorderRadius.circular(100),
                                               border: Border.all(
-                                                color: Colors.white.withOpacity(0.15),
+                                                color: Colors.white.withValues(alpha: 0.15),
                                                 width: 1,
                                               ),
                                             ),
@@ -288,8 +288,8 @@ class _SplashScreenState extends State<SplashScreen>
                                             decoration: BoxDecoration(
                                               gradient: LinearGradient(
                                                 colors: [
-                                                  Colors.white.withOpacity(0.15),
-                                                  Colors.white.withOpacity(0.01),
+                                                  Colors.white.withValues(alpha: 0.15),
+                                                  Colors.white.withValues(alpha: 0.01),
                                                 ],
                                               ),
                                             ),
@@ -303,10 +303,10 @@ class _SplashScreenState extends State<SplashScreen>
                                       Container(
                                         padding: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.08),
+                                          color: Colors.white.withValues(alpha: 0.08),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: Colors.white.withOpacity(0.15),
+                                            color: Colors.white.withValues(alpha: 0.15),
                                             width: 1,
                                           ),
                                         ),
@@ -336,7 +336,7 @@ class _SplashScreenState extends State<SplashScreen>
                                               style: GoogleFonts.manrope(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w500,
-                                                color: Colors.white.withOpacity(0.5),
+                                                color: Colors.white.withValues(alpha: 0.5),
                                               ),
                                             ),
                                           ],
@@ -390,12 +390,12 @@ class _SplashScreenState extends State<SplashScreen>
                               borderRadius: BorderRadius.circular(18),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.teal.withOpacity(0.3),
+                                  color: AppColors.teal.withValues(alpha: 0.3),
                                   blurRadius: 18,
                                   offset: const Offset(0, 8),
                                 ),
                                 BoxShadow(
-                                  color: AppColors.navy.withOpacity(0.15),
+                                  color: AppColors.navy.withValues(alpha: 0.15),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),

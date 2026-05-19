@@ -149,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: AppColors.teal.withOpacity(0.2),
+                      color: AppColors.teal.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     )
@@ -209,13 +209,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: AppColors.navy.withOpacity(0.12),
+                color: AppColors.navy.withValues(alpha: 0.12),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               )
             else
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -229,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? AppColors.teal.withOpacity(0.15) 
+                    ? AppColors.teal.withValues(alpha: 0.15) 
                     : Colors.grey[50]!,
                 shape: BoxShape.circle,
               ),
@@ -262,7 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: isSelected 
-                          ? Colors.white.withOpacity(0.65) 
+                          ? Colors.white.withValues(alpha: 0.65) 
                           : AppColors.textSecondary,
                       height: 1.3,
                     ),
@@ -316,7 +316,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withOpacity(0.02),
+            color: AppColors.navy.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -367,7 +367,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withOpacity(0.02),
+            color: AppColors.navy.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -482,7 +482,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         border: Border.all(color: Colors.grey[100]!, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withOpacity(0.03),
+            color: AppColors.navy.withValues(alpha: 0.03),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -495,7 +495,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              color: AppColors.navy.withOpacity(0.02),
+              color: AppColors.navy.withValues(alpha: 0.02),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
                 topRight: Radius.circular(24),
@@ -564,7 +564,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             right: 0,
             child: Container(
               height: 100,
-              color: AppColors.waveBlue.withOpacity(0.4),
+              color: AppColors.waveBlue.withValues(alpha: 0.4),
             ),
           ),
           Positioned(
@@ -579,65 +579,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             ),
           ),
 
-          // TOP NAVIGATION HEADER WITH BACK BUTTON & FLOATING LOGO
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 5,
-            left: 15,
-            right: 25,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (_currentStep > 1) {
-                      setState(() {
-                        _currentStep = 1;
-                      });
-                    } else {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      );
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        )
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: AppColors.navy,
-                      size: 20,
-                    ),
-                  ),
-                ),
-                AnimatedBuilder(
-                  animation: _floatController,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 8 * _floatController.value),
-                      child: child,
-                    );
-                  },
-                  child: Image.asset(
-                    AppAssets.logo,
-                    height: 48,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
+          // SafeArea Scrollable View
           SafeArea(
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
@@ -672,6 +614,65 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   ),
                 ),
               ),
+            ),
+          ),
+
+          // TOP NAVIGATION HEADER WITH BACK BUTTON & FLOATING LOGO (Placed last in Stack to receive click events)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 5,
+            left: 15,
+            right: 25,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (_currentStep > 1) {
+                      setState(() {
+                        _currentStep = 1;
+                      });
+                    } else {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        )
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.navy,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                AnimatedBuilder(
+                  animation: _floatController,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, 8 * _floatController.value),
+                      child: child,
+                    );
+                  },
+                  child: Image.asset(
+                    AppAssets.logo,
+                    height: 48,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -756,7 +757,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.teal.withOpacity(0.3),
+                  color: AppColors.teal.withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 6),
                 ),
@@ -822,7 +823,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.teal.withOpacity(0.12),
+                  color: AppColors.teal.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
@@ -954,7 +955,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.teal.withOpacity(0.35),
+                      color: AppColors.teal.withValues(alpha: 0.35),
                       blurRadius: 15,
                       offset: const Offset(0, 6),
                     ),
@@ -1000,7 +1001,7 @@ class CaptchaNoisePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey[400]!.withOpacity(0.4)
+      ..color = Colors.grey[400]!.withValues(alpha: 0.4)
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
@@ -1017,7 +1018,7 @@ class CaptchaNoisePainter extends CustomPainter {
     
     // Draw 20 random noise dots scattered across the captcha box
     final dotPaint = Paint()
-      ..color = Colors.grey[400]!.withOpacity(0.5)
+      ..color = Colors.grey[400]!.withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
     
     for (int i = 0; i < 20; i++) {

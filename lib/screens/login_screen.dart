@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             right: 0,
             child: Container(
               height: 100,
-              color: AppColors.waveBlue.withOpacity(0.4),
+              color: AppColors.waveBlue.withValues(alpha: 0.4),
             ),
           ),
           Positioned(
@@ -184,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               gradient: LinearGradient(
                                 colors: [
                                   item['color'],
-                                  (item['color'] as Color).withOpacity(0.55),
+                                  (item['color'] as Color).withValues(alpha: 0.55),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               border: Border.all(color: Colors.white, width: 2),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.navy.withOpacity(0.04),
+                                  color: AppColors.navy.withValues(alpha: 0.04),
                                   blurRadius: 12,
                                   offset: const Offset(0, 6),
                                 ),
@@ -385,7 +385,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             style: GoogleFonts.manrope(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.navy.withOpacity(0.85),
+              color: AppColors.navy.withValues(alpha: 0.85),
             ),
           ),
         ),
@@ -395,7 +395,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: AppColors.navy.withOpacity(0.03),
+                color: AppColors.navy.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -446,12 +446,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: AppColors.teal.withOpacity(0.35),
+            color: AppColors.teal.withValues(alpha: 0.35),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: AppColors.navy.withOpacity(0.15),
+            color: AppColors.navy.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
