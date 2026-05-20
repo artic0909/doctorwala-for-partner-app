@@ -261,4 +261,73 @@ class ApiService {
       };
     }
   }
+  /// Sends an OTP to the partner's registered email address for password reset (URL Encoded Form POST)
+  static Future<Map<String, dynamic>> forgotPasswordSendOtp({
+    required String email,
+  }) async {
+    final url = Uri.parse('$baseUrl/forgot-password/send-otp');
+    final Map<String, String> body = {
+      'partner_email': email,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Verifies an OTP and resets password (URL Encoded Form POST)
+  static Future<Map<String, dynamic>> forgotPasswordReset({
+    required String email,
+    required String otp,
+    required String password,
+  }) async {
+    final url = Uri.parse('$baseUrl/forgot-password/reset');
+    final Map<String, String> body = {
+      'partner_email': email,
+      'otp': otp,
+      'partner_password': password,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }

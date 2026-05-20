@@ -7,6 +7,7 @@ import '../core/app_assets.dart';
 import '../core/api_service.dart';
 import '../core/session_manager.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 import 'dashboard/dashboard.dart';
 import 'coupon_screen.dart';
 
@@ -285,7 +286,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                                );
+                              },
                               child: Text(
                                 'Forgot Password?',
                                 style: GoogleFonts.manrope(
