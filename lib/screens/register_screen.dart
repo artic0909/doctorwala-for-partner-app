@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
@@ -99,6 +100,51 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         SnackBar(
           content: Text(
             'Please fill in all required fields marked with *',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+      return;
+    }
+
+    // Validate Mobile Number
+    final mobileText = _mobileController.text.trim();
+    if (!RegExp(r'^\d{10,}$').hasMatch(mobileText)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Mobile number must be at least 10 digits',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+      return;
+    }
+
+    // Validate Email
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(_emailController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please enter a valid email address',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+      return;
+    }
+
+    // Validate Pincode
+    final pincodeText = _pinCodeController.text.trim();
+    if (!RegExp(r'^\d{5,}$').hasMatch(pincodeText)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Pincode must be at least 5 digits',
             style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.orangeAccent,
@@ -407,6 +453,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     VoidCallback? onToggle,
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -426,6 +473,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         obscureText: isObscure,
         maxLines: maxLines,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         style: GoogleFonts.manrope(
           fontSize: 14, 
           fontWeight: FontWeight.w600,
@@ -959,6 +1007,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     hint: 'Mobile Number *',
                     icon: Icons.phone_android_rounded,
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                   const SizedBox(height: 14),
                   _buildFormInput(
@@ -988,6 +1037,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     hint: 'Pin Code *',
                     icon: Icons.pin_drop_rounded,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                   const SizedBox(height: 14),
                   _buildFormInput(
