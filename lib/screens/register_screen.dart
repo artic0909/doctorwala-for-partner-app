@@ -7,6 +7,7 @@ import '../core/app_colors.dart';
 import '../core/app_assets.dart';
 import '../core/api_service.dart';
 import '../core/session_manager.dart';
+import '../core/custom_alerts.dart';
 import 'login_screen.dart';
 import 'coupon_screen.dart';
 
@@ -96,74 +97,34 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         _landmarkController.text.trim().isEmpty ||
         _addressController.text.trim().isEmpty ||
         _passwordController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please fill in all required fields marked with *',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Please fill in all required fields marked with *');
       return;
     }
 
     // Validate Mobile Number
     final mobileText = _mobileController.text.trim();
     if (!RegExp(r'^\d{10,}$').hasMatch(mobileText)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Mobile number must be at least 10 digits',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Mobile number must be at least 10 digits');
       return;
     }
 
     // Validate Email
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(_emailController.text.trim())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please enter a valid email address',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Please enter a valid email address');
       return;
     }
 
     // Validate Pincode
     final pincodeText = _pinCodeController.text.trim();
     if (!RegExp(r'^\d{5,}$').hasMatch(pincodeText)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Pincode must be at least 5 digits',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Pincode must be at least 5 digits');
       return;
     }
 
     // Validate Captcha
     if (_captchaInputController.text.trim() != _captchaText) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Incorrect Captcha! Please try again.',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Incorrect Captcha! Please try again.');
       _generateCaptcha();
       return;
     }
@@ -202,15 +163,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ?? 'Registration successful!',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: AppColors.teal,
-          ),
-        );
+        CustomAlerts.showSuccessLoader(context, response['message'] ?? 'Registration successful!');
+        
+        // Wait for 1.5 seconds to show the success loader before navigating
+        await Future.delayed(const Duration(milliseconds: 1500));
+        if (!mounted) return;
+        Navigator.pop(context); // Dismiss loader
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -230,30 +189,14 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             errorMessage = firstErrorList.first.toString();
           }
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              errorMessage,
-              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        CustomAlerts.showError(context, errorMessage);
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'An unexpected error occurred. Please try again.',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'An unexpected error occurred. Please try again.');
     }
   }
 

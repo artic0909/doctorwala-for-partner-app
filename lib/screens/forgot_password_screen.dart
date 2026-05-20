@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/app_assets.dart';
 import '../core/api_service.dart';
+import '../core/custom_alerts.dart';
 import 'package:flutter/services.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -33,23 +34,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void _sendOtp() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter your email', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Please enter your email');
       return;
     }
 
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter a valid email address', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Please enter a valid email address');
       return;
     }
 
@@ -67,34 +58,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (!mounted) return;
 
       if (response['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response['message'] ?? 'OTP sent successfully!', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-            backgroundColor: AppColors.teal,
-          ),
-        );
+        CustomAlerts.showSuccess(context, response['message'] ?? 'OTP sent successfully!');
         setState(() {
           _currentStep = 2;
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response['message'] ?? 'Failed to send OTP', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        CustomAlerts.showError(context, response['message'] ?? 'Failed to send OTP');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred. Please try again.', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'An error occurred. Please try again.');
     }
   }
 
@@ -104,22 +80,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final password = _passwordController.text.trim();
 
     if (otp.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please fill all fields', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Please fill all fields');
       return;
     }
 
     if (password.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Password must be at least 6 characters', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Password must be at least 6 characters');
       return;
     }
 
@@ -141,32 +107,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (!mounted) return;
 
       if (response['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response['message'] ?? 'Password reset successfully!', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-            backgroundColor: AppColors.teal,
-          ),
-        );
+        CustomAlerts.showSuccess(context, response['message'] ?? 'Password reset successfully!');
         Navigator.pop(context); // Go back to login screen
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response['message'] ?? 'Failed to reset password', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        CustomAlerts.showError(context, response['message'] ?? 'Failed to reset password');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred. Please try again.', style: GoogleFonts.manrope(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'An error occurred. Please try again.');
     }
   }
 

@@ -6,6 +6,7 @@ import '../core/app_colors.dart';
 import '../core/app_assets.dart';
 import '../core/api_service.dart';
 import '../core/session_manager.dart';
+import '../core/custom_alerts.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'dashboard/dashboard.dart';
@@ -431,15 +432,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final password = _passwordController.text.trim();
 
     if (emailOrMobile.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please fill in both mobile/email and password.',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Please fill in both mobile/email and password.');
       return;
     }
 
@@ -460,15 +453,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       if (!mounted) return;
 
       if (response['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ?? 'Login successful!',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: AppColors.teal,
-          ),
-        );
+        CustomAlerts.showSuccessLoader(context, response['message'] ?? 'Login successful!');
         final partnerData = response['partner'] as Map<String, dynamic>;
         final String status = partnerData['status']?.toString() ?? 'Pending';
         final String token = response['token'] ?? '';
@@ -480,6 +465,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         );
 
         if (!mounted) return;
+
+        // Wait for 1.5 seconds to show the success loader before navigating
+        await Future.delayed(const Duration(milliseconds: 1500));
+        if (!mounted) return;
+        Navigator.pop(context); // Dismiss loader
 
         if (status.toLowerCase() == 'pending') {
           Navigator.pushReplacement(
@@ -500,30 +490,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ?? 'Incorrect credentials.',
-              style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        CustomAlerts.showError(context, response['message'] ?? 'Incorrect credentials.');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to authenticate. Please check your internet connection.',
-            style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      CustomAlerts.showError(context, 'Failed to authenticate. Please check your internet connection.');
     }
   }
 
