@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
@@ -18,6 +20,9 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _isFetching = true;
+
+  String? _serverBannerUrl;
+  String? _localBannerPath;
 
   // Form Controllers
   final _clinicNameController = TextEditingController();
@@ -88,6 +93,7 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
       if (response['success'] == true && response['contact_details'] != null) {
         final data = response['contact_details'] as Map<String, dynamic>;
         setState(() {
+          _serverBannerUrl = response['opd_banner'];
           _clinicNameController.text = (data['clinic_name'] != null && data['clinic_name'].toString().isNotEmpty)
               ? data['clinic_name'].toString()
               : (partnerData?['partner_clinic_name']?.toString() ?? '');
@@ -229,6 +235,8 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
         type: 'opd',
         body: body,
         token: token,
+        imageKey: 'opdbanner',
+        imagePath: _localBannerPath,
       );
 
       setState(() => _isLoading = false);
@@ -306,6 +314,12 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
                 ),
               ),
               const SizedBox(height: 25),
+
+              // Banner Image Upload Card
+              FadeInUp(
+                duration: const Duration(milliseconds: 350),
+                child: _buildBannerUploadCard(),
+              ),
 
               // Section 1: Clinic Profile Types
               FadeInUp(
@@ -632,6 +646,175 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildBannerUploadCard() {
+    Widget imageWidget;
+    if (_localBannerPath != null) {
+      imageWidget = Image.file(
+        File(_localBannerPath!),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 180,
+      );
+    } else if (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty) {
+      imageWidget = Image.network(
+        _serverBannerUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 180,
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(
+            child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 40),
+          );
+        },
+      );
+    } else {
+      imageWidget = Container(
+        color: AppColors.background,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add_photo_alternate_rounded, color: AppColors.teal.withValues(alpha: 0.8), size: 40),
+              const SizedBox(height: 8),
+              Text(
+                'Upload Chamber Banner Image',
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.navy,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'JPG, PNG, WebP (Max 2MB)',
+                style: GoogleFonts.manrope(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.teal.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.image_rounded, color: AppColors.teal, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Chamber Banner Image',
+                  style: GoogleFonts.manrope(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.navy,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+            child: InkWell(
+              onTap: _pickBannerImage,
+              borderRadius: BorderRadius.circular(16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 180,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade200, width: 1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(child: imageWidget),
+                      if (_localBannerPath != null || (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty))
+                        Positioned(
+                          bottom: 12,
+                          right: 12,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.edit_rounded, color: Colors.white, size: 14),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Change',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickBannerImage() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _localBannerPath = pickedFile.path;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        CustomAlerts.showError(context, 'Failed to pick image. Please try again.');
+      }
+    }
   }
 
 }

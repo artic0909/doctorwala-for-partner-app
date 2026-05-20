@@ -362,30 +362,57 @@ class ApiService {
     }
   }
 
-  /// Stores or updates the Clinic Profile (OPD or Pathology) details (Sanctum protected, URL Encoded Form POST)
+  /// Stores or updates the Clinic Profile (OPD, Pathology or Doctor) details (Sanctum protected, supports Multipart for file upload)
   static Future<Map<String, dynamic>> storeClinicProfile({
-    required String type, // 'opd' or 'pathology'
+    required String type, // 'opd', 'pathology' or 'doctor'
     required Map<String, String> body,
     required String token,
+    String? imageKey,
+    String? imagePath,
   }) async {
     final url = Uri.parse('$baseUrl/clinic-profile/$type');
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
+      if (imagePath != null && imageKey != null) {
+        final request = http.MultipartRequest('POST', url);
+        request.headers.addAll({
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
-        },
-        body: body,
-      );
+        });
 
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      return {
-        'statusCode': response.statusCode,
-        'success': response.statusCode == 200,
-        ...responseData,
-      };
+        // Add text fields
+        request.fields.addAll(body);
+
+        // Add file field
+        final file = await http.MultipartFile.fromPath(imageKey, imagePath);
+        request.files.add(file);
+
+        final streamedResponse = await request.send();
+        final response = await http.Response.fromStream(streamedResponse);
+
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return {
+          'statusCode': response.statusCode,
+          'success': response.statusCode == 200,
+          ...responseData,
+        };
+      } else {
+        final response = await http.post(
+          url,
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: body,
+        );
+
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return {
+          'statusCode': response.statusCode,
+          'success': response.statusCode == 200,
+          ...responseData,
+        };
+      }
     } catch (e) {
       return {
         'success': false,
