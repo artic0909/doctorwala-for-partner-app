@@ -88,17 +88,6 @@ class CustomSidebar extends StatelessWidget {
                 ),
               ],
             ),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                clinicName.isNotEmpty ? clinicName[0].toUpperCase() : 'P',
-                style: GoogleFonts.manrope(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.navy,
-                ),
-              ),
-            ),
           ),
           
           // Menu Items
