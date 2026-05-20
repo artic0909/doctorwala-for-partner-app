@@ -33,26 +33,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _currentIndex == 0
               ? 'Dashboard'
               : _currentIndex == 1
-                  ? 'Pending Appointments'
-                  : _currentIndex == 2
-                      ? 'Account Settings'
-                      : _currentIndex == 3
-                          ? 'Add Doctor Chamber'
-                          : _currentIndex == 4
-                              ? 'Add Pathology Clinic'
-                              : _currentIndex == 5
-                                  ? 'Add Doctors'
-                                  : _currentIndex == 6
-                                      ? 'Add Test'
-                                      : _currentIndex == 7
-                                          ? 'Medical Card Access'
-                                          : _currentIndex == 8
-                                              ? 'Patient Lists'
-                                              : _currentIndex == 9
-                                                  ? 'Complete Appointments'
-                                                  : _currentIndex == 11
-                                                      ? 'List Myself'
-                                                      : 'Help & Support',
+              ? 'Pending Appointments'
+              : _currentIndex == 2
+              ? 'Account Settings'
+              : _currentIndex == 3
+              ? 'Add Doctor Chamber'
+              : _currentIndex == 4
+              ? 'Add Pathology Clinic'
+              : _currentIndex == 5
+              ? 'Add Doctors'
+              : _currentIndex == 6
+              ? 'Add Test'
+              : _currentIndex == 7
+              ? 'Medical Card Access'
+              : _currentIndex == 8
+              ? 'Patient Lists'
+              : _currentIndex == 9
+              ? 'Complete Appointments'
+              : _currentIndex == 11
+              ? 'List Myself'
+              : 'Help & Support',
           style: GoogleFonts.manrope(
             fontSize: 20,
             fontWeight: FontWeight.w900,
@@ -64,7 +64,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_none_rounded, color: AppColors.navy, size: 24),
+                icon: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: AppColors.navy,
+                  size: 24,
+                ),
                 onPressed: () {
                   // Dummy callback
                 },
@@ -141,9 +145,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 8:
         return _buildPlaceholderTab('Patient Lists', Icons.assignment_rounded);
       case 9:
-        return _buildPlaceholderTab('Complete Appointments', Icons.task_alt_rounded);
+        return _buildPlaceholderTab(
+          'Complete Appointments',
+          Icons.task_alt_rounded,
+        );
       case 10:
-        return _buildPlaceholderTab('Help & Support', Icons.help_outline_rounded);
+        return _buildPlaceholderTab(
+          'Help & Support',
+          Icons.help_outline_rounded,
+        );
       case 11:
         return const DoctorContactScreen();
       default:
@@ -154,7 +164,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // TAB 0: HOME / COUNTING CARDS
   Widget _buildHomeTab() {
     final clinicName = widget.partnerData['partner_clinic_name'] ?? 'N/A';
-    final contactPerson = widget.partnerData['partner_contact_person_name'] ?? 'N/A';
+    final contactPerson =
+        widget.partnerData['partner_contact_person_name'] ?? 'N/A';
 
     final rawRegType = widget.partnerData['registration_type'];
     final types = _parseRegistrationTypes(rawRegType);
@@ -207,64 +218,201 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header / Welcome banner
+          // Header / Welcome Certificate banner
           FadeInDown(
             duration: const Duration(milliseconds: 400),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: AppColors.getStartedGradient,
-                borderRadius: BorderRadius.circular(24),
+                color: const Color(0xFFFFFDF6), // Cream certificate background
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.navy.withValues(alpha: 0.15),
+                    color: AppColors.navy.withValues(alpha: 0.08),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
                 ],
+                border: Border.all(
+                  color: const Color(0xFFD4AF37), // Metallic Gold
+                  width: 2.5,
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome back,',
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
+              child: Container(
+                margin: const EdgeInsets.all(6),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                    width: 1,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    clinicName,
-                    style: GoogleFonts.manrope(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Top Logo & Stamp
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Image.asset(
+                          'assets/images/logo.png',
+                          height: 30,
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.local_hospital_rounded,
+                            color: AppColors.teal,
+                            size: 28,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
+                            border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.verified_rounded,
+                                color: Color(0xFFC59B27),
+                                size: 12,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'VERIFIED',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFFC59B27),
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.person_outline_rounded,
-                        color: Colors.white70,
-                        size: 16,
+                    const SizedBox(height: 14),
+                    
+                    // Certificate Title
+                    Text(
+                      'CERTIFICATE OF PARTNERSHIP',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.cinzel(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFC59B27),
+                        letterSpacing: 1.5,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        contactPerson,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'This is proudly presented to',
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.navy.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Partner/Clinic Name
+                    Text(
+                      clinicName,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.navy,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    
+                    // Partnership Text
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        'as a certified healthcare service partner under the Doctorwala Network.',
+                        textAlign: TextAlign.center,
                         style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 18),
+                    
+                    // Signature / Footer Row
+                    Container(
+                      padding: const EdgeInsets.only(top: 12),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'PARTNER ID',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textSecondary.withValues(alpha: 0.6),
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.partnerData['partner_id'] ?? 'N/A',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.navy,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'REPRESENTATIVE',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textSecondary.withValues(alpha: 0.6),
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                contactPerson,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.navy,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -322,10 +470,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(
-            color: Colors.grey[100]!,
-            width: 1.5,
-          ),
+          border: Border.all(color: Colors.grey[100]!, width: 1.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,11 +485,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: color, size: 20),
                 ),
               ],
             ),
@@ -432,11 +573,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: AppColors.teal.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: AppColors.teal,
-                size: 60,
-              ),
+              child: Icon(icon, color: AppColors.teal, size: 60),
             ),
             const SizedBox(height: 20),
             Text(
@@ -468,7 +605,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final email = widget.partnerData['partner_email'] ?? 'N/A';
     final mobile = widget.partnerData['partner_mobile_number'] ?? 'N/A';
     final status = widget.partnerData['status'] ?? 'N/A';
-    final regType = widget.partnerData['registration_type']?.toString() ?? 'N/A';
+    final regType =
+        widget.partnerData['registration_type']?.toString() ?? 'N/A';
 
     final state = widget.partnerData['partner_state'] ?? 'N/A';
     final city = widget.partnerData['partner_city'] ?? 'N/A';
@@ -609,8 +747,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       } catch (_) {}
       // fallback manual parse
-      final clean = str.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", '').replaceAll('\\', '');
-      return clean.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      final clean = str
+          .replaceAll('[', '')
+          .replaceAll(']', '')
+          .replaceAll('"', '')
+          .replaceAll("'", '')
+          .replaceAll('\\', '');
+      return clean
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
     }
     return [str];
   }

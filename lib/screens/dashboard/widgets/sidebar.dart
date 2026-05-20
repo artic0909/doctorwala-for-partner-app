@@ -31,8 +31,17 @@ class CustomSidebar extends StatelessWidget {
         }
       } catch (_) {}
       // fallback manual parse
-      final clean = str.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", '').replaceAll('\\', '');
-      return clean.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      final clean = str
+          .replaceAll('[', '')
+          .replaceAll(']', '')
+          .replaceAll('"', '')
+          .replaceAll("'", '')
+          .replaceAll('\\', '');
+      return clean
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
     }
     return [str];
   }
@@ -54,22 +63,30 @@ class CustomSidebar extends StatelessWidget {
       child: Column(
         children: [
           // Header
-          UserAccountsDrawerHeader(
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 20,
+              bottom: 20,
+              left: 20,
+              right: 20,
+            ),
             decoration: const BoxDecoration(
               gradient: AppColors.getStartedGradient,
             ),
-            accountName: Text(
-              clinicName,
-              style: GoogleFonts.manrope(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
-            accountEmail: Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                Text(
+                  clinicName,
+                  style: GoogleFonts.manrope(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Text(
                   'Contact: $contactPerson',
                   style: GoogleFonts.manrope(
@@ -78,6 +95,7 @@ class CustomSidebar extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   email,
                   style: GoogleFonts.manrope(
@@ -86,10 +104,24 @@ class CustomSidebar extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.6),
                   ),
                 ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Partner ID: ${partnerData['partner_id'] ?? 'N/A'}',
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          
+
           // Menu Items
           Expanded(
             child: ListView(
@@ -102,7 +134,7 @@ class CustomSidebar extends StatelessWidget {
                   context: context,
                 ),
                 const Divider(),
-                
+
                 // Clinic Profiles Group
                 if (hasOPD || hasPathology) ...[
                   _buildSectionHeader('Clinic Profiles'),
@@ -190,7 +222,7 @@ class CustomSidebar extends StatelessWidget {
                   index: 10,
                   context: context,
                 ),
-                
+
                 const Divider(height: 32),
                 ListTile(
                   leading: const Icon(
@@ -205,7 +237,9 @@ class CustomSidebar extends StatelessWidget {
                       color: Colors.redAccent,
                     ),
                   ),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   onTap: () async {
                     // Close drawer
                     Navigator.pop(context);
@@ -255,7 +289,8 @@ class CustomSidebar extends StatelessWidget {
       dense: true,
       leading: Icon(
         icon,
-        color: isSelected ? AppColors.teal : AppColors.navy.withValues(alpha: 0.7),
+        color:
+            isSelected ? AppColors.teal : AppColors.navy.withValues(alpha: 0.7),
         size: 20,
       ),
       title: Text(
