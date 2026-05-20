@@ -745,7 +745,7 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
           Padding(
             padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
             child: InkWell(
-              onTap: _pickBannerImage,
+              onTap: _showImageSourceBottomSheet,
               borderRadius: BorderRadius.circular(16),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
@@ -796,11 +796,86 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
     );
   }
 
-  Future<void> _pickBannerImage() async {
+  Future<void> _showImageSourceBottomSheet() async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: Text(
+                    'Select Image Source',
+                    style: GoogleFonts.manrope(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.navy,
+                    ),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.teal.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.camera_alt_rounded, color: AppColors.teal),
+                ),
+                title: Text(
+                  'Camera',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.navy,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickBannerImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.teal.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.photo_library_rounded, color: AppColors.teal),
+                ),
+                title: Text(
+                  'Gallery',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.navy,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickBannerImage(ImageSource.gallery);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickBannerImage(ImageSource source) async {
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
@@ -816,5 +891,4 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
       }
     }
   }
-
 }
