@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
@@ -48,7 +49,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               ? 'Patient Lists'
                                               : _currentIndex == 9
                                                   ? 'Complete Appointments'
-                                                  : 'Help & Support',
+                                                  : _currentIndex == 11
+                                                      ? 'List Myself'
+                                                      : 'Help & Support',
           style: GoogleFonts.manrope(
             fontSize: 20,
             fontWeight: FontWeight.w900,
@@ -114,6 +117,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return _buildPlaceholderTab('Complete Appointments', Icons.task_alt_rounded);
       case 10:
         return _buildPlaceholderTab('Help & Support', Icons.help_outline_rounded);
+      case 11:
+        return _buildPlaceholderTab('List Myself', Icons.assignment_ind_rounded);
       default:
         return _buildHomeTab();
     }
@@ -123,6 +128,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildHomeTab() {
     final clinicName = widget.partnerData['partner_clinic_name'] ?? 'N/A';
     final contactPerson = widget.partnerData['partner_contact_person_name'] ?? 'N/A';
+
+    final rawRegType = widget.partnerData['registration_type'];
+    final types = _parseRegistrationTypes(rawRegType);
+    final hasOPD = types.contains('OPD');
+    final hasPathology = types.contains('Pathology');
+
+    final cards = <Widget>[
+      _buildCountCard(
+        title: "Today's Appointments",
+        count: '0',
+        icon: Icons.today_rounded,
+        color: AppColors.teal,
+        delayMs: 300,
+      ),
+      _buildCountCard(
+        title: 'Pending Appts',
+        count: '0',
+        icon: Icons.pending_actions_rounded,
+        color: Colors.orangeAccent,
+        delayMs: 400,
+      ),
+      _buildCountCard(
+        title: 'Completed Appts',
+        count: '0',
+        icon: Icons.task_alt_rounded,
+        color: Colors.blueAccent,
+        delayMs: 500,
+      ),
+      if (hasOPD)
+        _buildCountCard(
+          title: 'Total Doctors',
+          count: '0',
+          icon: Icons.people_alt_rounded,
+          color: AppColors.navy,
+          delayMs: 600,
+        ),
+      if (hasPathology)
+        _buildCountCard(
+          title: 'Pathology Tests',
+          count: '0',
+          icon: Icons.biotech_rounded,
+          color: Colors.purpleAccent,
+          delayMs: 700,
+        ),
+    ];
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -216,44 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
             childAspectRatio: 1.15,
-            children: [
-              _buildCountCard(
-                title: "Today's Appointments",
-                count: '0',
-                icon: Icons.today_rounded,
-                color: AppColors.teal,
-                delayMs: 300,
-              ),
-              _buildCountCard(
-                title: 'Pending Appts',
-                count: '0',
-                icon: Icons.pending_actions_rounded,
-                color: Colors.orangeAccent,
-                delayMs: 400,
-              ),
-              _buildCountCard(
-                title: 'Completed Appts',
-                count: '0',
-                icon: Icons.task_alt_rounded,
-                color: Colors.blueAccent,
-                delayMs: 500,
-              ),
-              _buildCountCard(
-                title: 'Total Doctors',
-                count: '0',
-                icon: Icons.people_alt_rounded,
-                color: AppColors.navy,
-                delayMs: 600,
-              ),
-              _buildCountCard(
-                title: 'Pathology Tests',
-                count: '0',
-                icon: Icons.biotech_rounded,
-                color: Colors.purpleAccent,
-                delayMs: 700,
-                isFullWidth: true, // GridView.count doesn't support colSpan easily, we can add separately below if needed
-              ),
-            ],
+            children: cards,
           ),
           const SizedBox(height: 30),
         ],
@@ -554,5 +567,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
+  }
+
+  List<String> _parseRegistrationTypes(dynamic rawType) {
+    if (rawType == null) return [];
+    if (rawType is List) {
+      return rawType.map((e) => e.toString().trim()).toList();
+    }
+    final str = rawType.toString().trim();
+    if (str.startsWith('[') && str.endsWith(']')) {
+      try {
+        final decoded = jsonDecode(str);
+        if (decoded is List) {
+          return decoded.map((e) => e.toString().trim()).toList();
+        }
+      } catch (_) {}
+      // fallback manual parse
+      final clean = str.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", '').replaceAll('\\', '');
+      return clean.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+    return [str];
   }
 }

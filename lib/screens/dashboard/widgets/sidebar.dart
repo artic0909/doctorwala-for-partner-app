@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/app_colors.dart';
@@ -16,11 +17,37 @@ class CustomSidebar extends StatelessWidget {
     required this.onTap,
   });
 
+  List<String> _parseRegistrationTypes(dynamic rawType) {
+    if (rawType == null) return [];
+    if (rawType is List) {
+      return rawType.map((e) => e.toString().trim()).toList();
+    }
+    final str = rawType.toString().trim();
+    if (str.startsWith('[') && str.endsWith(']')) {
+      try {
+        final decoded = jsonDecode(str);
+        if (decoded is List) {
+          return decoded.map((e) => e.toString().trim()).toList();
+        }
+      } catch (_) {}
+      // fallback manual parse
+      final clean = str.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", '').replaceAll('\\', '');
+      return clean.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+    return [str];
+  }
+
   @override
   Widget build(BuildContext context) {
     final clinicName = partnerData['partner_clinic_name'] ?? 'N/A';
     final contactPerson = partnerData['partner_contact_person_name'] ?? 'N/A';
     final email = partnerData['partner_email'] ?? 'N/A';
+    final rawRegType = partnerData['registration_type'];
+
+    final types = _parseRegistrationTypes(rawRegType);
+    final hasOPD = types.contains('OPD');
+    final hasPathology = types.contains('Pathology');
+    final hasDoctor = types.contains('Doctor');
 
     return Drawer(
       backgroundColor: AppColors.background,
@@ -73,7 +100,7 @@ class CustomSidebar extends StatelessWidget {
               ),
             ),
           ),
-
+          
           // Menu Items
           Expanded(
             child: ListView(
@@ -86,36 +113,49 @@ class CustomSidebar extends StatelessWidget {
                   context: context,
                 ),
                 const Divider(),
-
+                
                 // Clinic Profiles Group
-                _buildSectionHeader('Clinic Profiles'),
-                _buildDrawerItem(
-                  icon: Icons.local_hospital_rounded,
-                  label: 'Add Doctor chamber',
-                  index: 3,
-                  context: context,
-                ),
-                _buildDrawerItem(
-                  icon: Icons.medical_services_rounded,
-                  label: 'Add Pathology clinic',
-                  index: 4,
-                  context: context,
-                ),
+                if (hasOPD || hasPathology) ...[
+                  _buildSectionHeader('Clinic Profiles'),
+                  if (hasOPD)
+                    _buildDrawerItem(
+                      icon: Icons.local_hospital_rounded,
+                      label: 'Add Doctor chamber',
+                      index: 3,
+                      context: context,
+                    ),
+                  if (hasPathology)
+                    _buildDrawerItem(
+                      icon: Icons.medical_services_rounded,
+                      label: 'Add Pathology clinic',
+                      index: 4,
+                      context: context,
+                    ),
+                ],
 
                 // Listings Group
                 _buildSectionHeader('Listings'),
-                _buildDrawerItem(
-                  icon: Icons.person_add_rounded,
-                  label: 'Add Doctors',
-                  index: 5,
-                  context: context,
-                ),
-                _buildDrawerItem(
-                  icon: Icons.science_rounded,
-                  label: 'Add Tests',
-                  index: 6,
-                  context: context,
-                ),
+                if (hasDoctor)
+                  _buildDrawerItem(
+                    icon: Icons.assignment_ind_rounded,
+                    label: 'List myself',
+                    index: 11,
+                    context: context,
+                  ),
+                if (hasOPD)
+                  _buildDrawerItem(
+                    icon: Icons.person_add_rounded,
+                    label: 'Add Doctors',
+                    index: 5,
+                    context: context,
+                  ),
+                if (hasPathology)
+                  _buildDrawerItem(
+                    icon: Icons.science_rounded,
+                    label: 'Add Tests',
+                    index: 6,
+                    context: context,
+                  ),
 
                 // Medical Card Access Group
                 _buildSectionHeader('Medical Card Access'),
@@ -137,7 +177,7 @@ class CustomSidebar extends StatelessWidget {
                 _buildDrawerItem(
                   icon: Icons.pending_actions_rounded,
                   label: 'Pending Appointments',
-                  index: 1, // reuse index 1 or map specifically
+                  index: 1,
                   context: context,
                 ),
                 _buildDrawerItem(
@@ -152,7 +192,7 @@ class CustomSidebar extends StatelessWidget {
                 _buildDrawerItem(
                   icon: Icons.manage_accounts_rounded,
                   label: 'Account Settings',
-                  index: 2, // reuse index 2 or profile/settings
+                  index: 2,
                   context: context,
                 ),
                 _buildDrawerItem(
@@ -161,7 +201,7 @@ class CustomSidebar extends StatelessWidget {
                   index: 10,
                   context: context,
                 ),
-
+                
                 const Divider(height: 32),
                 ListTile(
                   leading: const Icon(
@@ -176,9 +216,7 @@ class CustomSidebar extends StatelessWidget {
                       color: Colors.redAccent,
                     ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   onTap: () async {
                     // Close drawer
                     Navigator.pop(context);
@@ -228,8 +266,7 @@ class CustomSidebar extends StatelessWidget {
       dense: true,
       leading: Icon(
         icon,
-        color:
-            isSelected ? AppColors.teal : AppColors.navy.withValues(alpha: 0.7),
+        color: isSelected ? AppColors.teal : AppColors.navy.withValues(alpha: 0.7),
         size: 20,
       ),
       title: Text(
