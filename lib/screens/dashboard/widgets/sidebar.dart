@@ -73,7 +73,7 @@ class CustomSidebar extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Menu Items
           Expanded(
             child: ListView(
@@ -81,12 +81,12 @@ class CustomSidebar extends StatelessWidget {
               children: [
                 _buildDrawerItem(
                   icon: Icons.dashboard_rounded,
-                  label: 'Dashboard Home',
+                  label: 'Dashboard',
                   index: 0,
                   context: context,
                 ),
                 const Divider(),
-                
+
                 // Clinic Profiles Group
                 _buildSectionHeader('Clinic Profiles'),
                 _buildDrawerItem(
@@ -112,7 +112,7 @@ class CustomSidebar extends StatelessWidget {
                 ),
                 _buildDrawerItem(
                   icon: Icons.science_rounded,
-                  label: 'Add Test',
+                  label: 'Add Tests',
                   index: 6,
                   context: context,
                 ),
@@ -161,10 +161,13 @@ class CustomSidebar extends StatelessWidget {
                   index: 10,
                   context: context,
                 ),
-                
+
                 const Divider(height: 32),
                 ListTile(
-                  leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                  leading: const Icon(
+                    Icons.logout_rounded,
+                    color: Colors.redAccent,
+                  ),
                   title: Text(
                     'Logout',
                     style: GoogleFonts.manrope(
@@ -184,7 +187,9 @@ class CustomSidebar extends StatelessWidget {
                     if (!context.mounted) return;
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
                     );
                   },
                 ),
@@ -223,7 +228,8 @@ class CustomSidebar extends StatelessWidget {
       dense: true,
       leading: Icon(
         icon,
-        color: isSelected ? AppColors.teal : AppColors.navy.withValues(alpha: 0.7),
+        color:
+            isSelected ? AppColors.teal : AppColors.navy.withValues(alpha: 0.7),
         size: 20,
       ),
       title: Text(
@@ -236,9 +242,7 @@ class CustomSidebar extends StatelessWidget {
       ),
       selected: isSelected,
       selectedTileColor: AppColors.teal.withValues(alpha: 0.08),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onTap: () {
         // Close drawer first
         Navigator.pop(context);

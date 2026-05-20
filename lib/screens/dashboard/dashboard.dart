@@ -31,8 +31,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _currentIndex == 0
               ? 'Dashboard'
               : _currentIndex == 1
-                  ? 'Appointments'
-                  : 'Partner Profile',
+                  ? 'Pending Appointments'
+                  : _currentIndex == 2
+                      ? 'Account Settings'
+                      : _currentIndex == 3
+                          ? 'Add Doctor Chamber'
+                          : _currentIndex == 4
+                              ? 'Add Pathology Clinic'
+                              : _currentIndex == 5
+                                  ? 'Add Doctors'
+                                  : _currentIndex == 6
+                                      ? 'Add Test'
+                                      : _currentIndex == 7
+                                          ? 'Medical Card Access'
+                                          : _currentIndex == 8
+                                              ? 'Patient Lists'
+                                              : _currentIndex == 9
+                                                  ? 'Complete Appointments'
+                                                  : 'Help & Support',
           style: GoogleFonts.manrope(
             fontSize: 20,
             fontWeight: FontWeight.w900,
@@ -79,9 +95,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 0:
         return _buildHomeTab();
       case 1:
-        return _buildAppointmentsTab();
+        return _buildPendingAppointmentsTab();
       case 2:
-        return _buildProfileTab();
+        return _buildProfileTab(); // Profile serves as Account Settings
+      case 3:
+        return _buildPlaceholderTab('Add Doctor Chamber', Icons.local_hospital_rounded);
+      case 4:
+        return _buildPlaceholderTab('Add Pathology Clinic', Icons.medical_services_rounded);
+      case 5:
+        return _buildPlaceholderTab('Add Doctors', Icons.person_add_rounded);
+      case 6:
+        return _buildPlaceholderTab('Add Test', Icons.science_rounded);
+      case 7:
+        return _buildPlaceholderTab('Medical Card Access', Icons.badge_rounded);
+      case 8:
+        return _buildPlaceholderTab('Patient Lists', Icons.assignment_rounded);
+      case 9:
+        return _buildPlaceholderTab('Complete Appointments', Icons.task_alt_rounded);
+      case 10:
+        return _buildPlaceholderTab('Help & Support', Icons.help_outline_rounded);
       default:
         return _buildHomeTab();
     }
@@ -305,8 +337,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // TAB 1: APPOINTMENTS
-  Widget _buildAppointmentsTab() {
+  // TAB 1: PENDING APPOINTMENTS
+  Widget _buildPendingAppointmentsTab() {
+    return Center(
+      child: FadeIn(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.orangeAccent.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.pending_actions_rounded,
+                color: Colors.orangeAccent,
+                size: 60,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Pending Appointments',
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.navy,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No pending appointments found.',
+              style: GoogleFonts.manrope(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // GENERIC PLACEHOLDER TAB
+  Widget _buildPlaceholderTab(String title, IconData icon) {
     return Center(
       child: FadeIn(
         child: Column(
@@ -318,15 +393,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: AppColors.teal.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.calendar_month_rounded,
+              child: Icon(
+                icon,
                 color: AppColors.teal,
                 size: 60,
               ),
             ),
             const SizedBox(height: 20),
             Text(
-              'Appointments Management',
+              title,
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
@@ -335,7 +410,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'No appointments found for today.',
+              'This section is coming soon.',
               style: GoogleFonts.manrope(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
