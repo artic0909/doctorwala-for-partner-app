@@ -78,6 +78,8 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
         return;
       }
 
+      final partnerData = await SessionManager.getPartnerData();
+
       final response = await ApiService.getClinicProfile(
         type: 'opd',
         token: token,
@@ -86,18 +88,46 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
       if (response['success'] == true && response['contact_details'] != null) {
         final data = response['contact_details'] as Map<String, dynamic>;
         setState(() {
-          _clinicNameController.text = data['clinic_name'] ?? '';
-          _contactPersonController.text = data['clinic_contact_person_name'] ?? '';
+          _clinicNameController.text = (data['clinic_name'] != null && data['clinic_name'].toString().isNotEmpty)
+              ? data['clinic_name'].toString()
+              : (partnerData?['partner_clinic_name']?.toString() ?? '');
+
+          _contactPersonController.text = (data['clinic_contact_person_name'] != null && data['clinic_contact_person_name'].toString().isNotEmpty)
+              ? data['clinic_contact_person_name'].toString()
+              : (partnerData?['partner_contact_person_name']?.toString() ?? '');
+
           _gstinController.text = data['clinic_gstin'] ?? '';
-          _mobileController.text = data['clinic_mobile_number'] ?? '';
-          _emailController.text = data['clinic_email'] ?? '';
-          _cityController.text = data['clinic_city'] ?? '';
-          _pinCodeController.text = data['clinic_pincode']?.toString() ?? '';
-          _landmarkController.text = data['clinic_landmark'] ?? '';
+
+          _mobileController.text = (data['clinic_mobile_number'] != null && data['clinic_mobile_number'].toString().isNotEmpty)
+              ? data['clinic_mobile_number'].toString()
+              : (partnerData?['partner_mobile_number']?.toString() ?? '');
+
+          _emailController.text = (data['clinic_email'] != null && data['clinic_email'].toString().isNotEmpty)
+              ? data['clinic_email'].toString()
+              : (partnerData?['partner_email']?.toString() ?? '');
+
+          _cityController.text = (data['clinic_city'] != null && data['clinic_city'].toString().isNotEmpty)
+              ? data['clinic_city'].toString()
+              : (partnerData?['partner_city']?.toString() ?? '');
+
+          _pinCodeController.text = (data['clinic_pincode'] != null && data['clinic_pincode'].toString().isNotEmpty)
+              ? data['clinic_pincode'].toString()
+              : (partnerData?['partner_pincode']?.toString() ?? '');
+
+          _landmarkController.text = (data['clinic_landmark'] != null && data['clinic_landmark'].toString().isNotEmpty)
+              ? data['clinic_landmark'].toString()
+              : (partnerData?['partner_landmark']?.toString() ?? '');
+
           _googleMapController.text = data['clinic_google_map_link'] ?? '';
-          _addressController.text = data['clinic_address'] ?? '';
+
+          _addressController.text = (data['clinic_address'] != null && data['clinic_address'].toString().isNotEmpty)
+              ? data['clinic_address'].toString()
+              : (partnerData?['partner_address']?.toString() ?? '');
           
-          final fetchedState = data['clinic_state']?.toString().trim();
+          final fetchedState = (data['clinic_state'] != null && data['clinic_state'].toString().isNotEmpty)
+              ? data['clinic_state'].toString().trim()
+              : (partnerData?['partner_state']?.toString().trim());
+
           if (fetchedState != null && _states.contains(fetchedState)) {
             _selectedState = fetchedState;
           }
@@ -107,9 +137,27 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
             _selectedRegType = fetchedRegType;
           }
         });
+      } else {
+        if (partnerData != null) {
+          setState(() {
+            _clinicNameController.text = partnerData['partner_clinic_name']?.toString() ?? '';
+            _contactPersonController.text = partnerData['partner_contact_person_name']?.toString() ?? '';
+            _mobileController.text = partnerData['partner_mobile_number']?.toString() ?? '';
+            _emailController.text = partnerData['partner_email']?.toString() ?? '';
+            _cityController.text = partnerData['partner_city']?.toString() ?? '';
+            _pinCodeController.text = partnerData['partner_pincode']?.toString() ?? '';
+            _landmarkController.text = partnerData['partner_landmark']?.toString() ?? '';
+            _addressController.text = partnerData['partner_address']?.toString() ?? '';
+
+            final state = partnerData['partner_state']?.toString().trim();
+            if (state != null && _states.contains(state)) {
+              _selectedState = state;
+            }
+          });
+        }
       }
     } catch (_) {
-      // Quietly ignore or let the user try saving
+      // Quietly ignore
     } finally {
       setState(() => _isFetching = false);
     }
