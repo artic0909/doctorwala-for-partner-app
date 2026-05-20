@@ -7,6 +7,7 @@ import 'widgets/bottom_nav.dart';
 import 'widgets/sidebar.dart';
 import 'opdcontact.dart';
 import 'pathologycontact.dart';
+import 'doctocontact.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -144,7 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 10:
         return _buildPlaceholderTab('Help & Support', Icons.help_outline_rounded);
       case 11:
-        return _buildPlaceholderTab('List Myself', Icons.assignment_ind_rounded);
+        return const DoctorContactScreen();
       default:
         return _buildHomeTab();
     }
