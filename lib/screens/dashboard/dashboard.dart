@@ -219,109 +219,289 @@ class _DashboardScreenState extends State<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header / Welcome Certificate banner (Medical Theme)
-          FadeInDown(
-            duration: const Duration(milliseconds: 400),
-            child: Stack(
-              children: [
-                // Background Certificate Container
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF7FCFC), // Ice-teal light medical background
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.navy.withValues(alpha: 0.08),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
+          Builder(
+            builder: (context) {
+              // Parse dynamic certificate text based on registration types
+              String certTitle = 'CLINICAL NETWORK CERTIFICATE';
+              String certDesc = 'is certified as an official healthcare partner under the Doctorwala Network, authorized to manage digital clinics and patient services.';
+
+              final isOPD = types.contains('OPD');
+              final isPathology = types.contains('Pathology');
+              final isDoctor = types.contains('Doctor');
+
+              if (isOPD && isPathology && isDoctor) {
+                certTitle = 'INTEGRATED CLINICAL CERTIFICATE';
+                certDesc = 'is officially certified to manage doctor chambers, digital OPD services, clinical pathology lab diagnostics, and comprehensive patient consulting under Doctorwala.';
+              } else if (isOPD && isPathology) {
+                certTitle = 'CLINICAL & DIAGNOSTIC CERTIFICATE';
+                certDesc = 'is officially certified to operate doctor chambers, manage digital OPD appointments, and conduct clinical pathology laboratory test diagnostics under Doctorwala.';
+              } else if (isOPD && isDoctor) {
+                certTitle = 'CLINICAL CONSULTATION CERTIFICATE';
+                certDesc = 'is officially certified to manage patient consulting chambers, digital OPD services, and professional healthcare practice under Doctorwala.';
+              } else if (isDoctor && isPathology) {
+                certTitle = 'PRACTITIONER & DIAGNOSTIC CERTIFICATE';
+                certDesc = 'is officially certified to manage independent clinical consultations, pathology diagnostics, and patient lab test services under Doctorwala.';
+              } else if (isOPD) {
+                certTitle = 'OPD CHAMBER CERTIFICATE';
+                certDesc = 'is officially certified as a registered OPD Clinic Partner, authorized to run doctor chambers, schedule patient appointments, and provide digital health consultations under Doctorwala.';
+              } else if (isPathology) {
+                certTitle = 'PATHOLOGY LABORATORY CERTIFICATE';
+                certDesc = 'is officially certified as a clinical Pathology Lab Partner, authorized to manage lab tests, analyze diagnostics, and generate patient pathology reports under Doctorwala.';
+              } else if (isDoctor) {
+                certTitle = 'MEDICAL PRACTITIONER CERTIFICATE';
+                certDesc = 'is officially certified as a registered Medical Practitioner, authorized to manage independent clinical chambers, schedule patient consultations, and offer digital care under Doctorwala.';
+              }
+
+              return FadeInDown(
+                duration: const Duration(milliseconds: 400),
+                child: Stack(
+                  children: [
+                    // Background Certificate Container
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFCFBF7), // Warm premium ivory/parchment background
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.navy.withValues(alpha: 0.08),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: const Color(0xFFD4AF37), // Metallic Gold outer border
+                          width: 3.0,
+                        ),
                       ),
-                    ],
-                    border: Border.all(
-                      color: const Color(0xFFD4AF37), // Metallic Gold
-                      width: 2.5,
-                    ),
-                  ),
-                  child: Container(
-                    margin: const EdgeInsets.all(6),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppColors.teal.withValues(alpha: 0.3), // Teal inner border for medical vibe
-                        width: 1.2,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Stack(
-                      children: [
-                        // Medical Watermark Icons inside the card
-                        Positioned(
-                          right: -10,
-                          bottom: 20,
-                          child: Icon(
-                            Icons.health_and_safety_rounded,
-                            size: 110,
-                            color: AppColors.teal.withValues(alpha: 0.04),
+                      child: Container(
+                        margin: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.teal.withValues(alpha: 0.35), // Inner teal border
+                            width: 1.2,
                           ),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        Positioned(
-                          left: 10,
-                          top: 40,
-                          child: Icon(
-                            Icons.local_hospital_rounded,
-                            size: 45,
-                            color: AppColors.teal.withValues(alpha: 0.03),
-                          ),
-                        ),
-                        Positioned(
-                          left: 15,
-                          bottom: 50,
-                          child: Icon(
-                            Icons.medical_services_rounded,
-                            size: 40,
-                            color: AppColors.teal.withValues(alpha: 0.03),
-                          ),
-                        ),
-                        
-                        // Content Column
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                        child: Stack(
                           children: [
-                            // Top Logo & Stamp
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            // Medical Watermark Icon in background
+                            Positioned(
+                              right: -10,
+                              bottom: 10,
+                              child: Icon(
+                                Icons.local_hospital_rounded,
+                                size: 130,
+                                color: AppColors.teal.withValues(alpha: 0.025),
+                              ),
+                            ),
+                            Positioned(
+                              left: -10,
+                              top: 20,
+                              child: Icon(
+                                Icons.healing_rounded,
+                                size: 60,
+                                color: AppColors.teal.withValues(alpha: 0.02),
+                              ),
+                            ),
+                            
+                            // Content Column
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Image.asset(
-                                  'assets/images/logo.png',
-                                  height: 30,
-                                  errorBuilder: (context, error, stackTrace) => const Icon(
-                                    Icons.local_hospital_rounded,
-                                    color: AppColors.teal,
-                                    size: 28,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.teal.withValues(alpha: 0.06),
-                                    border: Border.all(color: AppColors.teal.withValues(alpha: 0.5), width: 1.0),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.healing_rounded,
+                                // Top Logo & Stamp
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/logo.png',
+                                      height: 28,
+                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                                        Icons.local_hospital_rounded,
                                         color: AppColors.teal,
-                                        size: 10,
+                                        size: 28,
                                       ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'MEDICAL PARTNER',
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
+                                        border: Border.all(color: const Color(0xFFD4AF37), width: 1.0),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        'OFFICIAL MEMBER',
                                         style: GoogleFonts.manrope(
                                           fontSize: 7.5,
                                           fontWeight: FontWeight.w800,
-                                          color: AppColors.teal,
-                                          letterSpacing: 0.8,
+                                          color: const Color(0xFF8B7355),
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                
+                                // Certificate Title
+                                Text(
+                                  certTitle,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.cinzel(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.navy,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'This is proudly presented to',
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 11.5,
+                                    fontStyle: FontStyle.italic,
+                                    color: AppColors.navy.withValues(alpha: 0.65),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                
+                                // Partner/Clinic Name
+                                Text(
+                                  clinicName,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.teal,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+
+                                // Classic Star Divider
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(width: 35, height: 1, color: const Color(0xFFD4AF37).withValues(alpha: 0.6)),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 6),
+                                      child: Icon(Icons.star_rounded, color: Color(0xFFD4AF37), size: 10),
+                                    ),
+                                    Container(width: 35, height: 1, color: const Color(0xFFD4AF37).withValues(alpha: 0.6)),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                
+                                // Partnership Text
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text(
+                                    certDesc,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                      height: 1.45,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+                                
+                                // Signature / Footer Row with award.png
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: Colors.grey.shade200,
+                                        width: 1,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'PARTNER ID',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.w800,
+                                                color: AppColors.textSecondary.withValues(alpha: 0.6),
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              widget.partnerData['partner_id'] ?? 'N/A',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.navy,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      
+                                      // Official Award Seal/Stamp Image with Gold Circular Shadow
+                                      Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                                              blurRadius: 8,
+                                              spreadRadius: 1,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Image.asset(
+                                          'assets/images/award.png',
+                                          height: 42,
+                                          errorBuilder: (context, error, stackTrace) => const Icon(
+                                            Icons.workspace_premium_rounded,
+                                            color: Color(0xFFD4AF37),
+                                            size: 36,
+                                          ),
+                                        ),
+                                      ),
+                                      
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              'REPRESENTATIVE',
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.w800,
+                                                color: AppColors.textSecondary.withValues(alpha: 0.6),
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              contactPerson,
+                                              textAlign: TextAlign.end,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.navy,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
@@ -329,154 +509,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 14),
-                            
-                            // Certificate Title
-                            Text(
-                              'CERTIFICATE OF CLINICAL NETWORK',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.cinzel(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.navy,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'This is proudly presented to',
-                              style: GoogleFonts.playfairDisplay(
-                                fontSize: 12,
-                                fontStyle: FontStyle.italic,
-                                color: AppColors.navy.withValues(alpha: 0.7),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            
-                            // Partner/Clinic Name
-                            Text(
-                              clinicName,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.playfairDisplay(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.teal,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            
-                            // Partnership Text
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'fully affiliated and authorized to provide digital OPD consultations, medical services, and clinical support under the Doctorwala Network.',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.manrope(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            // Signature / Footer Row with award.png
-                            Container(
-                              padding: const EdgeInsets.only(top: 10),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(
-                                    color: Colors.grey.shade200,
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'PARTNER ID',
-                                          style: GoogleFonts.manrope(
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.textSecondary.withValues(alpha: 0.6),
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          widget.partnerData['partner_id'] ?? 'N/A',
-                                          style: GoogleFonts.manrope(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.navy,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  
-                                  // Official Award Seal/Stamp Image
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    child: Image.asset(
-                                      'assets/images/award.png',
-                                      height: 48,
-                                      errorBuilder: (context, error, stackTrace) => const Icon(
-                                        Icons.workspace_premium_rounded,
-                                        color: Color(0xFFD4AF37),
-                                        size: 40,
-                                      ),
-                                    ),
-                                  ),
-                                  
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          'REPRESENTATIVE',
-                                          style: GoogleFonts.manrope(
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.textSecondary.withValues(alpha: 0.6),
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          contactPerson,
-                                          textAlign: TextAlign.end,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.manrope(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.navy,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(height: 25),
 
