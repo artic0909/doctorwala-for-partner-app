@@ -330,4 +330,68 @@ class ApiService {
       };
     }
   }
+
+  /// Gets the Clinic Profile (OPD or Pathology) details (Sanctum protected, GET)
+  static Future<Map<String, dynamic>> getClinicProfile({
+    required String type, // 'opd' or 'pathology'
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/clinic-profile/$type');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to retrieve clinic profile. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Stores or updates the Clinic Profile (OPD or Pathology) details (Sanctum protected, URL Encoded Form POST)
+  static Future<Map<String, dynamic>> storeClinicProfile({
+    required String type, // 'opd' or 'pathology'
+    required Map<String, String> body,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/clinic-profile/$type');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to save clinic profile. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }

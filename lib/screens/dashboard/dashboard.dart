@@ -7,6 +7,8 @@ import '../../core/session_manager.dart';
 import '../login_screen.dart';
 import 'widgets/bottom_nav.dart';
 import 'widgets/sidebar.dart';
+import 'opdcontact.dart';
+import 'pathologycontact.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -102,9 +104,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 2:
         return _buildProfileTab(); // Profile serves as Account Settings
       case 3:
-        return _buildPlaceholderTab('Add Doctor Chamber', Icons.local_hospital_rounded);
+        return const OpdContactScreen();
       case 4:
-        return _buildPlaceholderTab('Add Pathology Clinic', Icons.medical_services_rounded);
+        return const PathologyContactScreen();
       case 5:
         return _buildPlaceholderTab('Add Doctors', Icons.person_add_rounded);
       case 6:
@@ -280,7 +282,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required IconData icon,
     required Color color,
     required int delayMs,
-    bool isFullWidth = false,
   }) {
     return FadeInUp(
       delay: Duration(milliseconds: delayMs),
