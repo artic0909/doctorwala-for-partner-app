@@ -33,7 +33,14 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
 
   // Schedule management
   final List<String> _weekdays = [
-    'All Day', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'All Day',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
   final Map<String, bool> _activeDays = {};
   final Map<String, TimeOfDay> _startTimes = {};
@@ -63,7 +70,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
       _testNameController.text = test['test_name']?.toString() ?? '';
       _testTypeController.text = test['test_type']?.toString() ?? '';
       _priceController.text = test['test_price']?.toString() ?? '';
-      
+
       _resetSchedule();
 
       // Parse schedule
@@ -86,10 +93,14 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
 
             if (day != null && _weekdays.contains(day)) {
               _activeDays[day] = true;
-              if (start != null && start.toLowerCase() != 'null' && start.isNotEmpty) {
+              if (start != null &&
+                  start.toLowerCase() != 'null' &&
+                  start.isNotEmpty) {
                 _startTimes[day] = _parseTimeOfDay(start);
               }
-              if (end != null && end.toLowerCase() != 'null' && end.isNotEmpty) {
+              if (end != null &&
+                  end.toLowerCase() != 'null' &&
+                  end.isNotEmpty) {
                 _endTimes[day] = _parseTimeOfDay(end);
               }
             }
@@ -137,17 +148,18 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
         final timeParts = clean.split(':');
         final hour = int.parse(timeParts[0]);
         final minute = timeParts.length > 1 ? int.parse(timeParts[1]) : 0;
-        return TimeOfDay(
-          hour: hour,
-          minute: minute,
-        );
+        return TimeOfDay(hour: hour, minute: minute);
       }
     } catch (_) {
       return const TimeOfDay(hour: 8, minute: 0);
     }
   }
 
-  Future<void> _selectTime(BuildContext context, String day, bool isStart) async {
+  Future<void> _selectTime(
+    BuildContext context,
+    String day,
+    bool isStart,
+  ) async {
     final initialTime = isStart ? _startTimes[day]! : _endTimes[day]!;
     final pickedTime = await showTimePicker(
       context: context,
@@ -181,14 +193,20 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
     if (_testNameController.text.trim().isEmpty ||
         _testTypeController.text.trim().isEmpty ||
         _priceController.text.trim().isEmpty) {
-      CustomAlerts.showError(context, 'Please fill in all required fields marked with *');
+      CustomAlerts.showError(
+        context,
+        'Please fill in all required fields marked with *',
+      );
       return;
     }
 
     // Check if at least one day is selected
     final hasSchedule = _activeDays.values.any((active) => active);
     if (!hasSchedule) {
-      CustomAlerts.showError(context, 'Please select at least one weekday for the test availability schedule.');
+      CustomAlerts.showError(
+        context,
+        'Please select at least one weekday for the test availability schedule.',
+      );
       return;
     }
 
@@ -198,7 +216,10 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
       final token = await SessionManager.getToken();
       if (!mounted) return;
       if (token == null) {
-        CustomAlerts.showError(context, 'Session expired. Please log in again.');
+        CustomAlerts.showError(
+          context,
+          'Session expired. Please log in again.',
+        );
         setState(() => _isLoading = false);
         return;
       }
@@ -219,22 +240,31 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
         }
       }
 
-      final response = _isEditing
-          ? await ApiService.updateTest(token: token, id: _editingTestId!, body: body)
-          : await ApiService.addTest(token: token, body: body);
+      final response =
+          _isEditing
+              ? await ApiService.updateTest(
+                token: token,
+                id: _editingTestId!,
+                body: body,
+              )
+              : await ApiService.addTest(token: token, body: body);
 
       if (!mounted) return;
       setState(() => _isLoading = false);
 
       if (response['success'] == true) {
-        CustomAlerts.showSuccessLoader(context, response['message'] ?? 'Pathology test saved successfully!');
+        CustomAlerts.showSuccessLoader(
+          context,
+          response['message'] ?? 'Pathology test saved successfully!',
+        );
         await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
           Navigator.pop(context); // Pop success loader
           Navigator.pop(context, true); // Pop AddTestsScreen and return success
         }
       } else {
-        String errorMessage = response['message'] ?? 'Failed to save test details.';
+        String errorMessage =
+            response['message'] ?? 'Failed to save test details.';
         if (response['errors'] != null && response['errors'] is Map) {
           final errors = response['errors'] as Map;
           final firstErrorList = errors.values.first;
@@ -247,7 +277,10 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
     } catch (_) {
       if (mounted) {
         setState(() => _isLoading = false);
-        CustomAlerts.showError(context, 'An unexpected error occurred. Please try again.');
+        CustomAlerts.showError(
+          context,
+          'An unexpected error occurred. Please try again.',
+        );
       }
     }
   }
@@ -280,7 +313,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
             FadeInDown(
               duration: const Duration(milliseconds: 400),
               child: Text(
-                _isEditing ? 'Modify Test Parameters' : 'Register Pathology Test',
+                _isEditing ? 'Modify Test Parameters' : 'List Pathology Test',
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -351,11 +384,15 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             const SizedBox(height: 24),
-            
+
             // Schedule section
             Row(
               children: [
-                const Icon(Icons.schedule_rounded, color: AppColors.teal, size: 18),
+                const Icon(
+                  Icons.schedule_rounded,
+                  color: AppColors.teal,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'TEST AVAILABILITY HOURS *',
@@ -369,7 +406,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
               ],
             ),
             const SizedBox(height: 10),
-            
+
             Column(
               children: _weekdays.map((day) => _buildScheduleRow(day)).toList(),
             ),
@@ -384,7 +421,9 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.grey),
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: Text(
                       'Cancel',
@@ -416,34 +455,52 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _isEditing ? 'Update Details' : 'Upload Details',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                      child:
+                          _isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
                                   ),
                                 ),
-                                const SizedBox(width: 6),
-                                const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
-                              ],
-                            ),
+                              )
+                              : FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        _isEditing
+                                            ? 'Update Details'
+                                            : 'Upload Details',
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                     ),
                   ),
                 ),
@@ -477,7 +534,11 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
           color: AppColors.navy,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.7), size: 18),
+          prefixIcon: Icon(
+            icon,
+            color: AppColors.textSecondary.withValues(alpha: 0.7),
+            size: 18,
+          ),
           hintText: hint,
           hintStyle: GoogleFonts.manrope(
             fontSize: 13,
@@ -485,7 +546,10 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
             color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
       ),
     );
@@ -517,7 +581,10 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isEnabled ? AppColors.navy : AppColors.textSecondary.withValues(alpha: 0.6),
+                    color:
+                        isEnabled
+                            ? AppColors.navy
+                            : AppColors.textSecondary.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -532,14 +599,21 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                     child: InkWell(
                       onTap: () => _selectTime(context, day, true),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.background,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.access_time_filled_rounded, size: 14, color: AppColors.teal),
+                            const Icon(
+                              Icons.access_time_filled_rounded,
+                              size: 14,
+                              color: AppColors.teal,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -561,14 +635,21 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                     child: InkWell(
                       onTap: () => _selectTime(context, day, false),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.background,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.access_time_filled_rounded, size: 14, color: AppColors.teal),
+                            const Icon(
+                              Icons.access_time_filled_rounded,
+                              size: 14,
+                              color: AppColors.teal,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(

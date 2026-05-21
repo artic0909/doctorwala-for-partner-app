@@ -42,12 +42,17 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
       if (query.isEmpty) {
         _filteredDoctors = _doctors;
       } else {
-        _filteredDoctors = _doctors.where((doc) {
-          final name = (doc['doctor_name'] ?? '').toString().toLowerCase();
-          final spec = (doc['doctor_specialist'] ?? '').toString().toLowerCase();
-          final desig = (doc['doctor_designation'] ?? '').toString().toLowerCase();
-          return name.contains(query) || spec.contains(query) || desig.contains(query);
-        }).toList();
+        _filteredDoctors =
+            _doctors.where((doc) {
+              final name = (doc['doctor_name'] ?? '').toString().toLowerCase();
+              final spec =
+                  (doc['doctor_specialist'] ?? '').toString().toLowerCase();
+              final desig =
+                  (doc['doctor_designation'] ?? '').toString().toLowerCase();
+              return name.contains(query) ||
+                  spec.contains(query) ||
+                  desig.contains(query);
+            }).toList();
       }
     });
   }
@@ -92,53 +97,54 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
   Future<void> _deleteDoctor(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          'Delete Doctor',
-          style: GoogleFonts.manrope(
-            fontWeight: FontWeight.w800,
-            color: AppColors.navy,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete this doctor from your seating?',
-          style: GoogleFonts.manrope(
-            fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(
+              'Delete Doctor',
               style: GoogleFonts.manrope(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
+                color: AppColors.navy,
+              ),
+            ),
+            content: Text(
+              'Are you sure you want to delete this doctor from your seating?',
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              'Delete',
-              style: GoogleFonts.manrope(
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'Delete',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -204,10 +210,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
         final timeParts = clean.split(':');
         final hour = int.parse(timeParts[0]);
         final minute = timeParts.length > 1 ? int.parse(timeParts[1]) : 0;
-        return TimeOfDay(
-          hour: hour,
-          minute: minute,
-        );
+        return TimeOfDay(hour: hour, minute: minute);
       }
     } catch (_) {
       return const TimeOfDay(hour: 9, minute: 0);
@@ -257,7 +260,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Doctors Directory',
+                              'Doctors List',
                               style: GoogleFonts.manrope(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
@@ -267,7 +270,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Total registered: ${_doctors.length}',
+                              'Total Listed: ${_doctors.length}',
                               style: GoogleFonts.manrope(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -279,7 +282,11 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                         // Add Doctors Button
                         ElevatedButton.icon(
                           onPressed: () => _navigateToAddDoctor(),
-                          icon: const Icon(Icons.person_add_rounded, size: 16, color: Colors.white),
+                          icon: const Icon(
+                            Icons.person_add_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                           label: Text(
                             'Add Doctor',
                             style: GoogleFonts.manrope(
@@ -291,7 +298,10 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.teal,
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -315,14 +325,22 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                           color: AppColors.navy,
                         ),
                         decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.textSecondary,
+                            size: 20,
+                          ),
                           hintText: 'Search by doctor name or specialty...',
                           hintStyle: GoogleFonts.manrope(
                             fontSize: 13,
-                            color: AppColors.textSecondary.withValues(alpha: 0.6),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -332,29 +350,37 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
 
               // Listings List
               Expanded(
-                child: _isFetching
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
+                child:
+                    _isFetching
+                        ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.teal,
+                            ),
+                          ),
+                        )
+                        : RefreshIndicator(
+                          onRefresh: _fetchDoctors,
+                          color: AppColors.teal,
+                          child:
+                              _filteredDoctors.isEmpty
+                                  ? _buildEmptyState()
+                                  : ListView.builder(
+                                    padding: const EdgeInsets.all(20),
+                                    itemCount: _filteredDoctors.length,
+                                    itemBuilder: (context, idx) {
+                                      final doc =
+                                          _filteredDoctors[idx]
+                                              as Map<String, dynamic>;
+                                      return FadeInUp(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        child: _buildDoctorCard(doc),
+                                      );
+                                    },
+                                  ),
                         ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _fetchDoctors,
-                        color: AppColors.teal,
-                        child: _filteredDoctors.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.builder(
-                                padding: const EdgeInsets.all(20),
-                                itemCount: _filteredDoctors.length,
-                                itemBuilder: (context, idx) {
-                                  final doc = _filteredDoctors[idx] as Map<String, dynamic>;
-                                  return FadeInUp(
-                                    duration: const Duration(milliseconds: 300),
-                                    child: _buildDoctorCard(doc),
-                                  );
-                                },
-                              ),
-                      ),
               ),
             ],
           ),
@@ -497,7 +523,10 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.navy.withValues(alpha: 0.06),
                               borderRadius: BorderRadius.circular(8),
@@ -529,7 +558,9 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                           style: GoogleFonts.manrope(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.textSecondary.withValues(alpha: 0.8),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.8,
+                            ),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -593,55 +624,68 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children: daysList.map<Widget>((sched) {
-                      final dayName = sched['day']?.toString() ?? '';
-                      final start = sched['start_time']?.toString() ?? '';
-                      final end = sched['end_time']?.toString() ?? '';
+                    children:
+                        daysList.map<Widget>((sched) {
+                          final dayName = sched['day']?.toString() ?? '';
+                          final start = sched['start_time']?.toString() ?? '';
+                          final end = sched['end_time']?.toString() ?? '';
 
-                      String shortDay = dayName;
-                      if (dayName.length > 3 && dayName.toLowerCase() != 'all day') {
-                        shortDay = dayName.substring(0, 3);
-                      }
+                          String shortDay = dayName;
+                          if (dayName.length > 3 &&
+                              dayName.toLowerCase() != 'all day') {
+                            shortDay = dayName.substring(0, 3);
+                          }
 
-                      final startDisplay = _formatDBTime(start);
-                      final endDisplay = _formatDBTime(end);
-                      final String displayTime;
-                      if (startDisplay.isEmpty && endDisplay.isEmpty) {
-                        displayTime = 'No Timings';
-                      } else if (endDisplay.isEmpty) {
-                        displayTime = '$startDisplay onwards';
-                      } else if (startDisplay.isEmpty) {
-                        displayTime = 'Till $endDisplay';
-                      } else {
-                        displayTime = '$startDisplay - $endDisplay';
-                      }
+                          final startDisplay = _formatDBTime(start);
+                          final endDisplay = _formatDBTime(end);
+                          final String displayTime;
+                          if (startDisplay.isEmpty && endDisplay.isEmpty) {
+                            displayTime = 'No Timings';
+                          } else if (endDisplay.isEmpty) {
+                            displayTime = '$startDisplay onwards';
+                          } else if (startDisplay.isEmpty) {
+                            displayTime = 'Till $endDisplay';
+                          } else {
+                            displayTime = '$startDisplay - $endDisplay';
+                          }
 
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: Text(
-                          '$shortDay: $displayTime',
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.navy,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Text(
+                              '$shortDay: $displayTime',
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.navy,
+                              ),
+                            ),
+                          );
+                        }).toList(),
                   ),
                 const SizedBox(height: 8),
-                const Divider(height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
+                const Divider(
+                  height: 24,
+                  thickness: 1,
+                  color: Color(0xFFF1F5F9),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton.icon(
                       onPressed: () => _navigateToAddDoctor(doctorToEdit: doc),
-                      icon: const Icon(Icons.edit_rounded, size: 16, color: AppColors.teal),
+                      icon: const Icon(
+                        Icons.edit_rounded,
+                        size: 16,
+                        color: AppColors.teal,
+                      ),
                       label: Text(
                         'Edit Details',
                         style: GoogleFonts.manrope(
@@ -651,13 +695,20 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     TextButton.icon(
                       onPressed: () => _deleteDoctor(id),
-                      icon: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.redAccent),
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        size: 16,
+                        color: Colors.redAccent,
+                      ),
                       label: Text(
                         'Remove',
                         style: GoogleFonts.manrope(
@@ -667,7 +718,10 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                     ),
                   ],

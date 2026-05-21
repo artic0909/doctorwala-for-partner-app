@@ -42,11 +42,12 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
       if (query.isEmpty) {
         _filteredTests = _tests;
       } else {
-        _filteredTests = _tests.where((test) {
-          final name = (test['test_name'] ?? '').toString().toLowerCase();
-          final type = (test['test_type'] ?? '').toString().toLowerCase();
-          return name.contains(query) || type.contains(query);
-        }).toList();
+        _filteredTests =
+            _tests.where((test) {
+              final name = (test['test_name'] ?? '').toString().toLowerCase();
+              final type = (test['test_type'] ?? '').toString().toLowerCase();
+              return name.contains(query) || type.contains(query);
+            }).toList();
       }
     });
   }
@@ -69,11 +70,17 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
           _filteredTests = _tests;
         });
       } else {
-        CustomAlerts.showError(context, response['message'] ?? 'Failed to load tests.');
+        CustomAlerts.showError(
+          context,
+          response['message'] ?? 'Failed to load tests.',
+        );
       }
     } catch (_) {
       if (mounted) {
-        CustomAlerts.showError(context, 'An unexpected error occurred while fetching tests.');
+        CustomAlerts.showError(
+          context,
+          'An unexpected error occurred while fetching tests.',
+        );
       }
     } finally {
       if (mounted) {
@@ -85,31 +92,54 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
   Future<void> _deleteTest(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Delete Pathology Test',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w800, color: AppColors.navy),
-        ),
-        content: Text(
-          'Are you sure you want to delete this test? It will be removed from your catalog.',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w500, color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: Text('Delete', style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: Colors.white)),
+            title: Text(
+              'Delete Pathology Test',
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w800,
+                color: AppColors.navy,
+              ),
+            ),
+            content: Text(
+              'Are you sure you want to delete this test? It will be removed from your catalog.',
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'Delete',
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -121,10 +151,16 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
         final res = await ApiService.deleteTest(token: token, id: id);
         if (!mounted) return;
         if (res['success'] == true) {
-          CustomAlerts.showSuccess(context, res['message'] ?? 'Test deleted successfully!');
+          CustomAlerts.showSuccess(
+            context,
+            res['message'] ?? 'Test deleted successfully!',
+          );
           _fetchTests();
         } else {
-          CustomAlerts.showError(context, res['message'] ?? 'Failed to delete test.');
+          CustomAlerts.showError(
+            context,
+            res['message'] ?? 'Failed to delete test.',
+          );
         }
       } catch (_) {
         if (mounted) {
@@ -169,10 +205,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
         final timeParts = clean.split(':');
         final hour = int.parse(timeParts[0]);
         final minute = timeParts.length > 1 ? int.parse(timeParts[1]) : 0;
-        return TimeOfDay(
-          hour: hour,
-          minute: minute,
-        );
+        return TimeOfDay(hour: hour, minute: minute);
       }
     } catch (_) {
       return const TimeOfDay(hour: 8, minute: 0);
@@ -222,7 +255,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Pathology Tests Catalog',
+                              'Pathology Tests',
                               style: GoogleFonts.manrope(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
@@ -244,7 +277,11 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                         // Add Test Button
                         ElevatedButton.icon(
                           onPressed: () => _navigateToAddTest(),
-                          icon: const Icon(Icons.add_circle_outline_rounded, size: 16, color: Colors.white),
+                          icon: const Icon(
+                            Icons.add_circle_outline_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                           label: Text(
                             'Add Test',
                             style: GoogleFonts.manrope(
@@ -256,7 +293,10 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.teal,
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -280,14 +320,22 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                           color: AppColors.navy,
                         ),
                         decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.textSecondary,
+                            size: 20,
+                          ),
                           hintText: 'Search by test name or type...',
                           hintStyle: GoogleFonts.manrope(
                             fontSize: 13,
-                            color: AppColors.textSecondary.withValues(alpha: 0.6),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -297,29 +345,37 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
 
               // Listings List
               Expanded(
-                child: _isFetching
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
+                child:
+                    _isFetching
+                        ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.teal,
+                            ),
+                          ),
+                        )
+                        : RefreshIndicator(
+                          onRefresh: _fetchTests,
+                          color: AppColors.teal,
+                          child:
+                              _filteredTests.isEmpty
+                                  ? _buildEmptyState()
+                                  : ListView.builder(
+                                    padding: const EdgeInsets.all(20),
+                                    itemCount: _filteredTests.length,
+                                    itemBuilder: (context, idx) {
+                                      final test =
+                                          _filteredTests[idx]
+                                              as Map<String, dynamic>;
+                                      return FadeInUp(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        child: _buildTestCard(test),
+                                      );
+                                    },
+                                  ),
                         ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _fetchTests,
-                        color: AppColors.teal,
-                        child: _filteredTests.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.builder(
-                                padding: const EdgeInsets.all(20),
-                                itemCount: _filteredTests.length,
-                                itemBuilder: (context, idx) {
-                                  final test = _filteredTests[idx] as Map<String, dynamic>;
-                                  return FadeInUp(
-                                    duration: const Duration(milliseconds: 300),
-                                    child: _buildTestCard(test),
-                                  );
-                                },
-                              ),
-                      ),
               ),
             ],
           ),
@@ -456,7 +512,10 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.navy.withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(8),
@@ -529,55 +588,68 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children: daysList.map<Widget>((sched) {
-                      final dayName = sched['day']?.toString() ?? '';
-                      final start = sched['start_time']?.toString() ?? '';
-                      final end = sched['end_time']?.toString() ?? '';
+                    children:
+                        daysList.map<Widget>((sched) {
+                          final dayName = sched['day']?.toString() ?? '';
+                          final start = sched['start_time']?.toString() ?? '';
+                          final end = sched['end_time']?.toString() ?? '';
 
-                      String shortDay = dayName;
-                      if (dayName.length > 3 && dayName.toLowerCase() != 'all day') {
-                        shortDay = dayName.substring(0, 3);
-                      }
+                          String shortDay = dayName;
+                          if (dayName.length > 3 &&
+                              dayName.toLowerCase() != 'all day') {
+                            shortDay = dayName.substring(0, 3);
+                          }
 
-                      final startDisplay = _formatDBTime(start);
-                      final endDisplay = _formatDBTime(end);
-                      final String displayTime;
-                      if (startDisplay.isEmpty && endDisplay.isEmpty) {
-                        displayTime = 'No Timings';
-                      } else if (endDisplay.isEmpty) {
-                        displayTime = '$startDisplay onwards';
-                      } else if (startDisplay.isEmpty) {
-                        displayTime = 'Till $endDisplay';
-                      } else {
-                        displayTime = '$startDisplay - $endDisplay';
-                      }
+                          final startDisplay = _formatDBTime(start);
+                          final endDisplay = _formatDBTime(end);
+                          final String displayTime;
+                          if (startDisplay.isEmpty && endDisplay.isEmpty) {
+                            displayTime = 'No Timings';
+                          } else if (endDisplay.isEmpty) {
+                            displayTime = '$startDisplay onwards';
+                          } else if (startDisplay.isEmpty) {
+                            displayTime = 'Till $endDisplay';
+                          } else {
+                            displayTime = '$startDisplay - $endDisplay';
+                          }
 
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: Text(
-                          '$shortDay: $displayTime',
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.navy,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Text(
+                              '$shortDay: $displayTime',
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.navy,
+                              ),
+                            ),
+                          );
+                        }).toList(),
                   ),
                 const SizedBox(height: 8),
-                const Divider(height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
+                const Divider(
+                  height: 24,
+                  thickness: 1,
+                  color: Color(0xFFF1F5F9),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton.icon(
                       onPressed: () => _navigateToAddTest(testToEdit: test),
-                      icon: const Icon(Icons.edit_rounded, size: 16, color: AppColors.teal),
+                      icon: const Icon(
+                        Icons.edit_rounded,
+                        size: 16,
+                        color: AppColors.teal,
+                      ),
                       label: Text(
                         'Edit Details',
                         style: GoogleFonts.manrope(
@@ -587,13 +659,20 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     TextButton.icon(
                       onPressed: () => _deleteTest(id),
-                      icon: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.redAccent),
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        size: 16,
+                        color: Colors.redAccent,
+                      ),
                       label: Text(
                         'Remove',
                         style: GoogleFonts.manrope(
@@ -603,7 +682,10 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                     ),
                   ],

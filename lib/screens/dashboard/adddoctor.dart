@@ -70,11 +70,13 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       _isEditing = true;
       _editingDoctorId = doctor['id'].toString();
       _doctorNameController.text = doctor['doctor_name']?.toString() ?? '';
-      _specialistController.text = doctor['doctor_specialist']?.toString() ?? '';
-      
+      _specialistController.text =
+          doctor['doctor_specialist']?.toString() ?? '';
+
       final des = doctor['doctor_designation']?.toString() ?? '';
-      _selectedDesignation = ['MD', 'Dr', 'Prof', 'BDS'].contains(des) ? des : null;
-      
+      _selectedDesignation =
+          ['MD', 'Dr', 'Prof', 'BDS'].contains(des) ? des : null;
+
       _feesController.text = doctor['doctor_fees']?.toString() ?? '';
       _moreController.text = doctor['doctor_more']?.toString() ?? '';
 
@@ -100,10 +102,14 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
 
             if (day != null && _weekdays.contains(day)) {
               _activeDays[day] = true;
-              if (start != null && start.toLowerCase() != 'null' && start.isNotEmpty) {
+              if (start != null &&
+                  start.toLowerCase() != 'null' &&
+                  start.isNotEmpty) {
                 _startTimes[day] = _parseTimeOfDay(start);
               }
-              if (end != null && end.toLowerCase() != 'null' && end.isNotEmpty) {
+              if (end != null &&
+                  end.toLowerCase() != 'null' &&
+                  end.isNotEmpty) {
                 _endTimes[day] = _parseTimeOfDay(end);
               }
             }
@@ -152,10 +158,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
         final timeParts = clean.split(':');
         final hour = int.parse(timeParts[0]);
         final minute = timeParts.length > 1 ? int.parse(timeParts[1]) : 0;
-        return TimeOfDay(
-          hour: hour,
-          minute: minute,
-        );
+        return TimeOfDay(hour: hour, minute: minute);
       }
     } catch (_) {
       return const TimeOfDay(hour: 9, minute: 0);
@@ -247,9 +250,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
           body['doctor_visit_start_time[$idx]'] = _formatTime24h(
             _startTimes[day]!,
           );
-          body['doctor_visit_end_time[$idx]'] = _formatTime24h(
-            _endTimes[day]!,
-          );
+          body['doctor_visit_end_time[$idx]'] = _formatTime24h(_endTimes[day]!);
           idx++;
         }
       }
@@ -274,10 +275,14 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
         await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
           Navigator.pop(context); // Pop success loader
-          Navigator.pop(context, true); // Pop AddDoctorScreen with success result
+          Navigator.pop(
+            context,
+            true,
+          ); // Pop AddDoctorScreen with success result
         }
       } else {
-        String errorMessage = response['message'] ?? 'Failed to save doctor details.';
+        String errorMessage =
+            response['message'] ?? 'Failed to save doctor details.';
         if (response['errors'] != null && response['errors'] is Map) {
           final errors = response['errors'] as Map;
           final firstErrorList = errors.values.first;
@@ -326,7 +331,7 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
             FadeInDown(
               duration: const Duration(milliseconds: 400),
               child: Text(
-                _isEditing ? 'Modify Practitioner Details' : 'Register New Doctor',
+                _isEditing ? 'Modify Practitioner Details' : 'List New Doctor',
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -477,38 +482,52 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _isEditing ? 'Update Details' : 'Upload Details',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                      child:
+                          _isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
                                   ),
                                 ),
-                                const SizedBox(width: 6),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Colors.white,
-                                  size: 16,
+                              )
+                              : FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        _isEditing
+                                            ? 'Update Details'
+                                            : 'Upload Details',
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
+                              ),
                     ),
                   ),
                 ),
@@ -601,12 +620,10 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
             vertical: 14,
           ),
         ),
-        items: ['MD', 'Dr', 'Prof', 'BDS'].map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
+        items:
+            ['MD', 'Dr', 'Prof', 'BDS'].map((String value) {
+              return DropdownMenuItem<String>(value: value, child: Text(value));
+            }).toList(),
         onChanged: (newValue) {
           setState(() {
             _selectedDesignation = newValue;
@@ -642,7 +659,10 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isEnabled ? AppColors.navy : AppColors.textSecondary.withValues(alpha: 0.6),
+                    color:
+                        isEnabled
+                            ? AppColors.navy
+                            : AppColors.textSecondary.withValues(alpha: 0.6),
                   ),
                 ),
               ),
