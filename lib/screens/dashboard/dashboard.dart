@@ -218,12 +218,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Overview Header
+          FadeIn(
+            delay: const Duration(milliseconds: 200),
+            child: Text(
+              'Dashboard Overview',
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.navy,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
+
+          // Counting Cards Grid
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.15,
+            children: cards,
+          ),
+          const SizedBox(height: 25),
+
           // Header / Welcome Certificate banner (Medical Theme)
           Builder(
             builder: (context) {
               // Parse dynamic certificate text based on registration types
               String certTitle = 'CLINICAL NETWORK CERTIFICATE';
-              String certDesc = 'is certified as an official healthcare partner under the Doctorwala Network, authorized to manage digital clinics and patient services.';
+              String certDesc =
+                  'is certified as an official healthcare partner under the Doctorwala Network, authorized to manage digital clinics and patient services.';
 
               final isOPD = types.contains('OPD');
               final isPathology = types.contains('Pathology');
@@ -231,25 +259,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               if (isOPD && isPathology && isDoctor) {
                 certTitle = 'INTEGRATED CLINICAL CERTIFICATE';
-                certDesc = 'is officially certified to manage doctor chambers, digital OPD services, clinical pathology lab diagnostics, and comprehensive patient consulting under Doctorwala.';
+                certDesc =
+                    'is officially certified to manage doctor chambers, digital OPD services, clinical pathology lab diagnostics, and comprehensive patient consulting under Doctorwala.';
               } else if (isOPD && isPathology) {
                 certTitle = 'CLINICAL & DIAGNOSTIC CERTIFICATE';
-                certDesc = 'is officially certified to operate doctor chambers, manage digital OPD appointments, and conduct clinical pathology laboratory test diagnostics under Doctorwala.';
+                certDesc =
+                    'is officially certified to operate doctor chambers, manage digital OPD appointments, and conduct clinical pathology laboratory test diagnostics under Doctorwala.';
               } else if (isOPD && isDoctor) {
                 certTitle = 'CLINICAL CONSULTATION CERTIFICATE';
-                certDesc = 'is officially certified to manage patient consulting chambers, digital OPD services, and professional healthcare practice under Doctorwala.';
+                certDesc =
+                    'is officially certified to manage patient consulting chambers, digital OPD services, and professional healthcare practice under Doctorwala.';
               } else if (isDoctor && isPathology) {
                 certTitle = 'PRACTITIONER & DIAGNOSTIC CERTIFICATE';
-                certDesc = 'is officially certified to manage independent clinical consultations, pathology diagnostics, and patient lab test services under Doctorwala.';
+                certDesc =
+                    'is officially certified to manage independent clinical consultations, pathology diagnostics, and patient lab test services under Doctorwala.';
               } else if (isOPD) {
                 certTitle = 'OPD CHAMBER CERTIFICATE';
-                certDesc = 'is officially certified as a registered OPD Clinic Partner, authorized to run doctor chambers, schedule patient appointments, and provide digital health consultations under Doctorwala.';
+                certDesc =
+                    'is officially certified as a registered OPD Clinic Partner, authorized to run doctor chambers, schedule patient appointments, and provide digital health consultations under Doctorwala.';
               } else if (isPathology) {
                 certTitle = 'PATHOLOGY LABORATORY CERTIFICATE';
-                certDesc = 'is officially certified as a clinical Pathology Lab Partner, authorized to manage lab tests, analyze diagnostics, and generate patient pathology reports under Doctorwala.';
+                certDesc =
+                    'is officially certified as a clinical Pathology Lab Partner, authorized to manage lab tests, analyze diagnostics, and generate patient pathology reports under Doctorwala.';
               } else if (isDoctor) {
                 certTitle = 'MEDICAL PRACTITIONER CERTIFICATE';
-                certDesc = 'is officially certified as a registered Medical Practitioner, authorized to manage independent clinical chambers, schedule patient consultations, and offer digital care under Doctorwala.';
+                certDesc =
+                    'is officially certified as a registered Medical Practitioner, authorized to manage independent clinical chambers, schedule patient consultations, and offer digital care under Doctorwala.';
               }
 
               return FadeInDown(
@@ -260,7 +295,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFCFBF7), // Warm premium ivory/parchment background
+                        color: const Color(
+                          0xFFFCFBF7,
+                        ), // Warm premium ivory/parchment background
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -270,16 +307,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ],
                         border: Border.all(
-                          color: const Color(0xFFD4AF37), // Metallic Gold outer border
+                          color: const Color(
+                            0xFFD4AF37,
+                          ), // Metallic Gold outer border
                           width: 3.0,
                         ),
                       ),
                       child: Container(
                         margin: const EdgeInsets.all(4),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 18,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: AppColors.teal.withValues(alpha: 0.35), // Inner teal border
+                            color: AppColors.teal.withValues(
+                              alpha: 0.35,
+                            ), // Inner teal border
                             width: 1.2,
                           ),
                           borderRadius: BorderRadius.circular(14),
@@ -305,29 +349,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 color: AppColors.teal.withValues(alpha: 0.02),
                               ),
                             ),
-                            
+
                             // Content Column
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 // Top Logo & Stamp
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Image.asset(
                                       'assets/images/logo.png',
                                       height: 28,
-                                      errorBuilder: (context, error, stackTrace) => const Icon(
-                                        Icons.local_hospital_rounded,
-                                        color: AppColors.teal,
-                                        size: 28,
-                                      ),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(
+                                                Icons.local_hospital_rounded,
+                                                color: AppColors.teal,
+                                                size: 28,
+                                              ),
                                     ),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
-                                        border: Border.all(color: const Color(0xFFD4AF37), width: 1.0),
+                                        color: const Color(
+                                          0xFFD4AF37,
+                                        ).withValues(alpha: 0.1),
+                                        border: Border.all(
+                                          color: const Color(0xFFD4AF37),
+                                          width: 1.0,
+                                        ),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
@@ -343,7 +398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                
+
                                 // Certificate Title
                                 Text(
                                   certTitle,
@@ -361,11 +416,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   style: GoogleFonts.playfairDisplay(
                                     fontSize: 11.5,
                                     fontStyle: FontStyle.italic,
-                                    color: AppColors.navy.withValues(alpha: 0.65),
+                                    color: AppColors.navy.withValues(
+                                      alpha: 0.65,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                
+
                                 // Partner/Clinic Name
                                 Text(
                                   clinicName,
@@ -385,19 +442,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Container(width: 35, height: 1, color: const Color(0xFFD4AF37).withValues(alpha: 0.6)),
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 6),
-                                      child: Icon(Icons.star_rounded, color: Color(0xFFD4AF37), size: 10),
+                                    Container(
+                                      width: 35,
+                                      height: 1,
+                                      color: const Color(
+                                        0xFFD4AF37,
+                                      ).withValues(alpha: 0.6),
                                     ),
-                                    Container(width: 35, height: 1, color: const Color(0xFFD4AF37).withValues(alpha: 0.6)),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
+                                      child: Icon(
+                                        Icons.star_rounded,
+                                        color: Color(0xFFD4AF37),
+                                        size: 10,
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 35,
+                                      height: 1,
+                                      color: const Color(
+                                        0xFFD4AF37,
+                                      ).withValues(alpha: 0.6),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                
+
                                 // Partnership Text
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                   child: Text(
                                     certDesc,
                                     textAlign: TextAlign.center,
@@ -410,7 +487,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 18),
-                                
+
                                 // Signature / Footer Row with award.png
                                 Container(
                                   padding: const EdgeInsets.only(top: 10),
@@ -423,24 +500,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     ),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'PARTNER ID',
                                               style: GoogleFonts.manrope(
                                                 fontSize: 8,
                                                 fontWeight: FontWeight.w800,
-                                                color: AppColors.textSecondary.withValues(alpha: 0.6),
+                                                color: AppColors.textSecondary
+                                                    .withValues(alpha: 0.6),
                                                 letterSpacing: 0.5,
                                               ),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
-                                              widget.partnerData['partner_id'] ?? 'N/A',
+                                              widget.partnerData['partner_id'] ??
+                                                  'N/A',
                                               style: GoogleFonts.manrope(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.bold,
@@ -450,7 +531,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           ],
                                         ),
                                       ),
-                                      
+
                                       // Official Award Seal/Stamp Image with Gold Circular Shadow
                                       Container(
                                         padding: const EdgeInsets.all(3),
@@ -459,7 +540,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           color: Colors.white,
                                           boxShadow: [
                                             BoxShadow(
-                                              color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                                              color: const Color(
+                                                0xFFD4AF37,
+                                              ).withValues(alpha: 0.25),
                                               blurRadius: 8,
                                               spreadRadius: 1,
                                             ),
@@ -468,24 +551,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         child: Image.asset(
                                           'assets/images/award.png',
                                           height: 42,
-                                          errorBuilder: (context, error, stackTrace) => const Icon(
-                                            Icons.workspace_premium_rounded,
-                                            color: Color(0xFFD4AF37),
-                                            size: 36,
-                                          ),
+                                          errorBuilder:
+                                              (
+                                                context,
+                                                error,
+                                                stackTrace,
+                                              ) => const Icon(
+                                                Icons.workspace_premium_rounded,
+                                                color: Color(0xFFD4AF37),
+                                                size: 36,
+                                              ),
                                         ),
                                       ),
-                                      
+
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
                                           children: [
                                             Text(
                                               'REPRESENTATIVE',
                                               style: GoogleFonts.manrope(
                                                 fontSize: 8,
                                                 fontWeight: FontWeight.w800,
-                                                color: AppColors.textSecondary.withValues(alpha: 0.6),
+                                                color: AppColors.textSecondary
+                                                    .withValues(alpha: 0.6),
                                                 letterSpacing: 0.5,
                                               ),
                                             ),
@@ -517,33 +607,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               );
             },
-          ),
-          const SizedBox(height: 25),
-
-          // Overview Header
-          FadeIn(
-            delay: const Duration(milliseconds: 200),
-            child: Text(
-              'Practice Overview',
-              style: GoogleFonts.manrope(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.navy,
-                letterSpacing: -0.3,
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-
-          // Counting Cards Grid
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.15,
-            children: cards,
           ),
           const SizedBox(height: 30),
         ],
