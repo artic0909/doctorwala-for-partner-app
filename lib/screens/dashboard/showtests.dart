@@ -2,11 +2,25 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'addtests.dart';
+
+class _TestTheme {
+  static const Color primary = Color(0xFF4C1D95); // Deep Biotech Purple/Violet
+  static const Color accent = Color(0xFFD946EF); // Diagnostic Fuchsia/Orchid
+  static const Color accentLight = Color(0xFFFAF5FF); // Soft Lavender
+  static const Color bgTint = Color(0xFFFAF5FF); // Tint background
+  static const Color textPrimary = Color(0xFF1E1B4B); // Deep indigo text
+  static const Color textSecondary = Color(0xFF475569); // Slate secondary text
+  static const Color border = Color(0xFFE9D5FF); // Soft purple border
+  static const LinearGradient buttonGradient = LinearGradient(
+    colors: [Color(0xFF4C1D95), Color(0xFFD946EF)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+}
 
 class ShowTestsScreen extends StatefulWidget {
   const ShowTestsScreen({super.key});
@@ -42,12 +56,11 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
       if (query.isEmpty) {
         _filteredTests = _tests;
       } else {
-        _filteredTests =
-            _tests.where((test) {
-              final name = (test['test_name'] ?? '').toString().toLowerCase();
-              final type = (test['test_type'] ?? '').toString().toLowerCase();
-              return name.contains(query) || type.contains(query);
-            }).toList();
+        _filteredTests = _tests.where((test) {
+          final name = (test['test_name'] ?? '').toString().toLowerCase();
+          final type = (test['test_type'] ?? '').toString().toLowerCase();
+          return name.contains(query) || type.contains(query);
+        }).toList();
       }
     });
   }
@@ -92,54 +105,53 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
   Future<void> _deleteTest(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: Text(
-              'Delete Pathology Test',
-              style: GoogleFonts.manrope(
-                fontWeight: FontWeight.w800,
-                color: AppColors.navy,
-              ),
-            ),
-            content: Text(
-              'Are you sure you want to delete this test? It will be removed from your catalog.',
-              style: GoogleFonts.manrope(
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'Cancel',
-                  style: GoogleFonts.manrope(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  'Delete',
-                  style: GoogleFonts.manrope(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          'Delete Pathology Test',
+          style: GoogleFonts.manrope(
+            fontWeight: FontWeight.w800,
+            color: _TestTheme.primary,
           ),
+        ),
+        content: Text(
+          'Are you sure you want to delete this test? It will be removed from your catalog.',
+          style: GoogleFonts.manrope(
+            fontWeight: FontWeight.w500,
+            color: _TestTheme.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w700,
+                color: _TestTheme.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.manrope(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
 
     if (confirm == true) {
@@ -227,12 +239,11 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: _TestTheme.bgTint,
       body: Stack(
         children: [
           Column(
             children: [
-              // Custom Header Bar with Search & Add button
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
@@ -240,7 +251,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.navy.withValues(alpha: 0.03),
+                      color: _TestTheme.primary.withValues(alpha: 0.03),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -259,7 +270,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                               style: GoogleFonts.manrope(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.navy,
+                                color: _TestTheme.primary,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -269,113 +280,114 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                               style: GoogleFonts.manrope(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                                color: _TestTheme.textSecondary,
                               ),
                             ),
                           ],
                         ),
-                        // Add Test Button
-                        ElevatedButton.icon(
-                          onPressed: () => _navigateToAddTest(),
-                          icon: const Icon(
-                            Icons.add_circle_outline_rounded,
-                            size: 16,
-                            color: Colors.white,
+                        Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: _TestTheme.buttonGradient,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _TestTheme.accent.withValues(alpha: 0.25),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
-                          label: Text(
-                            'Add Test',
-                            style: GoogleFonts.manrope(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _navigateToAddTest(),
+                            icon: const Icon(
+                              Icons.add_circle_outline_rounded,
+                              size: 16,
                               color: Colors.white,
                             ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.teal,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                            label: Text(
+                              'Add Test',
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    // Search Bar
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: _TestTheme.bgTint,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: _TestTheme.border),
                       ),
                       child: TextField(
                         controller: _searchController,
                         style: GoogleFonts.manrope(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.navy,
+                          color: _TestTheme.textPrimary,
                         ),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(
                             Icons.search_rounded,
-                            color: AppColors.textSecondary,
+                            color: _TestTheme.accent,
                             size: 20,
                           ),
                           hintText: 'Search by test name or type...',
                           hintStyle: GoogleFonts.manrope(
                             fontSize: 13,
-                            color: AppColors.textSecondary.withValues(
-                              alpha: 0.6,
-                            ),
+                            color: _TestTheme.textSecondary.withValues(alpha: 0.6),
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // Listings List
               Expanded(
-                child:
-                    _isFetching
-                        ? const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.teal,
-                            ),
+                child: _isFetching
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _TestTheme.accent,
                           ),
-                        )
-                        : RefreshIndicator(
-                          onRefresh: _fetchTests,
-                          color: AppColors.teal,
-                          child:
-                              _filteredTests.isEmpty
-                                  ? _buildEmptyState()
-                                  : ListView.builder(
-                                    padding: const EdgeInsets.all(20),
-                                    itemCount: _filteredTests.length,
-                                    itemBuilder: (context, idx) {
-                                      final test =
-                                          _filteredTests[idx]
-                                              as Map<String, dynamic>;
-                                      return FadeInUp(
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        child: _buildTestCard(test),
-                                      );
-                                    },
-                                  ),
                         ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _fetchTests,
+                        color: _TestTheme.accent,
+                        child: _filteredTests.isEmpty
+                            ? _buildEmptyState()
+                            : ListView.builder(
+                                padding: const EdgeInsets.all(20),
+                                itemCount: _filteredTests.length,
+                                itemBuilder: (context, idx) {
+                                  final test = _filteredTests[idx] as Map<String, dynamic>;
+                                  return FadeInUp(
+                                    duration: const Duration(milliseconds: 300),
+                                    child: _buildTestCard(test),
+                                  );
+                                },
+                              ),
+                      ),
               ),
             ],
           ),
@@ -384,7 +396,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
               color: Colors.black12,
               child: const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
+                  valueColor: AlwaysStoppedAnimation<Color>(_TestTheme.accent),
                 ),
               ),
             ),
@@ -405,13 +417,13 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.skyBlue,
+              decoration: const BoxDecoration(
+                color: _TestTheme.accentLight,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.science_rounded,
-                color: AppColors.navy,
+                color: _TestTheme.primary,
                 size: 40,
               ),
             ),
@@ -421,7 +433,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: AppColors.navy,
+                color: _TestTheme.primary,
               ),
             ),
             const SizedBox(height: 8),
@@ -433,7 +445,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: _TestTheme.textSecondary,
               ),
             ),
           ],
@@ -448,7 +460,6 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
     final type = test['test_type'] ?? 'N/A';
     final price = test['test_price']?.toString() ?? '0';
 
-    // Decode availability days
     List<dynamic> daysList = [];
     final scheduleData = test['test_day_time'];
     if (scheduleData != null) {
@@ -466,10 +477,10 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        border: Border.all(color: _TestTheme.border, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.02),
+            color: _TestTheme.primary.withValues(alpha: 0.02),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -483,21 +494,23 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Science Icon Frame
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.skyBlue,
+                    color: _TestTheme.accentLight,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _TestTheme.accent.withValues(alpha: 0.2),
+                      width: 1.5,
+                    ),
                   ),
                   child: const Icon(
                     Icons.science_rounded,
-                    color: AppColors.navy,
+                    color: _TestTheme.primary,
                     size: 28,
                   ),
                 ),
                 const SizedBox(width: 14),
-                // Main Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,7 +520,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                         style: GoogleFonts.manrope(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.navy,
+                          color: _TestTheme.primary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -517,15 +530,19 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.navy.withValues(alpha: 0.06),
+                          color: _TestTheme.accentLight,
                           borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: _TestTheme.accent.withValues(alpha: 0.3),
+                            width: 1.0,
+                          ),
                         ),
                         child: Text(
                           type,
                           style: GoogleFonts.manrope(
                             fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.navy,
+                            fontWeight: FontWeight.w800,
+                            color: _TestTheme.accent,
                           ),
                         ),
                       ),
@@ -536,7 +553,6 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
             ),
           ),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-          // Price & availability bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -550,7 +566,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textSecondary.withValues(alpha: 0.6),
+                        color: _TestTheme.textSecondary.withValues(alpha: 0.6),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -559,7 +575,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.teal,
+                        color: _TestTheme.accent,
                       ),
                     ),
                   ],
@@ -570,7 +586,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textSecondary.withValues(alpha: 0.6),
+                    color: _TestTheme.textSecondary.withValues(alpha: 0.6),
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -588,51 +604,52 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children:
-                        daysList.map<Widget>((sched) {
-                          final dayName = sched['day']?.toString() ?? '';
-                          final start = sched['start_time']?.toString() ?? '';
-                          final end = sched['end_time']?.toString() ?? '';
+                    children: daysList.map<Widget>((sched) {
+                      final dayName = sched['day']?.toString() ?? '';
+                      final start = sched['start_time']?.toString() ?? '';
+                      final end = sched['end_time']?.toString() ?? '';
 
-                          String shortDay = dayName;
-                          if (dayName.length > 3 &&
-                              dayName.toLowerCase() != 'all day') {
-                            shortDay = dayName.substring(0, 3);
-                          }
+                      String shortDay = dayName;
+                      if (dayName.length > 3 && dayName.toLowerCase() != 'all day') {
+                        shortDay = dayName.substring(0, 3);
+                      }
 
-                          final startDisplay = _formatDBTime(start);
-                          final endDisplay = _formatDBTime(end);
-                          final String displayTime;
-                          if (startDisplay.isEmpty && endDisplay.isEmpty) {
-                            displayTime = 'No Timings';
-                          } else if (endDisplay.isEmpty) {
-                            displayTime = '$startDisplay onwards';
-                          } else if (startDisplay.isEmpty) {
-                            displayTime = 'Till $endDisplay';
-                          } else {
-                            displayTime = '$startDisplay - $endDisplay';
-                          }
+                      final startDisplay = _formatDBTime(start);
+                      final endDisplay = _formatDBTime(end);
+                      final String displayTime;
+                      if (startDisplay.isEmpty && endDisplay.isEmpty) {
+                        displayTime = 'No Timings';
+                      } else if (endDisplay.isEmpty) {
+                        displayTime = '$startDisplay onwards';
+                      } else if (startDisplay.isEmpty) {
+                        displayTime = 'Till $endDisplay';
+                      } else {
+                        displayTime = '$startDisplay - $endDisplay';
+                      }
 
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Text(
-                              '$shortDay: $displayTime',
-                              style: GoogleFonts.manrope(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.navy,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _TestTheme.accentLight,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _TestTheme.accent.withValues(alpha: 0.15),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Text(
+                          '$shortDay: $displayTime',
+                          style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: _TestTheme.primary,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 const SizedBox(height: 8),
                 const Divider(
@@ -648,14 +665,14 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                       icon: const Icon(
                         Icons.edit_rounded,
                         size: 16,
-                        color: AppColors.teal,
+                        color: _TestTheme.accent,
                       ),
                       label: Text(
                         'Edit Details',
                         style: GoogleFonts.manrope(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.teal,
+                          color: _TestTheme.accent,
                         ),
                       ),
                       style: TextButton.styleFrom(

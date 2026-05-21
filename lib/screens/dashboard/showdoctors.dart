@@ -2,11 +2,25 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'adddoctor.dart';
+
+class _DoctorTheme {
+  static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
+  static const Color accent = Color(0xFF0D9488); // Turquoise/Teal
+  static const Color accentLight = Color(0xFFF0FDFA); // Soft Mint/Turquoise Light
+  static const Color bgTint = Color(0xFFF8FAFC); // Slate background
+  static const Color textPrimary = Color(0xFF0F172A); // Dark slate
+  static const Color textSecondary = Color(0xFF64748B); // Medium slate
+  static const Color border = Color(0xFFE2E8F0); // Border color
+  static const LinearGradient buttonGradient = LinearGradient(
+    colors: [Color(0xFF1E3A8A), Color(0xFF0D9488)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+}
 
 class ShowDoctorsScreen extends StatefulWidget {
   const ShowDoctorsScreen({super.key});
@@ -106,14 +120,14 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
               'Delete Doctor',
               style: GoogleFonts.manrope(
                 fontWeight: FontWeight.w800,
-                color: AppColors.navy,
+                color: _DoctorTheme.primary,
               ),
             ),
             content: Text(
               'Are you sure you want to delete this doctor from your seating?',
               style: GoogleFonts.manrope(
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: _DoctorTheme.textSecondary,
               ),
             ),
             actions: [
@@ -123,7 +137,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                   'Cancel',
                   style: GoogleFonts.manrope(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
+                    color: _DoctorTheme.textSecondary,
                   ),
                 ),
               ),
@@ -232,7 +246,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: _DoctorTheme.bgTint,
       body: Stack(
         children: [
           Column(
@@ -245,7 +259,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.navy.withValues(alpha: 0.03),
+                      color: _DoctorTheme.primary.withValues(alpha: 0.03),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -264,7 +278,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                               style: GoogleFonts.manrope(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.navy,
+                                color: _DoctorTheme.primary,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -274,36 +288,51 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                               style: GoogleFonts.manrope(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                                color: _DoctorTheme.textSecondary,
                               ),
                             ),
                           ],
                         ),
-                        // Add Doctors Button
-                        ElevatedButton.icon(
-                          onPressed: () => _navigateToAddDoctor(),
-                          icon: const Icon(
-                            Icons.person_add_rounded,
-                            size: 16,
-                            color: Colors.white,
+                        // Add Doctors Button with gradient
+                        Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: _DoctorTheme.buttonGradient,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _DoctorTheme.accent.withValues(alpha: 0.25),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
-                          label: Text(
-                            'Add Doctor',
-                            style: GoogleFonts.manrope(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _navigateToAddDoctor(),
+                            icon: const Icon(
+                              Icons.person_add_rounded,
+                              size: 16,
                               color: Colors.white,
                             ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.teal,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                            label: Text(
+                              'Add Doctor',
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
@@ -313,27 +342,27 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                     // Search Bar
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: _DoctorTheme.bgTint,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: _DoctorTheme.border),
                       ),
                       child: TextField(
                         controller: _searchController,
                         style: GoogleFonts.manrope(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.navy,
+                          color: _DoctorTheme.textPrimary,
                         ),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(
                             Icons.search_rounded,
-                            color: AppColors.textSecondary,
+                            color: _DoctorTheme.accent,
                             size: 20,
                           ),
                           hintText: 'Search by doctor name or specialty...',
                           hintStyle: GoogleFonts.manrope(
                             fontSize: 13,
-                            color: AppColors.textSecondary.withValues(
+                            color: _DoctorTheme.textSecondary.withValues(
                               alpha: 0.6,
                             ),
                           ),
@@ -355,13 +384,13 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                         ? const Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.teal,
+                              _DoctorTheme.accent,
                             ),
                           ),
                         )
                         : RefreshIndicator(
                           onRefresh: _fetchDoctors,
-                          color: AppColors.teal,
+                          color: _DoctorTheme.accent,
                           child:
                               _filteredDoctors.isEmpty
                                   ? _buildEmptyState()
@@ -389,7 +418,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
               color: Colors.black12,
               child: const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
+                  valueColor: AlwaysStoppedAnimation<Color>(_DoctorTheme.accent),
                 ),
               ),
             ),
@@ -410,13 +439,13 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.skyBlue,
+              decoration: const BoxDecoration(
+                color: _DoctorTheme.accentLight,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.medical_information_rounded,
-                color: AppColors.navy,
+                color: _DoctorTheme.primary,
                 size: 40,
               ),
             ),
@@ -426,7 +455,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: AppColors.navy,
+                color: _DoctorTheme.primary,
               ),
             ),
             const SizedBox(height: 8),
@@ -438,7 +467,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: _DoctorTheme.textSecondary,
               ),
             ),
           ],
@@ -473,10 +502,10 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        border: Border.all(color: _DoctorTheme.border, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.02),
+            color: _DoctorTheme.primary.withValues(alpha: 0.02),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -494,12 +523,16 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.skyBlue,
+                    color: _DoctorTheme.accentLight,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _DoctorTheme.accent.withValues(alpha: 0.2),
+                      width: 1.5,
+                    ),
                   ),
                   child: const Icon(
                     Icons.person_rounded,
-                    color: AppColors.navy,
+                    color: _DoctorTheme.primary,
                     size: 28,
                   ),
                 ),
@@ -518,7 +551,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                               style: GoogleFonts.manrope(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.navy,
+                                color: _DoctorTheme.primary,
                               ),
                             ),
                           ),
@@ -528,15 +561,19 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.navy.withValues(alpha: 0.06),
+                              color: _DoctorTheme.accentLight,
                               borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: _DoctorTheme.accent.withValues(alpha: 0.3),
+                                width: 1.0,
+                              ),
                             ),
                             child: Text(
                               desig,
                               style: GoogleFonts.manrope(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.navy,
+                                color: _DoctorTheme.accent,
                               ),
                             ),
                           ),
@@ -548,7 +585,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                         style: GoogleFonts.manrope(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                          color: _DoctorTheme.textSecondary,
                         ),
                       ),
                       if (more.isNotEmpty) ...[
@@ -558,7 +595,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                           style: GoogleFonts.manrope(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.textSecondary.withValues(
+                            color: _DoctorTheme.textSecondary.withValues(
                               alpha: 0.8,
                             ),
                             fontStyle: FontStyle.italic,
@@ -586,7 +623,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textSecondary.withValues(alpha: 0.6),
+                        color: _DoctorTheme.textSecondary.withValues(alpha: 0.6),
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -595,7 +632,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.teal,
+                        color: _DoctorTheme.accent,
                       ),
                     ),
                   ],
@@ -606,7 +643,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textSecondary.withValues(alpha: 0.6),
+                    color: _DoctorTheme.textSecondary.withValues(alpha: 0.6),
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -655,16 +692,19 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.background,
+                              color: _DoctorTheme.accentLight,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.grey.shade200),
+                              border: Border.all(
+                                color: _DoctorTheme.accent.withValues(alpha: 0.15),
+                                width: 1.0,
+                              ),
                             ),
                             child: Text(
                               '$shortDay: $displayTime',
                               style: GoogleFonts.manrope(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.navy,
+                                color: _DoctorTheme.primary,
                               ),
                             ),
                           );
@@ -684,14 +724,14 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                       icon: const Icon(
                         Icons.edit_rounded,
                         size: 16,
-                        color: AppColors.teal,
+                        color: _DoctorTheme.accent,
                       ),
                       label: Text(
                         'Edit Details',
                         style: GoogleFonts.manrope(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.teal,
+                          color: _DoctorTheme.accent,
                         ),
                       ),
                       style: TextButton.styleFrom(

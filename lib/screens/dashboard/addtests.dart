@@ -3,10 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
-import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
+
+class _TestTheme {
+  static const Color primary = Color(0xFF4C1D95); // Deep Biotech Purple/Violet
+  static const Color accent = Color(0xFFD946EF); // Diagnostic Fuchsia/Orchid
+  static const Color bgTint = Color(0xFFFAF5FF); // Tint background
+  static const Color textPrimary = Color(0xFF1E1B4B); // Deep indigo text
+  static const Color textSecondary = Color(0xFF475569); // Slate secondary text
+  static const Color border = Color(0xFFE9D5FF); // Soft purple border
+  static const LinearGradient buttonGradient = LinearGradient(
+    colors: [Color(0xFF4C1D95), Color(0xFFD946EF)],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+}
 
 class AddTestsScreen extends StatefulWidget {
   final Map<String, dynamic>? testToEdit;
@@ -168,9 +181,9 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppColors.teal,
+              primary: _TestTheme.accent,
               onPrimary: Colors.white,
-              onSurface: AppColors.navy,
+              onSurface: _TestTheme.primary,
             ),
           ),
           child: child!,
@@ -288,19 +301,19 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: _TestTheme.bgTint,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+          icon: const Icon(Icons.arrow_back_rounded, color: _TestTheme.primary),
           onPressed: () => Navigator.pop(context, false),
         ),
         title: Text(
           _isEditing ? 'Edit Test Details' : 'Add New Test',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.w800,
-            color: AppColors.navy,
+            color: _TestTheme.primary,
           ),
         ),
       ),
@@ -317,7 +330,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.navy,
+                  color: _TestTheme.primary,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -330,7 +343,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: _TestTheme.textSecondary,
                 ),
               ),
             ),
@@ -351,7 +364,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        border: Border.all(color: _TestTheme.border, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -364,19 +377,19 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
         key: _formKey,
         child: Column(
           children: [
-            _buildFormInput(
+            _AnimatedFormInput(
               controller: _testNameController,
               hint: 'Enter Test Name *',
               icon: Icons.science_outlined,
             ),
             const SizedBox(height: 14),
-            _buildFormInput(
+            _AnimatedFormInput(
               controller: _testTypeController,
               hint: 'Enter Test Type *',
               icon: Icons.category_outlined,
             ),
             const SizedBox(height: 14),
-            _buildFormInput(
+            _AnimatedFormInput(
               controller: _priceController,
               hint: 'Enter Test Price *',
               icon: Icons.currency_rupee_rounded,
@@ -390,7 +403,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
               children: [
                 const Icon(
                   Icons.schedule_rounded,
-                  color: AppColors.teal,
+                  color: _TestTheme.accent,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -399,7 +412,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.navy,
+                    color: _TestTheme.primary,
                     letterSpacing: 1.0,
                   ),
                 ),
@@ -419,7 +432,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context, false),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.grey),
+                      side: const BorderSide(color: _TestTheme.border),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -430,7 +443,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textSecondary,
+                        color: _TestTheme.textSecondary,
                       ),
                     ),
                   ),
@@ -440,11 +453,11 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
-                      gradient: AppColors.getStartedGradient,
+                      gradient: _TestTheme.buttonGradient,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.teal.withValues(alpha: 0.25),
+                          color: _TestTheme.accent.withValues(alpha: 0.25),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -512,107 +525,98 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
     );
   }
 
-  Widget _buildFormInput({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    List<TextInputFormatter>? inputFormatters,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters,
-        style: GoogleFonts.manrope(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.navy,
-        ),
-        decoration: InputDecoration(
-          prefixIcon: Icon(
-            icon,
-            color: AppColors.textSecondary.withValues(alpha: 0.7),
-            size: 18,
-          ),
-          hintText: hint,
-          hintStyle: GoogleFonts.manrope(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary.withValues(alpha: 0.5),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildScheduleRow(String day) {
     final isEnabled = _activeDays[day] ?? false;
     final startTime = _startTimes[day]!;
     final endTime = _endTimes[day]!;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isEnabled ? Colors.white : _TestTheme.bgTint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isEnabled ? _TestTheme.accent.withValues(alpha: 0.3) : Colors.grey.shade200,
+          width: 1.5,
+        ),
+        boxShadow: isEnabled
+            ? [
+                BoxShadow(
+                  color: _TestTheme.accent.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
+      ),
       child: Column(
         children: [
-          Row(
-            children: [
-              Checkbox(
-                value: isEnabled,
-                activeColor: AppColors.teal,
-                onChanged: (val) {
-                  setState(() {
-                    _activeDays[day] = val ?? false;
-                  });
-                },
-              ),
-              Expanded(
-                child: Text(
-                  day,
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color:
-                        isEnabled
-                            ? AppColors.navy
-                            : AppColors.textSecondary.withValues(alpha: 0.6),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              setState(() {
+                _activeDays[day] = !isEnabled;
+              });
+            },
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: isEnabled ? _TestTheme.accent : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isEnabled ? _TestTheme.accent : Colors.grey.shade400,
+                      width: 2,
+                    ),
+                  ),
+                  child: isEnabled
+                      ? const Icon(Icons.check, size: 14, color: Colors.white)
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    day,
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: isEnabled ? _TestTheme.textPrimary : _TestTheme.textSecondary,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Icon(
+                  isEnabled ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                  color: isEnabled ? _TestTheme.accent : Colors.grey.shade400,
+                  size: 20,
+                ),
+              ],
+            ),
           ),
           if (isEnabled)
             Padding(
-              padding: const EdgeInsets.only(left: 48, top: 2, bottom: 8),
+              padding: const EdgeInsets.only(top: 12),
               child: Row(
                 children: [
                   Expanded(
                     child: InkWell(
                       onTap: () => _selectTime(context, day, true),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                         decoration: BoxDecoration(
-                          color: AppColors.background,
+                          color: _TestTheme.bgTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           children: [
                             const Icon(
-                              Icons.access_time_filled_rounded,
+                              Icons.access_time_rounded,
                               size: 14,
-                              color: AppColors.teal,
+                              color: _TestTheme.accent,
                             ),
                             const SizedBox(width: 6),
                             Expanded(
@@ -621,7 +625,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                                 style: GoogleFonts.manrope(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.navy,
+                                  color: _TestTheme.textPrimary,
                                 ),
                               ),
                             ),
@@ -630,17 +634,14 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: InkWell(
                       onTap: () => _selectTime(context, day, false),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                         decoration: BoxDecoration(
-                          color: AppColors.background,
+                          color: _TestTheme.bgTint,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -648,7 +649,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                             const Icon(
                               Icons.access_time_filled_rounded,
                               size: 14,
-                              color: AppColors.teal,
+                              color: _TestTheme.accent,
                             ),
                             const SizedBox(width: 6),
                             Expanded(
@@ -657,7 +658,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
                                 style: GoogleFonts.manrope(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.navy,
+                                  color: _TestTheme.textPrimary,
                                 ),
                               ),
                             ),
@@ -670,6 +671,102 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedFormInput extends StatefulWidget {
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+
+  const _AnimatedFormInput({
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.keyboardType = TextInputType.text,
+    this.inputFormatters,
+  });
+
+  @override
+  State<_AnimatedFormInput> createState() => _AnimatedFormInputState();
+}
+
+class _AnimatedFormInputState extends State<_AnimatedFormInput> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: _isFocused ? Colors.white : _TestTheme.bgTint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _isFocused ? _TestTheme.primary : Colors.transparent,
+          width: 1.5,
+        ),
+        boxShadow: _isFocused
+            ? [
+                BoxShadow(
+                  color: _TestTheme.primary.withValues(alpha: 0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
+      ),
+      child: TextField(
+        controller: widget.controller,
+        focusNode: _focusNode,
+        keyboardType: widget.keyboardType,
+        inputFormatters: widget.inputFormatters,
+        maxLines: 1,
+        style: GoogleFonts.manrope(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: _TestTheme.textPrimary,
+        ),
+        decoration: InputDecoration(
+          prefixIcon: Icon(
+            widget.icon,
+            color: _isFocused 
+                ? _TestTheme.primary 
+                : _TestTheme.textSecondary.withValues(alpha: 0.7),
+            size: 18,
+          ),
+          hintText: widget.hint,
+          hintStyle: GoogleFonts.manrope(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: _TestTheme.textSecondary.withValues(alpha: 0.5),
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+        ),
       ),
     );
   }
