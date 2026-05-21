@@ -9,7 +9,8 @@ import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 
 class AddTestsScreen extends StatefulWidget {
-  const AddTestsScreen({super.key});
+  final Map<String, dynamic>? testToEdit;
+  const AddTestsScreen({super.key, this.testToEdit});
 
   @override
   State<AddTestsScreen> createState() => _AddTestsScreenState();
@@ -20,9 +21,6 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
   final ScrollController _scrollController = ScrollController();
 
   bool _isLoading = false;
-  bool _isFetching = true;
-  bool _isFormExpanded = false;
-  List<dynamic> _tests = [];
 
   // Edit Mode state
   bool _isEditing = false;
@@ -35,7 +33,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
 
   // Schedule management
   final List<String> _weekdays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'All Day', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
   final Map<String, bool> _activeDays = {};
   final Map<String, TimeOfDay> _startTimes = {};
@@ -45,7 +43,9 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
   void initState() {
     super.initState();
     _resetSchedule();
-    _fetchTests();
+    if (widget.testToEdit != null) {
+      _loadTestForEdit(widget.testToEdit!);
+    }
   }
 
   void _resetSchedule() {
@@ -54,6 +54,49 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
       _startTimes[day] = const TimeOfDay(hour: 8, minute: 0);
       _endTimes[day] = const TimeOfDay(hour: 20, minute: 0);
     }
+  }
+
+  void _loadTestForEdit(Map<String, dynamic> test) {
+    setState(() {
+      _isEditing = true;
+      _editingTestId = test['id'].toString();
+      _testNameController.text = test['test_name']?.toString() ?? '';
+      _testTypeController.text = test['test_type']?.toString() ?? '';
+      _priceController.text = test['test_price']?.toString() ?? '';
+      
+      _resetSchedule();
+
+      // Parse schedule
+      final scheduleData = test['test_day_time'];
+      if (scheduleData != null) {
+        List<dynamic> schedules = [];
+        if (scheduleData is List) {
+          schedules = scheduleData;
+        } else if (scheduleData is String) {
+          try {
+            schedules = jsonDecode(scheduleData);
+          } catch (_) {}
+        }
+
+        for (var sched in schedules) {
+          if (sched is Map) {
+            final day = sched['day']?.toString();
+            final start = sched['start_time']?.toString();
+            final end = sched['end_time']?.toString();
+
+            if (day != null && _weekdays.contains(day)) {
+              _activeDays[day] = true;
+              if (start != null && start.toLowerCase() != 'null' && start.isNotEmpty) {
+                _startTimes[day] = _parseTimeOfDay(start);
+              }
+              if (end != null && end.toLowerCase() != 'null' && end.isNotEmpty) {
+                _endTimes[day] = _parseTimeOfDay(end);
+              }
+            }
+          }
+        }
+      }
+    });
   }
 
   @override
@@ -76,14 +119,6 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
-  }
-
-  String _formatDBTime(String? dbTime) {
-    if (dbTime == null || dbTime.isEmpty || dbTime.toLowerCase() == 'null') {
-      return '';
-    }
-    final time = _parseTimeOfDay(dbTime);
-    return _formatTimeDisplay(time);
   }
 
   TimeOfDay _parseTimeOfDay(String timeStr) {
@@ -142,153 +177,6 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
     }
   }
 
-  Future<void> _fetchTests() async {
-    setState(() => _isFetching = true);
-    try {
-      final token = await SessionManager.getToken();
-      if (token == null) {
-        setState(() => _isFetching = false);
-        return;
-      }
-
-      final response = await ApiService.getTests(token: token);
-      if (!mounted) return;
-      if (response['success'] == true) {
-        setState(() {
-          _tests = response['tests'] ?? [];
-        });
-      } else {
-        CustomAlerts.showError(context, response['message'] ?? 'Failed to load tests.');
-      }
-    } catch (_) {
-      if (mounted) {
-        CustomAlerts.showError(context, 'An unexpected error occurred while fetching tests.');
-      }
-    } finally {
-      setState(() => _isFetching = false);
-    }
-  }
-
-  void _editTest(Map<String, dynamic> test) {
-    setState(() {
-      _isEditing = true;
-      _editingTestId = test['id'].toString();
-      _testNameController.text = test['test_name']?.toString() ?? '';
-      _testTypeController.text = test['test_type']?.toString() ?? '';
-      _priceController.text = test['test_price']?.toString() ?? '';
-      
-      _resetSchedule();
-
-      // Parse schedule
-      final scheduleData = test['test_day_time'];
-      if (scheduleData != null) {
-        List<dynamic> schedules = [];
-        if (scheduleData is List) {
-          schedules = scheduleData;
-        } else if (scheduleData is String) {
-          try {
-            schedules = jsonDecode(scheduleData);
-          } catch (_) {}
-        }
-
-        for (var sched in schedules) {
-          if (sched is Map) {
-            final day = sched['day']?.toString();
-            final start = sched['start_time']?.toString();
-            final end = sched['end_time']?.toString();
-
-            if (day != null && _weekdays.contains(day)) {
-              _activeDays[day] = true;
-              if (start != null && start.toLowerCase() != 'null' && start.isNotEmpty) {
-                _startTimes[day] = _parseTimeOfDay(start);
-              }
-              if (end != null && end.toLowerCase() != 'null' && end.isNotEmpty) {
-                _endTimes[day] = _parseTimeOfDay(end);
-              }
-            }
-          }
-        }
-      }
-
-      _isFormExpanded = true;
-    });
-
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void _cancelEdit() {
-    setState(() {
-      _isEditing = false;
-      _editingTestId = null;
-      _testNameController.clear();
-      _testTypeController.clear();
-      _priceController.clear();
-      _resetSchedule();
-      _isFormExpanded = false;
-    });
-  }
-
-  Future<void> _deleteTest(String id) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Delete Pathology Test',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w800, color: AppColors.navy),
-        ),
-        content: Text(
-          'Are you sure you want to delete this test? It will be removed from your catalog.',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w500, color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text('Delete', style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      setState(() => _isLoading = true);
-      try {
-        final token = await SessionManager.getToken();
-        if (token == null) return;
-
-        final res = await ApiService.deleteTest(token: token, id: id);
-        if (!mounted) return;
-        if (res['success'] == true) {
-          CustomAlerts.showSuccess(context, res['message'] ?? 'Test deleted successfully!');
-          _fetchTests();
-          if (_isEditing && _editingTestId == id) {
-            _cancelEdit();
-          }
-        } else {
-          CustomAlerts.showError(context, res['message'] ?? 'Failed to delete test.');
-        }
-      } catch (_) {
-        if (mounted) {
-          CustomAlerts.showError(context, 'An error occurred while deleting.');
-        }
-      } finally {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
   void _submitForm() async {
     if (_testNameController.text.trim().isEmpty ||
         _testTypeController.text.trim().isEmpty ||
@@ -343,8 +231,7 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
         await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
           Navigator.pop(context); // Pop success loader
-          _cancelEdit();
-          _fetchTests();
+          Navigator.pop(context, true); // Pop AddTestsScreen and return success
         }
       } else {
         String errorMessage = response['message'] ?? 'Failed to save test details.';
@@ -369,84 +256,65 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _isFetching
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _fetchTests,
-              color: AppColors.teal,
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FadeInDown(
-                      duration: const Duration(milliseconds: 400),
-                      child: Text(
-                        'Pathology Tests',
-                        style: GoogleFonts.manrope(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.navy,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    FadeInDown(
-                      duration: const Duration(milliseconds: 450),
-                      child: Text(
-                        'Configure pathology tests catalog, pricing, and operating times.',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-
-                    // Expandable Test Add Form
-                    FadeInUp(
-                      duration: const Duration(milliseconds: 400),
-                      child: _buildFormCard(),
-                    ),
-
-                    const SizedBox(height: 25),
-
-                    // Test Catalog Title
-                    Row(
-                      children: [
-                        const Icon(Icons.biotech_rounded, color: AppColors.navy, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Test Catalog (${_tests.length})',
-                          style: GoogleFonts.manrope(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.navy,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-
-                    // Tests List
-                    _buildTestsList(),
-                  ],
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.navy),
+          onPressed: () => Navigator.pop(context, false),
+        ),
+        title: Text(
+          _isEditing ? 'Edit Test Details' : 'Add New Test',
+          style: GoogleFonts.manrope(
+            fontWeight: FontWeight.w800,
+            color: AppColors.navy,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FadeInDown(
+              duration: const Duration(milliseconds: 400),
+              child: Text(
+                _isEditing ? 'Modify Test Parameters' : 'Register Pathology Test',
+                style: GoogleFonts.manrope(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.navy,
+                  letterSpacing: -0.5,
                 ),
               ),
             ),
+            const SizedBox(height: 6),
+            FadeInDown(
+              duration: const Duration(milliseconds: 450),
+              child: Text(
+                'Configure price, diagnostic category, and operational timings.',
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
+            FadeInUp(
+              duration: const Duration(milliseconds: 400),
+              child: _buildFormCard(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildFormCard() {
     return Container(
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -459,166 +327,127 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
           ),
         ],
       ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          initiallyExpanded: _isFormExpanded,
-          onExpansionChanged: (expanded) {
-            setState(() {
-              _isFormExpanded = expanded;
-            });
-          },
-          key: ValueKey<bool>(_isFormExpanded),
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.teal.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              _isEditing ? Icons.biotech_rounded : Icons.add_circle_outline_rounded,
-              color: AppColors.teal,
-              size: 20,
-            ),
-          ),
-          title: Text(
-            _isEditing ? 'Edit Test: ${_testNameController.text}' : 'Add New Test',
-            style: GoogleFonts.manrope(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: AppColors.navy,
-            ),
-          ),
-          childrenPadding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      child: Form(
+        key: _formKey,
+        child: Column(
           children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  const Divider(height: 1, thickness: 1),
-                  const SizedBox(height: 20),
-                  _buildFormInput(
-                    controller: _testNameController,
-                    hint: 'Enter Test Name *',
-                    icon: Icons.science_outlined,
+            _buildFormInput(
+              controller: _testNameController,
+              hint: 'Enter Test Name *',
+              icon: Icons.science_outlined,
+            ),
+            const SizedBox(height: 14),
+            _buildFormInput(
+              controller: _testTypeController,
+              hint: 'Enter Test Type *',
+              icon: Icons.category_outlined,
+            ),
+            const SizedBox(height: 14),
+            _buildFormInput(
+              controller: _priceController,
+              hint: 'Enter Test Price *',
+              icon: Icons.currency_rupee_rounded,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            ),
+            const SizedBox(height: 24),
+            
+            // Schedule section
+            Row(
+              children: [
+                const Icon(Icons.schedule_rounded, color: AppColors.teal, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'TEST AVAILABILITY HOURS *',
+                  style: GoogleFonts.manrope(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.navy,
+                    letterSpacing: 1.0,
                   ),
-                  const SizedBox(height: 14),
-                  _buildFormInput(
-                    controller: _testTypeController,
-                    hint: 'Enter Test Type *',
-                    icon: Icons.category_outlined,
-                  ),
-                  const SizedBox(height: 14),
-                  _buildFormInput(
-                    controller: _priceController,
-                    hint: 'Enter Test Price *',
-                    icon: Icons.currency_rupee_rounded,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Schedule section
-                  Row(
-                    children: [
-                      const Icon(Icons.schedule_rounded, color: AppColors.teal, size: 18),
-                      const SizedBox(width: 8),
-                      Text(
-                        'TEST AVAILABILITY HOURS *',
-                        style: GoogleFonts.manrope(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.navy,
-                          letterSpacing: 1.0,
-                        ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            
+            Column(
+              children: _weekdays.map((day) => _buildScheduleRow(day)).toList(),
+            ),
+
+            const SizedBox(height: 30),
+
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.grey),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
                       ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  
-                  Column(
-                    children: _weekdays.map((day) => _buildScheduleRow(day)).toList(),
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  Row(
-                    children: [
-                      if (_isEditing) ...[
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: _cancelEdit,
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.grey),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                            child: Text(
-                              'Cancel',
-                              style: GoogleFonts.manrope(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.getStartedGradient,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.teal.withValues(alpha: 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                        const SizedBox(width: 12),
                       ],
-                      Expanded(
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            gradient: AppColors.getStartedGradient,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.teal.withValues(alpha: 0.25),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _submitForm,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        _isEditing ? 'Update Details' : 'Upload Details',
-                                        style: GoogleFonts.manrope(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
-                                    ],
-                                  ),
-                          ),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _submitForm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                    ],
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _isEditing ? 'Update Details' : 'Upload Details',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
+                              ],
+                            ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -761,245 +590,6 @@ class _AddTestsScreenState extends State<AddTestsScreen> {
             ),
         ],
       ),
-    );
-  }
-
-  Widget _buildTestsList() {
-    if (_tests.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.shade100, width: 1.5),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.skyBlue,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.science_rounded,
-                color: AppColors.navy,
-                size: 36,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No Tests Setup Yet',
-              style: GoogleFonts.manrope(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: AppColors.navy,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Tap "+ Add New Test" above to configure your pathology and diagnostic tests list.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _tests.length,
-      itemBuilder: (context, idx) {
-        final test = _tests[idx] as Map<String, dynamic>;
-        final id = test['id']?.toString() ?? '';
-        final name = test['test_name'] ?? 'N/A';
-        final type = test['test_type'] ?? 'N/A';
-        final price = test['test_price']?.toString() ?? '0';
-
-        // Decode days list
-        List<dynamic> daysList = [];
-        final scheduleData = test['test_day_time'];
-        if (scheduleData != null) {
-          if (scheduleData is List) {
-            daysList = scheduleData;
-          } else if (scheduleData is String) {
-            try {
-              daysList = jsonDecode(scheduleData);
-            } catch (_) {}
-          }
-        }
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 15),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade100, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.navy.withValues(alpha: 0.015),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.skyBlue,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(
-                      Icons.science_rounded,
-                      color: AppColors.navy,
-                      size: 26,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: GoogleFonts.manrope(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.navy,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          type,
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.teal.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '₹$price',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.teal,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-              ),
-
-              // Timings / Schedule list
-              Text(
-                'Available Hours:',
-                style: GoogleFonts.manrope(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.navy.withValues(alpha: 0.8),
-                ),
-              ),
-              const SizedBox(height: 6),
-              
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: daysList.map<Widget>((sched) {
-                  final dayName = sched['day']?.toString() ?? '';
-                  final start = sched['start_time']?.toString() ?? '';
-                  final end = sched['end_time']?.toString() ?? '';
-                  
-                  // Make short day names, e.g. Monday -> Mon
-                  String shortDay = dayName;
-                  if (dayName.length > 3) {
-                    shortDay = dayName.substring(0, 3);
-                  }
-
-                  final startDisplay = _formatDBTime(start);
-                  final endDisplay = _formatDBTime(end);
-                  final String displayTime;
-                  if (startDisplay.isEmpty && endDisplay.isEmpty) {
-                    displayTime = 'No Timings';
-                  } else if (endDisplay.isEmpty) {
-                    displayTime = '$startDisplay onwards';
-                  } else if (startDisplay.isEmpty) {
-                    displayTime = 'Till $endDisplay';
-                  } else {
-                    displayTime = '$startDisplay - $endDisplay';
-                  }
-
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Text(
-                      '$shortDay ($displayTime)',
-                      style: GoogleFonts.manrope(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.navy,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 10),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    onPressed: () => _editTest(test),
-                    icon: const Icon(Icons.edit_outlined, color: AppColors.teal, size: 20),
-                    tooltip: 'Edit test details',
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(8),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () => _deleteTest(id),
-                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                    tooltip: 'Delete test',
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(8),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

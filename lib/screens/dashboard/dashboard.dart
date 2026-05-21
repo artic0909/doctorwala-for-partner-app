@@ -8,8 +8,8 @@ import 'widgets/sidebar.dart';
 import 'opdcontact.dart';
 import 'pathologycontact.dart';
 import 'doctocontact.dart';
-import 'adddoctor.dart';
-import 'addtests.dart';
+import 'showdoctors.dart';
+import 'showtests.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -43,9 +43,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               : _currentIndex == 4
               ? 'Add Pathology Clinic'
               : _currentIndex == 5
-              ? 'Add Doctors'
+              ? 'Doctors Directory'
               : _currentIndex == 6
-              ? 'Add Test'
+              ? 'Tests Catalog'
               : _currentIndex == 7
               ? 'Medical Card Access'
               : _currentIndex == 8
@@ -139,9 +139,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 4:
         return const PathologyContactScreen();
       case 5:
-        return const AddDoctorScreen();
+        return const ShowDoctorsScreen();
       case 6:
-        return const AddTestsScreen();
+        return const ShowTestsScreen();
       case 7:
         return _buildPlaceholderTab('Medical Card Access', Icons.badge_rounded);
       case 8:
