@@ -8,6 +8,8 @@ import 'widgets/sidebar.dart';
 import 'opdcontact.dart';
 import 'pathologycontact.dart';
 import 'doctocontact.dart';
+import 'adddoctor.dart';
+import 'addtests.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -137,9 +139,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 4:
         return const PathologyContactScreen();
       case 5:
-        return _buildPlaceholderTab('Add Doctors', Icons.person_add_rounded);
+        return const AddDoctorScreen();
       case 6:
-        return _buildPlaceholderTab('Add Test', Icons.science_rounded);
+        return const AddTestsScreen();
       case 7:
         return _buildPlaceholderTab('Medical Card Access', Icons.badge_rounded);
       case 8:
@@ -238,12 +240,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.15,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.4,
             children: cards,
           ),
           const SizedBox(height: 25),
+
+          // Certificate Section Label
+          FadeIn(
+            delay: const Duration(milliseconds: 250),
+            child: Text(
+              'Verification Certificate',
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.navy,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
 
           // Header / Welcome Certificate banner (Medical Theme)
           Builder(
@@ -624,10 +641,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return FadeInUp(
       delay: Duration(milliseconds: delayMs),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: AppColors.navy.withValues(alpha: 0.03),
@@ -645,12 +662,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(icon, color: color, size: 20),
+                  child: Icon(icon, color: color, size: 18),
                 ),
               ],
             ),
@@ -660,16 +677,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   count,
                   style: GoogleFonts.manrope(
-                    fontSize: 24,
+                    fontSize: 26,
                     fontWeight: FontWeight.w900,
                     color: AppColors.navy,
+                    height: 1.1,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.manrope(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textSecondary,
                   ),

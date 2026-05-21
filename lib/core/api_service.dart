@@ -421,4 +421,256 @@ class ApiService {
       };
     }
   }
+
+  /// Retrieves all OPD doctors for the authenticated partner (Sanctum protected, GET)
+  static Future<Map<String, dynamic>> getDoctors({
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/doctors');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to retrieve doctors. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Adds a new OPD doctor details (Sanctum protected, POST)
+  static Future<Map<String, dynamic>> addDoctor({
+    required String token,
+    required Map<String, String> body,
+  }) async {
+    final url = Uri.parse('$baseUrl/doctors');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to add doctor. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Updates an existing OPD doctor details (Sanctum protected, POST)
+  static Future<Map<String, dynamic>> updateDoctor({
+    required String token,
+    required String id,
+    required Map<String, String> body,
+  }) async {
+    final url = Uri.parse('$baseUrl/doctors/$id');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to update doctor. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Deletes an OPD doctor (Sanctum protected, DELETE)
+  static Future<Map<String, dynamic>> deleteDoctor({
+    required String token,
+    required String id,
+  }) async {
+    final url = Uri.parse('$baseUrl/doctors/$id');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to delete doctor. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Retrieves all pathology tests for the authenticated partner (Sanctum protected, GET)
+  static Future<Map<String, dynamic>> getTests({
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/tests');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to retrieve tests. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Adds a new pathology test details (Sanctum protected, POST)
+  static Future<Map<String, dynamic>> addTest({
+    required String token,
+    required Map<String, String> body,
+  }) async {
+    final url = Uri.parse('$baseUrl/tests');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to add test. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Updates an existing pathology test details (Sanctum protected, POST)
+  static Future<Map<String, dynamic>> updateTest({
+    required String token,
+    required String id,
+    required Map<String, String> body,
+  }) async {
+    final url = Uri.parse('$baseUrl/tests/$id');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to update test. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Deletes a pathology test (Sanctum protected, DELETE)
+  static Future<Map<String, dynamic>> deleteTest({
+    required String token,
+    required String id,
+  }) async {
+    final url = Uri.parse('$baseUrl/tests/$id');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to delete test. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }
