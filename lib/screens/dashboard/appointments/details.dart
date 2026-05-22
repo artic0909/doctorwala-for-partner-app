@@ -268,7 +268,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Appointment Details',
+          'Serial No: ${_appointment['enquiry_serial'] ?? 'N/A'}',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.w900,
             color: AppColors.navy,

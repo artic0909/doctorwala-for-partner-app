@@ -500,6 +500,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             ),
                             Row(
                               children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.teal.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'SL: ${appt['enquiry_serial'] ?? 'N/A'}',
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.teal,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
                                 if (isUnread) ...[
                                   Container(
                                     width: 7,
