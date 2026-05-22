@@ -17,6 +17,8 @@ import 'appointments/complete.dart';
 import 'appointments/cancel.dart';
 import 'appointments/today.dart';
 import 'account_settings.dart';
+import 'notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -36,6 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _completedCount = 0;
   int _todayCount = 0;
   bool _isFetchingStats = false;
+  bool _hasUnreadNotifications = false;
   late Map<String, dynamic> _partnerData;
 
   @override
@@ -59,17 +62,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ApiService.getDoctors(token: token).catchError((_) => {'success': false}),
         ApiService.getTests(token: token).catchError((_) => {'success': false}),
         ApiService.getAppointmentsStats(token: token).catchError((_) => {'success': false}),
+        ApiService.getAppointments(token: token).catchError((_) => {'success': false}),
       ]);
 
       final doctorsRes = results[0];
       final testsRes = results[1];
       final statsRes = results[2];
+      final apptsRes = results[3];
 
       int docCount = 0;
       int testCount = 0;
       int upcoming = 0;
       int completed = 0;
       int today = 0;
+      bool hasUnread = false;
 
       if (doctorsRes['success'] == true && doctorsRes['doctors'] != null) {
         docCount = (doctorsRes['doctors'] as List).length;
@@ -83,6 +89,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         completed = s['completed_count'] ?? 0;
         today = s['today_count'] ?? 0;
       }
+      if (apptsRes['success'] == true && apptsRes['appointments'] != null) {
+        final List<dynamic> appts = apptsRes['appointments'];
+        final prefs = await SharedPreferences.getInstance();
+        final readIds = (prefs.getStringList('partner_read_booking_ids') ?? []).toSet();
+        hasUnread = appts.any((appt) => !readIds.contains(appt['id']?.toString() ?? ''));
+      }
 
       if (mounted) {
         setState(() {
@@ -91,6 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _upcomingCount = upcoming;
           _completedCount = completed;
           _todayCount = today;
+          _hasUnreadNotifications = hasUnread;
           _isFetchingStats = false;
         });
       }
@@ -164,28 +177,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     size: 24,
                   ),
                   onPressed: () {
-                    // Dummy callback
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NotificationsScreen(partnerData: _partnerData),
+                      ),
+                    ).then((_) => _fetchStats());
                   },
                 ),
-                Positioned(
-                  right: 12,
-                  top: 12,
-                  child: Container(
-                    height: 8,
-                    width: 8,
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.redAccent.withValues(alpha: 0.4),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ],
+                if (_hasUnreadNotifications)
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: Container(
+                      height: 8,
+                      width: 8,
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.redAccent.withValues(alpha: 0.4),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
