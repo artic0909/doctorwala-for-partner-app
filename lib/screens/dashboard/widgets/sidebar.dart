@@ -197,7 +197,7 @@ class CustomSidebar extends StatelessWidget {
                 _buildSectionHeader('Appointments'),
                 _buildDrawerItem(
                   icon: Icons.pending_actions_rounded,
-                  label: 'Pending Appointments',
+                  label: 'Upcoming Appointments',
                   index: 1,
                   context: context,
                 ),
@@ -207,6 +207,14 @@ class CustomSidebar extends StatelessWidget {
                   index: 9,
                   context: context,
                 ),
+
+                _buildDrawerItem(
+                  icon: Icons.cancel_rounded,
+                  label: 'Cancelled Appointments',
+                  index: 14,
+                  context: context,
+                ),
+
 
                 // Settings Group
                 _buildSectionHeader('Settings'),

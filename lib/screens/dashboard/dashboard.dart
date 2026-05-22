@@ -12,6 +12,9 @@ import 'pathologycontact.dart';
 import 'doctocontact.dart';
 import 'showdoctors.dart';
 import 'showtests.dart';
+import 'appointments/upcoming.dart';
+import 'appointments/complete.dart';
+import 'appointments/cancel.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -26,6 +29,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   int _totalDoctors = 0;
   int _totalTests = 0;
+  int _upcomingCount = 0;
+  int _completedCount = 0;
+  int _todayCount = 0;
   bool _isFetchingStats = false;
 
   @override
@@ -47,13 +53,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final results = await Future.wait([
         ApiService.getDoctors(token: token).catchError((_) => {'success': false}),
         ApiService.getTests(token: token).catchError((_) => {'success': false}),
+        ApiService.getAppointmentsStats(token: token).catchError((_) => {'success': false}),
       ]);
 
       final doctorsRes = results[0];
       final testsRes = results[1];
+      final statsRes = results[2];
 
       int docCount = 0;
       int testCount = 0;
+      int upcoming = 0;
+      int completed = 0;
+      int today = 0;
 
       if (doctorsRes['success'] == true && doctorsRes['doctors'] != null) {
         docCount = (doctorsRes['doctors'] as List).length;
@@ -61,11 +72,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (testsRes['success'] == true && testsRes['tests'] != null) {
         testCount = (testsRes['tests'] as List).length;
       }
+      if (statsRes['success'] == true && statsRes['stats'] != null) {
+        final s = statsRes['stats'];
+        upcoming = s['upcoming_count'] ?? 0;
+        completed = s['completed_count'] ?? 0;
+        today = s['today_count'] ?? 0;
+      }
 
       if (mounted) {
         setState(() {
           _totalDoctors = docCount;
           _totalTests = testCount;
+          _upcomingCount = upcoming;
+          _completedCount = completed;
+          _todayCount = today;
           _isFetchingStats = false;
         });
       }
@@ -94,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _currentIndex == 0
               ? 'Dashboard'
               : _currentIndex == 1
-              ? 'Pending Appointments'
+              ? 'Upcoming Appointments'
               : _currentIndex == 2
               ? 'Account Settings'
               : _currentIndex == 3
@@ -113,6 +133,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ? 'Complete Appointments'
               : _currentIndex == 11
               ? 'List Myself'
+              : _currentIndex == 14
+              ? 'Cancelled Appointments'
               : 'Help & Support',
           style: GoogleFonts.manrope(
             fontSize: 18,
@@ -186,7 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 0:
         return _buildHomeTab();
       case 1:
-        return _buildPendingAppointmentsTab();
+        return UpcomingAppointmentsScreen(partnerData: widget.partnerData);
       case 2:
         return _buildProfileTab(); // Profile serves as Account Settings
       case 3:
@@ -202,10 +224,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 8:
         return _buildPlaceholderTab('Patient Lists', Icons.assignment_rounded);
       case 9:
-        return _buildPlaceholderTab(
-          'Complete Appointments',
-          Icons.task_alt_rounded,
-        );
+        return CompleteAppointmentsScreen(partnerData: widget.partnerData);
       case 10:
         return _buildPlaceholderTab(
           'Help & Support',
@@ -213,6 +232,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       case 11:
         return const DoctorContactScreen();
+      case 14:
+        return CancelledAppointmentsScreen(partnerData: widget.partnerData);
       default:
         return _buildHomeTab();
     }
@@ -336,34 +357,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final cards = <Widget>[
       _buildCountCard(
         title: "Today's Appointments",
-        count: '0',
+        count: '$_todayCount',
         icon: Icons.today_rounded,
         color: AppColors.teal,
         delayMs: 100,
+        isLoading: _isFetchingStats,
         onTap: () {
           setState(() {
-            _currentIndex = 1; // Pending Appointments
+            _currentIndex = 1; // Upcoming Appointments
           });
         },
       ),
       _buildCountCard(
         title: 'Pending Appts',
-        count: '0',
+        count: '$_upcomingCount',
         icon: Icons.pending_actions_rounded,
         color: Colors.orangeAccent,
         delayMs: 150,
+        isLoading: _isFetchingStats,
         onTap: () {
           setState(() {
-            _currentIndex = 1; // Pending Appointments
+            _currentIndex = 1; // Upcoming Appointments
           });
         },
       ),
       _buildCountCard(
         title: 'Completed Appts',
-        count: '0',
+        count: '$_completedCount',
         icon: Icons.task_alt_rounded,
         color: Colors.blueAccent,
         delayMs: 200,
+        isLoading: _isFetchingStats,
         onTap: () {
           setState(() {
             _currentIndex = 9; // Completed Appointments
@@ -817,48 +841,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // TAB 1: PENDING APPOINTMENTS
-  Widget _buildPendingAppointmentsTab() {
-    return Center(
-      child: FadeIn(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.orangeAccent.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.pending_actions_rounded,
-                color: Colors.orangeAccent,
-                size: 60,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Pending Appointments',
-              style: GoogleFonts.manrope(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.navy,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'No pending appointments found.',
-              style: GoogleFonts.manrope(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   // GENERIC PLACEHOLDER TAB
   Widget _buildPlaceholderTab(String title, IconData icon) {

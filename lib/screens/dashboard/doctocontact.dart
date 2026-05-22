@@ -41,17 +41,53 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
 
   // States List
   final List<String> _states = [
-    'Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
-    'Chandigarh', 'Chhattisgarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Goa',
-    'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka',
-    'Kerala', 'Ladakh', 'Lakshadweep', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya',
-    'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Sikkim',
-    'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+    'Andaman and Nicobar Islands',
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chandigarh',
+    'Chhattisgarh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jammu and Kashmir',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Ladakh',
+    'Lakshadweep',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Puducherry',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
   ];
 
   // Weekdays Schedule State
   final List<String> _weekdays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
 
   // Store selection state for each day
@@ -100,7 +136,11 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
     return '$hour:$minute $period';
   }
 
-  Future<void> _selectTime(BuildContext context, String day, bool isStart) async {
+  Future<void> _selectTime(
+    BuildContext context,
+    String day,
+    bool isStart,
+  ) async {
     final initialTime = isStart ? _startTimes[day]! : _endTimes[day]!;
     final pickedTime = await showTimePicker(
       context: context,
@@ -149,50 +189,71 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
         final data = response['contact_details'] as Map<String, dynamic>;
         setState(() {
           _serverBannerUrl = response['doctor_banner'];
-          _doctorNameController.text = (data['partner_doctor_name'] != null && data['partner_doctor_name'].toString().isNotEmpty)
-              ? data['partner_doctor_name'].toString()
-              : (partnerData?['partner_contact_person_name']?.toString() ?? '');
+          _doctorNameController.text =
+              (data['partner_doctor_name'] != null &&
+                      data['partner_doctor_name'].toString().isNotEmpty)
+                  ? data['partner_doctor_name'].toString()
+                  : (partnerData?['partner_contact_person_name']?.toString() ??
+                      '');
 
-          _specialistController.text = data['partner_doctor_specialist']?.toString() ?? '';
-          _designationController.text = data['partner_doctor_designation']?.toString() ?? '';
+          _specialistController.text =
+              data['partner_doctor_specialist']?.toString() ?? '';
+          _designationController.text =
+              data['partner_doctor_designation']?.toString() ?? '';
           _feesController.text = data['partner_doctor_fees']?.toString() ?? '';
 
-          _mobileController.text = (data['partner_doctor_mobile'] != null && data['partner_doctor_mobile'].toString().isNotEmpty)
-              ? data['partner_doctor_mobile'].toString()
-              : (partnerData?['partner_mobile_number']?.toString() ?? '');
+          _mobileController.text =
+              (data['partner_doctor_mobile'] != null &&
+                      data['partner_doctor_mobile'].toString().isNotEmpty)
+                  ? data['partner_doctor_mobile'].toString()
+                  : (partnerData?['partner_mobile_number']?.toString() ?? '');
 
-          _emailController.text = (data['partner_doctor_email'] != null && data['partner_doctor_email'].toString().isNotEmpty)
-              ? data['partner_doctor_email'].toString()
-              : (partnerData?['partner_email']?.toString() ?? '');
+          _emailController.text =
+              (data['partner_doctor_email'] != null &&
+                      data['partner_doctor_email'].toString().isNotEmpty)
+                  ? data['partner_doctor_email'].toString()
+                  : (partnerData?['partner_email']?.toString() ?? '');
 
-          _cityController.text = (data['partner_doctor_city'] != null && data['partner_doctor_city'].toString().isNotEmpty)
-              ? data['partner_doctor_city'].toString()
-              : (partnerData?['partner_city']?.toString() ?? '');
+          _cityController.text =
+              (data['partner_doctor_city'] != null &&
+                      data['partner_doctor_city'].toString().isNotEmpty)
+                  ? data['partner_doctor_city'].toString()
+                  : (partnerData?['partner_city']?.toString() ?? '');
 
-          _pinCodeController.text = (data['partner_doctor_pincode'] != null && data['partner_doctor_pincode'].toString().isNotEmpty)
-              ? data['partner_doctor_pincode'].toString()
-              : (partnerData?['partner_pincode']?.toString() ?? '');
+          _pinCodeController.text =
+              (data['partner_doctor_pincode'] != null &&
+                      data['partner_doctor_pincode'].toString().isNotEmpty)
+                  ? data['partner_doctor_pincode'].toString()
+                  : (partnerData?['partner_pincode']?.toString() ?? '');
 
-          _landmarkController.text = (data['partner_doctor_landmark'] != null && data['partner_doctor_landmark'].toString().isNotEmpty)
-              ? data['partner_doctor_landmark'].toString()
-              : (partnerData?['partner_landmark']?.toString() ?? '');
+          _landmarkController.text =
+              (data['partner_doctor_landmark'] != null &&
+                      data['partner_doctor_landmark'].toString().isNotEmpty)
+                  ? data['partner_doctor_landmark'].toString()
+                  : (partnerData?['partner_landmark']?.toString() ?? '');
 
-          _googleMapController.text = data['partner_doctor_google_map_link'] ?? '';
+          _googleMapController.text =
+              data['partner_doctor_google_map_link'] ?? '';
 
-          _addressController.text = (data['partner_doctor_address'] != null && data['partner_doctor_address'].toString().isNotEmpty)
-              ? data['partner_doctor_address'].toString()
-              : (partnerData?['partner_address']?.toString() ?? '');
-          
-          final fetchedState = (data['partner_doctor_state'] != null && data['partner_doctor_state'].toString().isNotEmpty)
-              ? data['partner_doctor_state'].toString().trim()
-              : (partnerData?['partner_state']?.toString().trim());
+          _addressController.text =
+              (data['partner_doctor_address'] != null &&
+                      data['partner_doctor_address'].toString().isNotEmpty)
+                  ? data['partner_doctor_address'].toString()
+                  : (partnerData?['partner_address']?.toString() ?? '');
+
+          final fetchedState =
+              (data['partner_doctor_state'] != null &&
+                      data['partner_doctor_state'].toString().isNotEmpty)
+                  ? data['partner_doctor_state'].toString().trim()
+                  : (partnerData?['partner_state']?.toString().trim());
 
           if (fetchedState != null && _states.contains(fetchedState)) {
             _selectedState = fetchedState;
           }
 
           // Parse visit days and timings
-          if (data['visit_day_time'] != null && data['visit_day_time'] is List) {
+          if (data['visit_day_time'] != null &&
+              data['visit_day_time'] is List) {
             final list = data['visit_day_time'] as List;
             for (var item in list) {
               if (item is Map) {
@@ -224,13 +285,20 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       } else {
         if (partnerData != null) {
           setState(() {
-            _doctorNameController.text = partnerData['partner_contact_person_name']?.toString() ?? '';
-            _mobileController.text = partnerData['partner_mobile_number']?.toString() ?? '';
-            _emailController.text = partnerData['partner_email']?.toString() ?? '';
-            _cityController.text = partnerData['partner_city']?.toString() ?? '';
-            _pinCodeController.text = partnerData['partner_pincode']?.toString() ?? '';
-            _landmarkController.text = partnerData['partner_landmark']?.toString() ?? '';
-            _addressController.text = partnerData['partner_address']?.toString() ?? '';
+            _doctorNameController.text =
+                partnerData['partner_contact_person_name']?.toString() ?? '';
+            _mobileController.text =
+                partnerData['partner_mobile_number']?.toString() ?? '';
+            _emailController.text =
+                partnerData['partner_email']?.toString() ?? '';
+            _cityController.text =
+                partnerData['partner_city']?.toString() ?? '';
+            _pinCodeController.text =
+                partnerData['partner_pincode']?.toString() ?? '';
+            _landmarkController.text =
+                partnerData['partner_landmark']?.toString() ?? '';
+            _addressController.text =
+                partnerData['partner_address']?.toString() ?? '';
 
             final state = partnerData['partner_state']?.toString().trim();
             if (state != null && _states.contains(state)) {
@@ -258,13 +326,19 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
         _pinCodeController.text.trim().isEmpty ||
         _landmarkController.text.trim().isEmpty ||
         _addressController.text.trim().isEmpty) {
-      CustomAlerts.showError(context, 'Please fill in all required fields marked with *');
+      CustomAlerts.showError(
+        context,
+        'Please fill in all required fields marked with *',
+      );
       return;
     }
 
     final mobileText = _mobileController.text.trim();
     if (!RegExp(r'^\d{10,}$').hasMatch(mobileText)) {
-      CustomAlerts.showError(context, 'Mobile number must be at least 10 digits');
+      CustomAlerts.showError(
+        context,
+        'Mobile number must be at least 10 digits',
+      );
       return;
     }
 
@@ -281,9 +355,13 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
     }
 
     // Verify schedule: At least one day must be active, and end time must be after start time
-    final activeDaysList = _weekdays.where((day) => _activeDays[day] == true).toList();
+    final activeDaysList =
+        _weekdays.where((day) => _activeDays[day] == true).toList();
     if (activeDaysList.isEmpty) {
-      CustomAlerts.showError(context, 'Please enable at least one weekday schedule');
+      CustomAlerts.showError(
+        context,
+        'Please enable at least one weekday schedule',
+      );
       return;
     }
 
@@ -295,7 +373,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       if (endMinutes <= startMinutes) {
         CustomAlerts.showError(
           context,
-          'On $day, the Visit End Time must be after the Visit Start Time.'
+          'On $day, the Visit End Time must be after the Visit Start Time.',
         );
         return;
       }
@@ -307,7 +385,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       final token = await SessionManager.getToken();
       if (!mounted) return;
       if (token == null) {
-        CustomAlerts.showError(context, 'Session expired. Please log in again.');
+        CustomAlerts.showError(
+          context,
+          'Session expired. Please log in again.',
+        );
         setState(() => _isLoading = false);
         return;
       }
@@ -333,8 +414,12 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       for (int i = 0; i < activeDaysList.length; i++) {
         final day = activeDaysList[i];
         body['partner_doctor_visit_day[$i]'] = day;
-        body['partner_doctor_visit_start_time[$i]'] = _formatTimeOfDay(_startTimes[day]!);
-        body['partner_doctor_visit_end_time[$i]'] = _formatTimeOfDay(_endTimes[day]!);
+        body['partner_doctor_visit_start_time[$i]'] = _formatTimeOfDay(
+          _startTimes[day]!,
+        );
+        body['partner_doctor_visit_end_time[$i]'] = _formatTimeOfDay(
+          _endTimes[day]!,
+        );
       }
 
       final response = await ApiService.storeClinicProfile(
@@ -350,7 +435,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       if (!mounted) return;
 
       if (response['success'] == true) {
-        CustomAlerts.showSuccessLoader(context, response['message'] ?? 'Doctor contact saved successfully!');
+        CustomAlerts.showSuccessLoader(
+          context,
+          response['message'] ?? 'Doctor contact saved successfully!',
+        );
         await Future.delayed(const Duration(milliseconds: 1500));
         if (!mounted) return;
         Navigator.pop(context); // Dismiss success loader
@@ -368,7 +456,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (!mounted) return;
-      CustomAlerts.showError(context, 'An unexpected error occurred. Please try again.');
+      CustomAlerts.showError(
+        context,
+        'An unexpected error occurred. Please try again.',
+      );
     }
   }
 
@@ -494,7 +585,8 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                 child: _buildSectionCard(
                   title: 'Practice Schedule *',
                   icon: Icons.schedule_rounded,
-                  children: _weekdays.map((day) => _buildScheduleRow(day)).toList(),
+                  children:
+                      _weekdays.map((day) => _buildScheduleRow(day)).toList(),
                 ),
               ),
 
@@ -560,23 +652,24 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
+                    child:
+                        _isLoading
+                            ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                            : Text(
+                              'Save & Complete Setup',
+                              style: GoogleFonts.manrope(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
-                          )
-                        : Text(
-                            'Save & Complete Setup',
-                            style: GoogleFonts.manrope(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
                   ),
                 ),
               ),
@@ -627,7 +720,11 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
               color: AppColors.navy,
             ),
           ),
-          childrenPadding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+          childrenPadding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            bottom: 20,
+          ),
           children: children,
         ),
       ),
@@ -658,7 +755,11 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
           color: AppColors.navy,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.7), size: 20),
+          prefixIcon: Icon(
+            icon,
+            color: AppColors.textSecondary.withValues(alpha: 0.7),
+            size: 20,
+          ),
           hintText: hint,
           hintStyle: GoogleFonts.manrope(
             fontSize: 13,
@@ -666,7 +767,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
             color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
       ),
     );
@@ -685,7 +789,11 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
           isExpanded: true,
           hint: Row(
             children: [
-              Icon(Icons.map_outlined, color: AppColors.textSecondary.withValues(alpha: 0.7), size: 20),
+              Icon(
+                Icons.map_outlined,
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
+                size: 20,
+              ),
               const SizedBox(width: 10),
               Text(
                 'Select State *',
@@ -697,27 +805,35 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
               ),
             ],
           ),
-          icon: Icon(Icons.arrow_drop_down_rounded, color: AppColors.textSecondary.withValues(alpha: 0.7)),
+          icon: Icon(
+            Icons.arrow_drop_down_rounded,
+            color: AppColors.textSecondary.withValues(alpha: 0.7),
+          ),
           decoration: const InputDecoration(border: InputBorder.none),
-          items: _states.map((state) {
-            return DropdownMenuItem<String>(
-              value: state,
-              child: Row(
-                children: [
-                  Icon(Icons.map_outlined, color: AppColors.textSecondary.withValues(alpha: 0.7), size: 20),
-                  const SizedBox(width: 10),
-                  Text(
-                    state,
-                    style: GoogleFonts.manrope(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.navy,
-                    ),
+          items:
+              _states.map((state) {
+                return DropdownMenuItem<String>(
+                  value: state,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.map_outlined,
+                        color: AppColors.textSecondary.withValues(alpha: 0.7),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        state,
+                        style: GoogleFonts.manrope(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.navy,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
           onChanged: (val) {
             setState(() {
               _selectedState = val;
@@ -754,7 +870,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: isEnabled ? AppColors.navy : AppColors.textSecondary.withValues(alpha: 0.6),
+                    color:
+                        isEnabled
+                            ? AppColors.navy
+                            : AppColors.textSecondary.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -769,14 +888,21 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                     child: InkWell(
                       onTap: () => _selectTime(context, day, true),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.background,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.access_time_filled_rounded, size: 16, color: AppColors.teal),
+                            const Icon(
+                              Icons.access_time_filled_rounded,
+                              size: 16,
+                              color: AppColors.teal,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -798,14 +924,21 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                     child: InkWell(
                       onTap: () => _selectTime(context, day, false),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.background,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.access_time_filled_rounded, size: 16, color: AppColors.teal),
+                            const Icon(
+                              Icons.access_time_filled_rounded,
+                              size: 16,
+                              color: AppColors.teal,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -848,7 +981,11 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
         height: 180,
         errorBuilder: (context, error, stackTrace) {
           return const Center(
-            child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 40),
+            child: Icon(
+              Icons.broken_image_rounded,
+              color: Colors.grey,
+              size: 40,
+            ),
           );
         },
       );
@@ -859,7 +996,11 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_photo_alternate_rounded, color: AppColors.teal.withValues(alpha: 0.8), size: 40),
+              Icon(
+                Icons.add_photo_alternate_rounded,
+                color: AppColors.teal.withValues(alpha: 0.8),
+                size: 40,
+              ),
               const SizedBox(height: 8),
               Text(
                 'Upload Doctor Banner Image',
@@ -902,7 +1043,12 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 12),
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: 12,
+            ),
             child: Row(
               children: [
                 Container(
@@ -911,7 +1057,11 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                     color: AppColors.teal.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.image_rounded, color: AppColors.teal, size: 20),
+                  child: const Icon(
+                    Icons.image_rounded,
+                    color: AppColors.teal,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -942,19 +1092,28 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                   child: Stack(
                     children: [
                       Positioned.fill(child: imageWidget),
-                      if (_localBannerPath != null || (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty))
+                      if (_localBannerPath != null ||
+                          (_serverBannerUrl != null &&
+                              _serverBannerUrl!.isNotEmpty))
                         Positioned(
                           bottom: 12,
                           right: 12,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.edit_rounded, color: Colors.white, size: 14),
+                                const Icon(
+                                  Icons.edit_rounded,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 6),
                                 Text(
                                   'Change',
@@ -1011,7 +1170,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                     color: AppColors.teal.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.camera_alt_rounded, color: AppColors.teal),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: AppColors.teal,
+                  ),
                 ),
                 title: Text(
                   'Camera',
@@ -1032,7 +1194,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                     color: AppColors.teal.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.photo_library_rounded, color: AppColors.teal),
+                  child: const Icon(
+                    Icons.photo_library_rounded,
+                    color: AppColors.teal,
+                  ),
                 ),
                 title: Text(
                   'Gallery',
@@ -1070,7 +1235,10 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       }
     } catch (e) {
       if (mounted) {
-        CustomAlerts.showError(context, 'Failed to pick image. Please try again.');
+        CustomAlerts.showError(
+          context,
+          'Failed to pick image. Please try again.',
+        );
       }
     }
   }

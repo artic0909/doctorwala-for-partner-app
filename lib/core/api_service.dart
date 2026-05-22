@@ -673,4 +673,102 @@ class ApiService {
       };
     }
   }
+
+  /// Retrieves appointments for the authenticated partner (Sanctum protected, GET)
+  static Future<Map<String, dynamic>> getAppointments({
+    required String token,
+    String? status,
+  }) async {
+    final statusQuery = status != null ? '?status=$status' : '';
+    final url = Uri.parse('$baseUrl/appointments$statusQuery');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to retrieve appointments. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Retrieves appointment stats for the dashboard (Sanctum protected, GET)
+  static Future<Map<String, dynamic>> getAppointmentsStats({
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/appointments/stats');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to retrieve appointment statistics.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Updates the status of an appointment (Sanctum protected, POST)
+  static Future<Map<String, dynamic>> updateAppointmentStatus({
+    required String token,
+    required String id,
+    required String status,
+  }) async {
+    final url = Uri.parse('$baseUrl/appointments/$id/status');
+    final Map<String, String> body = {
+      'status': status,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to update appointment status. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }
