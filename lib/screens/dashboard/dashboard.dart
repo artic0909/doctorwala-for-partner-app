@@ -16,6 +16,7 @@ import 'appointments/upcoming.dart';
 import 'appointments/complete.dart';
 import 'appointments/cancel.dart';
 import 'appointments/today.dart';
+import 'account_settings.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -35,10 +36,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _completedCount = 0;
   int _todayCount = 0;
   bool _isFetchingStats = false;
+  late Map<String, dynamic> _partnerData;
 
   @override
   void initState() {
     super.initState();
+    _partnerData = widget.partnerData;
     _fetchStats();
   }
 
@@ -189,7 +192,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       drawer: CustomSidebar(
-        partnerData: widget.partnerData,
+        partnerData: _partnerData,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
@@ -200,7 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: _buildBody(),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
-        partnerData: widget.partnerData,
+        partnerData: _partnerData,
         onTap: (index) {
           if (index == -1) {
             _scaffoldKey.currentState?.openDrawer();
@@ -219,9 +222,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 0:
         return _buildHomeTab();
       case 1:
-        return UpcomingAppointmentsScreen(partnerData: widget.partnerData);
+        return UpcomingAppointmentsScreen(partnerData: _partnerData);
       case 2:
-        return _buildProfileTab(); // Profile serves as Account Settings
+        return AccountSettingsScreen(
+          partnerData: _partnerData,
+          onProfileUpdated: (updatedData) {
+            setState(() {
+              _partnerData = updatedData;
+            });
+          },
+        );
       case 3:
         return const OpdContactScreen();
       case 4:
@@ -235,7 +245,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 8:
         return _buildPlaceholderTab('Patient Lists', Icons.assignment_rounded);
       case 9:
-        return CompleteAppointmentsScreen(partnerData: widget.partnerData);
+        return CompleteAppointmentsScreen(partnerData: _partnerData);
       case 10:
         return _buildPlaceholderTab(
           'Help & Support',
@@ -244,9 +254,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 11:
         return const DoctorContactScreen();
       case 14:
-        return CancelledAppointmentsScreen(partnerData: widget.partnerData);
+        return CancelledAppointmentsScreen(partnerData: _partnerData);
       case 15:
-        return TodayAppointmentsScreen(partnerData: widget.partnerData, isTab: true);
+        return TodayAppointmentsScreen(partnerData: _partnerData, isTab: true);
       default:
         return _buildHomeTab();
     }
@@ -369,7 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Partner ID: ${widget.partnerData['partner_id'] ?? 'N/A'}',
+                        'Partner ID: ${_partnerData['partner_id'] ?? 'N/A'}',
                         style: GoogleFonts.manrope(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -390,11 +400,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // TAB 0: HOME / COUNTING CARDS
   Widget _buildHomeTab() {
-    final clinicName = widget.partnerData['partner_clinic_name'] ?? 'N/A';
+    final clinicName = _partnerData['partner_clinic_name'] ?? 'N/A';
     final contactPerson =
-        widget.partnerData['partner_contact_person_name'] ?? 'N/A';
+        _partnerData['partner_contact_person_name'] ?? 'N/A';
 
-    final rawRegType = widget.partnerData['registration_type'];
+    final rawRegType = _partnerData['registration_type'];
     final types = _parseRegistrationTypes(rawRegType);
     final hasOPD = types.contains('OPD');
     final hasPathology = types.contains('Pathology');
@@ -926,139 +936,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // TAB 2: PROFILE DETAILS
-  Widget _buildProfileTab() {
-    final partnerId = widget.partnerData['partner_id'] ?? 'N/A';
-    final email = widget.partnerData['partner_email'] ?? 'N/A';
-    final mobile = widget.partnerData['partner_mobile_number'] ?? 'N/A';
-    final status = widget.partnerData['status'] ?? 'N/A';
-    final regType =
-        widget.partnerData['registration_type']?.toString() ?? 'N/A';
 
-    final state = widget.partnerData['partner_state'] ?? 'N/A';
-    final city = widget.partnerData['partner_city'] ?? 'N/A';
-    final pincode = widget.partnerData['partner_pincode'] ?? 'N/A';
-    final landmark = widget.partnerData['partner_landmark'] ?? 'N/A';
-    final address = widget.partnerData['partner_address'] ?? 'N/A';
-
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 110),
-      child: FadeInUp(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Details Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.navy.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: Border.all(color: Colors.grey[100]!, width: 1.5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Profile Details',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.navy,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDetailRow('Partner ID', partnerId),
-                  _buildDetailRow('Email Address', email),
-                  _buildDetailRow('Mobile Number', mobile),
-                  _buildDetailRow('Account Status', status),
-                  _buildDetailRow('Category Type', regType),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Address Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.navy.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: Border.all(color: Colors.grey[100]!, width: 1.5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Address Information',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.navy,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDetailRow('State', state),
-                  _buildDetailRow('City', city),
-                  _buildDetailRow('Pincode', pincode),
-                  _buildDetailRow('Landmark', landmark),
-                  _buildDetailRow('Street Address', address),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: GoogleFonts.manrope(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: GoogleFonts.manrope(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: AppColors.navy,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   List<String> _parseRegistrationTypes(dynamic rawType) {
     if (rawType == null) return [];

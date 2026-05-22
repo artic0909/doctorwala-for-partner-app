@@ -771,4 +771,59 @@ class ApiService {
       };
     }
   }
+
+  /// Updates the partner profile details (Sanctum protected, POST)
+  static Future<Map<String, dynamic>> updateProfile({
+    required String token,
+    required String clinicName,
+    required String contactPerson,
+    required String mobileNumber,
+    required String email,
+    required String state,
+    required String city,
+    required String pincode,
+    required String landmark,
+    required String address,
+    String? password,
+  }) async {
+    final url = Uri.parse('$baseUrl/profile/update');
+    final Map<String, String> body = {
+      'partner_clinic_name': clinicName,
+      'partner_contact_person_name': contactPerson,
+      'partner_mobile_number': mobileNumber,
+      'partner_email': email,
+      'partner_state': state,
+      'partner_city': city,
+      'partner_pincode': pincode,
+      'partner_landmark': landmark,
+      'partner_address': address,
+    };
+    if (password != null && password.isNotEmpty) {
+      body['partner_password'] = password;
+    }
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to update profile. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }
