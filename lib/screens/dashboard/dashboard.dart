@@ -15,6 +15,7 @@ import 'showtests.dart';
 import 'appointments/upcoming.dart';
 import 'appointments/complete.dart';
 import 'appointments/cancel.dart';
+import 'appointments/today.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -362,10 +363,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         color: AppColors.teal,
         delayMs: 100,
         isLoading: _isFetchingStats,
-        onTap: () {
-          setState(() {
-            _currentIndex = 1; // Upcoming Appointments
-          });
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TodayAppointmentsScreen(
+                partnerData: widget.partnerData,
+              ),
+            ),
+          );
+          _fetchStats();
         },
       ),
       _buildCountCard(

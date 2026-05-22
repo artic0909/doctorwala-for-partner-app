@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -54,28 +53,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     _appointment = Map<String, dynamic>.from(widget.appointment);
   }
 
-  void _copyToClipboard(String text, String label) {
-    final status = _appointment['status'] ?? 'Upcoming';
-    final Color themeColor;
-    if (status == 'Completed') {
-      themeColor = AppColors.teal;
-    } else if (status == 'Cancelled') {
-      themeColor = const Color(0xFFEF4444);
-    } else {
-      themeColor = const Color(0xFFD97706);
-    }
-
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$label copied to clipboard'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: themeColor,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
       scheme: 'tel',
@@ -88,7 +65,26 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         throw 'Could not launch $launchUri';
       }
     } catch (_) {
-      _copyToClipboard(phoneNumber, 'Mobile number');
+      if (mounted) {
+        final status = _appointment['status'] ?? 'Upcoming';
+        final Color themeColor;
+        if (status == 'Completed') {
+          themeColor = AppColors.teal;
+        } else if (status == 'Cancelled') {
+          themeColor = const Color(0xFFEF4444);
+        } else {
+          themeColor = const Color(0xFFD97706);
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Could not open the dialer app.'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: themeColor,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -669,7 +665,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 110,
+            width: 130,
             child: Text(
               label,
               style: GoogleFonts.manrope(
@@ -699,20 +695,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(5),
                     tooltip: 'Call Patient',
-                    style: IconButton.styleFrom(
-                      backgroundColor: themeColor.withValues(alpha: 0.08),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () => _copyToClipboard(value, 'Mobile number'),
-                    icon: Icon(Icons.copy_rounded, color: themeColor, size: 14),
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(5),
-                    tooltip: 'Copy contact',
                     style: IconButton.styleFrom(
                       backgroundColor: themeColor.withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(

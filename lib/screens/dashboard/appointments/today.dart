@@ -9,16 +9,16 @@ import '../../../core/session_manager.dart';
 import '../../../core/custom_alerts.dart';
 import 'details.dart';
 
-class CompleteAppointmentsScreen extends StatefulWidget {
+class TodayAppointmentsScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
 
-  const CompleteAppointmentsScreen({super.key, required this.partnerData});
+  const TodayAppointmentsScreen({super.key, required this.partnerData});
 
   @override
-  State<CompleteAppointmentsScreen> createState() => _CompleteAppointmentsScreenState();
+  State<TodayAppointmentsScreen> createState() => _TodayAppointmentsScreenState();
 }
 
-class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen> {
+class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
   static const Color themeColor = AppColors.teal;
   static const Color themeLight = Color(0xFFF0FAF7);
   static const Color themeBorder = Color(0xFFBFECE1);
@@ -61,13 +61,60 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
     super.dispose();
   }
 
+  bool _isToday(String dateStr) {
+    if (dateStr == 'N/A' || dateStr.trim().isEmpty) return false;
+    
+    final now = DateTime.now();
+    
+    // Format 1: YYYY-MM-DD
+    final yyyymmdd = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    // Format 2: DD-MM-YYYY
+    final ddmmyyyy = '${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year}';
+    // Format 3: D-M-YYYY
+    final dmyyyy = '${now.day}-${now.month}-${now.year}';
+    // Format 4: DD/MM/YYYY
+    final ddmmyyyySlash = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+    // Format 5: D/M/YYYY
+    final dmyyyySlash = '${now.day}/${now.month}/${now.year}';
+    // Format 6: YYYY/MM/DD
+    final yyyymmddSlash = '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
+
+    final cleanDate = dateStr.trim();
+    if (cleanDate == yyyymmdd || 
+        cleanDate == ddmmyyyy || 
+        cleanDate == dmyyyy || 
+        cleanDate == ddmmyyyySlash || 
+        cleanDate == dmyyyySlash || 
+        cleanDate == yyyymmddSlash) {
+      return true;
+    }
+
+    try {
+      final parsed = DateTime.tryParse(cleanDate);
+      if (parsed != null) {
+        return parsed.year == now.year && parsed.month == now.month && parsed.day == now.day;
+      }
+    } catch (_) {}
+
+    if (cleanDate.contains(yyyymmdd) || cleanDate.contains(ddmmyyyy)) {
+      return true;
+    }
+
+    return false;
+  }
+
   void _onSearchChanged() {
     final query = _searchController.text.toLowerCase().trim();
     setState(() {
+      final todayAppts = _appointments.where((appt) {
+        final dateStr = (appt['booking_date'] ?? '').toString();
+        return _isToday(dateStr);
+      }).toList();
+
       if (query.isEmpty) {
-        _filteredAppointments = _appointments;
+        _filteredAppointments = todayAppts;
       } else {
-        _filteredAppointments = _appointments.where((appt) {
+        _filteredAppointments = todayAppts.where((appt) {
           final patientName = (appt['user_name'] ?? appt['user']?['user_name'] ?? '').toString().toLowerCase();
           final patientMobile = (appt['user_mobile'] ?? appt['user']?['user_mobile'] ?? '').toString().toLowerCase();
           final doctorName = (appt['doctor']?['doctor_name'] ?? '').toString().toLowerCase();
@@ -96,18 +143,22 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
         return;
       }
 
-      final response = await ApiService.getAppointments(token: token, status: 'Completed');
+      final response = await ApiService.getAppointments(token: token, status: 'Upcoming');
       if (!mounted) return;
 
       if (response['success'] == true) {
         setState(() {
           _appointments = response['appointments'] ?? [];
-          _filteredAppointments = _appointments;
+          // Filter to today's appointments initially
+          _filteredAppointments = _appointments.where((appt) {
+            final dateStr = (appt['booking_date'] ?? '').toString();
+            return _isToday(dateStr);
+          }).toList();
         });
       } else {
         CustomAlerts.showError(
           context,
-          response['message'] ?? 'Failed to load completed appointments.',
+          response['message'] ?? "Failed to load today's appointments.",
         );
       }
     } catch (_) {
@@ -184,8 +235,36 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Total count calculation based on today's filter
+    final todayCount = _appointments.where((appt) {
+      final dateStr = (appt['booking_date'] ?? '').toString();
+      return _isToday(dateStr);
+    }).length;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.navy),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Today's Appointments",
+          style: GoogleFonts.manrope(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            color: AppColors.navy,
+          ),
+        ),
+        shape: Border(
+          bottom: BorderSide(
+            color: Colors.grey.withValues(alpha: 0.1),
+            width: 1.0,
+          ),
+        ),
+      ),
       body: Column(
         children: [
           // Header section
@@ -211,7 +290,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Completed Appointments',
+                          "Today's Bookings",
                           style: GoogleFonts.manrope(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -221,7 +300,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Total Completed: ${_appointments.length}',
+                          'Total Pending: $todayCount',
                           style: GoogleFonts.manrope(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -276,10 +355,10 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
           Expanded(
             child: _isFetching
                 ? const Center(
-                     child: CircularProgressIndicator(
-                       valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                     ),
-                   )
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                    ),
+                  )
                 : RefreshIndicator(
                     onRefresh: _fetchAppointments,
                     color: themeColor,
@@ -321,14 +400,14 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.task_alt_rounded,
-                color: AppColors.teal,
+                Icons.calendar_month_rounded,
+                color: AppColors.navy,
                 size: 40,
               ),
             ),
             const SizedBox(height: 20),
             Text(
-              query.isEmpty ? 'No Completed Appointments' : 'No Results Found',
+              query.isEmpty ? "No Appointments for Today" : 'No Results Found',
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
@@ -338,7 +417,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
             const SizedBox(height: 8),
             Text(
               query.isEmpty
-                  ? 'There are no completed appointments found in your history.'
+                  ? 'There are no active upcoming inquiries or appointments booked for today.'
                   : 'We couldn\'t find any matches for "$query". Try searching something else.',
               textAlign: TextAlign.center,
               style: GoogleFonts.manrope(
@@ -391,7 +470,6 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top row with status tags & clinical type tag
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -440,7 +518,6 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                 ),
                 const SizedBox(height: 12),
 
-                // Patient details
                 Text(
                   patientName,
                   style: GoogleFonts.manrope(
@@ -451,7 +528,6 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                 ),
                 const SizedBox(height: 4),
 
-                // Service Name
                 if (!(_isDoctorPartner() && !isPathology)) ...[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,7 +557,6 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                 const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
                 const SizedBox(height: 12),
 
-                // Date, Time, Contact
                 Row(
                   children: [
                     Expanded(
@@ -521,7 +596,6 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                       ),
                     ),
                     
-                    // Call number
                     if (patientMobile != 'N/A' && patientMobile.isNotEmpty) ...[
                       IconButton(
                         onPressed: () => _makePhoneCall(patientMobile),

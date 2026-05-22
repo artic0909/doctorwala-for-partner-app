@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -125,18 +124,6 @@ class _CancelledAppointmentsScreenState extends State<CancelledAppointmentsScree
     }
   }
 
-  void _copyToClipboard(String text, String label) {
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$label copied to clipboard'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: themeColor,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
       scheme: 'tel',
@@ -149,7 +136,16 @@ class _CancelledAppointmentsScreenState extends State<CancelledAppointmentsScree
         throw 'Could not launch $launchUri';
       }
     } catch (_) {
-      _copyToClipboard(phoneNumber, 'Mobile number');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Could not open the dialer app.'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: themeColor,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -525,25 +521,12 @@ class _CancelledAppointmentsScreenState extends State<CancelledAppointmentsScree
                       ),
                     ),
                     
-                    // Call / copy number
+                    // Call number
                     if (patientMobile != 'N/A' && patientMobile.isNotEmpty) ...[
                       IconButton(
                         onPressed: () => _makePhoneCall(patientMobile),
                         icon: const Icon(Icons.phone_in_talk_rounded, color: themeColor, size: 18),
                         tooltip: 'Call Patient',
-                        style: IconButton.styleFrom(
-                          backgroundColor: themeColor.withValues(alpha: 0.08),
-                          padding: const EdgeInsets.all(8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: () => _copyToClipboard(patientMobile, 'Mobile number'),
-                        icon: const Icon(Icons.copy_rounded, color: themeColor, size: 18),
-                        tooltip: 'Copy contact',
                         style: IconButton.styleFrom(
                           backgroundColor: themeColor.withValues(alpha: 0.08),
                           padding: const EdgeInsets.all(8),
