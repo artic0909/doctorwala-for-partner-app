@@ -55,12 +55,22 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   void _copyToClipboard(String text, String label) {
+    final status = _appointment['status'] ?? 'Upcoming';
+    final Color themeColor;
+    if (status == 'Completed') {
+      themeColor = AppColors.teal;
+    } else if (status == 'Cancelled') {
+      themeColor = const Color(0xFFEF4444);
+    } else {
+      themeColor = const Color(0xFFD97706);
+    }
+
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$label copied to clipboard'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.teal,
+        backgroundColor: themeColor,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -231,16 +241,24 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     final testPrice = test?['test_price']?.toString() ?? 'N/A';
 
     // Status Styling
-    Color statusColor;
-    IconData statusIcon;
+    final Color themeColor;
+    final Color themeLight;
+    final Color themeBorder;
+    final IconData statusIcon;
     if (status == 'Completed') {
-      statusColor = AppColors.teal;
+      themeColor = AppColors.teal;
+      themeLight = const Color(0xFFF0FAF7);
+      themeBorder = const Color(0xFFBFECE1);
       statusIcon = Icons.check_circle_rounded;
     } else if (status == 'Cancelled') {
-      statusColor = Colors.redAccent;
+      themeColor = const Color(0xFFEF4444);
+      themeLight = const Color(0xFFFFF1F2);
+      themeBorder = const Color(0xFFFECDD3);
       statusIcon = Icons.cancel_rounded;
     } else {
-      statusColor = Colors.orangeAccent;
+      themeColor = const Color(0xFFD97706);
+      themeLight = const Color(0xFFFFF9EE);
+      themeBorder = const Color(0xFFFCD34D);
       statusIcon = Icons.pending_actions_rounded;
     }
 
@@ -278,12 +296,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: themeLight,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+                        border: Border.all(color: themeBorder.withValues(alpha: 0.4), width: 1.5),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.navy.withValues(alpha: 0.02),
+                            color: themeColor.withValues(alpha: 0.04),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )
@@ -297,21 +315,21 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.1),
+                                  color: themeColor.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1.0),
+                                  border: Border.all(color: themeColor.withValues(alpha: 0.3), width: 1.0),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(statusIcon, color: statusColor, size: 14),
+                                    Icon(statusIcon, color: themeColor, size: 14),
                                     const SizedBox(width: 6),
                                     Text(
                                       status.toUpperCase(),
                                       style: GoogleFonts.manrope(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w800,
-                                        color: statusColor,
+                                        color: themeColor,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -321,7 +339,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppColors.navy.withValues(alpha: 0.05),
+                                  color: themeColor.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -329,14 +347,14 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                   style: GoogleFonts.manrope(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.navy,
+                                    color: themeColor,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                          Divider(height: 1, thickness: 1, color: themeBorder.withValues(alpha: 0.3)),
                           const SizedBox(height: 16),
                           Row(
                             children: [
@@ -345,14 +363,16 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                   Icons.calendar_month_rounded,
                                   'Booking Date',
                                   date,
+                                  themeColor,
                                 ),
                               ),
-                              Container(width: 1, height: 35, color: Colors.grey.shade200),
+                              Container(width: 1, height: 35, color: themeBorder.withValues(alpha: 0.3)),
                               Expanded(
                                 child: _buildHeaderTimeItem(
                                   Icons.access_time_rounded,
                                   'Booking Time',
                                   _formatTime12h(time),
+                                  themeColor,
                                 ),
                               ),
                             ],
@@ -369,10 +389,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     child: _buildSectionCard(
                       title: 'Patient Information',
                       icon: Icons.person_rounded,
+                      themeColor: themeColor,
+                      themeLight: themeLight,
+                      themeBorder: themeBorder,
                       children: [
-                        _buildInfoRow('Name', patientName),
-                        _buildInfoRow('Mobile Number', patientMobile),
-                        _buildInfoRow('Email Address', patientEmail),
+                        _buildInfoRow('Name', patientName, themeColor),
+                        _buildInfoRow('Mobile Number', patientMobile, themeColor),
+                        _buildInfoRow('Email Address', patientEmail, themeColor),
                         if (inquiry.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Text(
@@ -388,9 +411,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppColors.background,
+                              color: themeLight.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade200),
+                              border: Border.all(color: themeBorder.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               inquiry,
@@ -415,29 +438,38 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         ? _buildSectionCard(
                             title: 'Test Details',
                             icon: Icons.science_rounded,
+                            themeColor: themeColor,
+                            themeLight: themeLight,
+                            themeBorder: themeBorder,
                             children: [
-                              _buildInfoRow('Test Name', testName),
-                              _buildInfoRow('Test Type', testType),
-                              _buildInfoRow('Test Cost', '₹$testPrice'),
-                              _buildInfoRow('Visit Mode', visitMode),
+                              _buildInfoRow('Test Name', testName, themeColor),
+                              _buildInfoRow('Test Type', testType, themeColor),
+                              _buildInfoRow('Test Cost', '₹$testPrice', themeColor),
+                              _buildInfoRow('Visit Mode', visitMode, themeColor),
                             ],
                           )
                         : _isDoctorPartner()
                             ? _buildSectionCard(
                                 title: 'Visit Details',
                                 icon: Icons.meeting_room_rounded,
+                                themeColor: themeColor,
+                                themeLight: themeLight,
+                                themeBorder: themeBorder,
                                 children: [
-                                  _buildInfoRow('Visit Mode', visitMode),
+                                  _buildInfoRow('Visit Mode', visitMode, themeColor),
                                 ],
                               )
                             : _buildSectionCard(
                                 title: 'Doctor Details',
                                 icon: Icons.medical_information_rounded,
+                                themeColor: themeColor,
+                                themeLight: themeLight,
+                                themeBorder: themeBorder,
                                 children: [
-                                  _buildInfoRow('Doctor Name', doctorName),
-                                  _buildInfoRow('Specialty', doctorSpeciality),
-                                  _buildInfoRow('Designation', doctorDesignation),
-                                  _buildInfoRow('Visit Mode', visitMode),
+                                  _buildInfoRow('Doctor Name', doctorName, themeColor),
+                                  _buildInfoRow('Specialty', doctorSpeciality, themeColor),
+                                  _buildInfoRow('Designation', doctorDesignation, themeColor),
+                                  _buildInfoRow('Visit Mode', visitMode, themeColor),
                                 ],
                               ),
                   ),
@@ -506,9 +538,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                         decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.05),
+                          color: themeColor.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: statusColor.withValues(alpha: 0.15)),
+                          border: Border.all(color: themeColor.withValues(alpha: 0.15)),
                         ),
                         child: Text(
                           status == 'Completed'
@@ -518,7 +550,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           style: GoogleFonts.manrope(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: statusColor,
+                            color: themeColor,
                           ),
                         ),
                       ),
@@ -530,9 +562,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           if (_isLoading)
             Container(
               color: Colors.black12,
-              child: const Center(
+              child: Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
+                  valueColor: AlwaysStoppedAnimation<Color>(themeColor),
                 ),
               ),
             ),
@@ -541,13 +573,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     );
   }
 
-  Widget _buildHeaderTimeItem(IconData icon, String label, String value) {
+  Widget _buildHeaderTimeItem(IconData icon, String label, String value, Color themeColor) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: AppColors.teal, size: 16),
+            Icon(icon, color: themeColor, size: 16),
             const SizedBox(width: 6),
             Text(
               label.toUpperCase(),
@@ -577,6 +609,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     required String title,
     required IconData icon,
     required List<Widget> children,
+    required Color themeColor,
+    required Color themeLight,
+    required Color themeBorder,
   }) {
     return Container(
       width: double.infinity,
@@ -584,10 +619,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        border: Border.all(color: themeBorder.withValues(alpha: 0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.02),
+            color: themeColor.withValues(alpha: 0.02),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -601,10 +636,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.teal.withValues(alpha: 0.08),
+                  color: themeColor.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: AppColors.teal, size: 18),
+                child: Icon(icon, color: themeColor, size: 18),
               ),
               const SizedBox(width: 12),
               Text(
@@ -618,7 +653,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+          Divider(height: 1, thickness: 1, color: themeBorder.withValues(alpha: 0.2)),
           const SizedBox(height: 16),
           ...children,
         ],
@@ -626,7 +661,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, Color themeColor) {
     final isMobile = label == 'Mobile Number' && value != 'N/A' && value.trim().isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -660,12 +695,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                 if (isMobile) ...[
                   IconButton(
                     onPressed: () => _makePhoneCall(value),
-                    icon: const Icon(Icons.phone_in_talk_rounded, color: AppColors.teal, size: 14),
+                    icon: Icon(Icons.phone_in_talk_rounded, color: themeColor, size: 14),
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(5),
                     tooltip: 'Call Patient',
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.teal.withValues(alpha: 0.08),
+                      backgroundColor: themeColor.withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -674,12 +709,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   const SizedBox(width: 8),
                   IconButton(
                     onPressed: () => _copyToClipboard(value, 'Mobile number'),
-                    icon: const Icon(Icons.copy_rounded, color: AppColors.teal, size: 14),
+                    icon: Icon(Icons.copy_rounded, color: themeColor, size: 14),
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(5),
                     tooltip: 'Copy contact',
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.teal.withValues(alpha: 0.08),
+                      backgroundColor: themeColor.withValues(alpha: 0.08),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),

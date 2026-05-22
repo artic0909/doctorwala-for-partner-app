@@ -20,6 +20,10 @@ class CompleteAppointmentsScreen extends StatefulWidget {
 }
 
 class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen> {
+  static const Color themeColor = AppColors.teal;
+  static const Color themeLight = Color(0xFFF0FAF7);
+  static const Color themeBorder = Color(0xFFBFECE1);
+
   bool _isFetching = true;
   List<dynamic> _appointments = [];
   List<dynamic> _filteredAppointments = [];
@@ -127,7 +131,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
       SnackBar(
         content: Text('$label copied to clipboard'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.teal,
+        backgroundColor: themeColor,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -231,7 +235,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.refresh_rounded, color: AppColors.teal),
+                      icon: const Icon(Icons.refresh_rounded, color: themeColor),
                       onPressed: _fetchAppointments,
                       tooltip: 'Refresh',
                     ),
@@ -255,7 +259,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                     decoration: InputDecoration(
                       prefixIcon: const Icon(
                         Icons.search_rounded,
-                        color: AppColors.teal,
+                        color: themeColor,
                         size: 20,
                       ),
                       hintText: 'Search patient, phone, doctor or test...',
@@ -276,13 +280,13 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
           Expanded(
             child: _isFetching
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
-                    ),
-                  )
+                     child: CircularProgressIndicator(
+                       valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                     ),
+                   )
                 : RefreshIndicator(
                     onRefresh: _fetchAppointments,
-                    color: AppColors.teal,
+                    color: themeColor,
                     child: _filteredAppointments.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
@@ -317,7 +321,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.teal.withValues(alpha: 0.08),
+                color: themeColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -369,9 +373,9 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: themeLight,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+        border: Border.all(color: themeBorder.withValues(alpha: 0.4), width: 1.2),
         boxShadow: [
           BoxShadow(
             color: AppColors.navy.withValues(alpha: 0.02),
@@ -398,7 +402,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: (isPathology ? Colors.purpleAccent : AppColors.teal).withValues(alpha: 0.08),
+                        color: (isPathology ? Colors.purpleAccent : themeColor).withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -407,7 +411,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                           Icon(
                             isPathology ? Icons.science_rounded : Icons.medical_information_rounded,
                             size: 12,
-                            color: isPathology ? Colors.purple : AppColors.teal,
+                            color: isPathology ? Colors.purple : themeColor,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -415,7 +419,7 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                             style: GoogleFonts.manrope(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
-                              color: isPathology ? Colors.purple : AppColors.teal,
+                              color: isPathology ? Colors.purple : themeColor,
                             ),
                           ),
                         ],
@@ -525,10 +529,10 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                     if (patientMobile != 'N/A' && patientMobile.isNotEmpty) ...[
                       IconButton(
                         onPressed: () => _makePhoneCall(patientMobile),
-                        icon: const Icon(Icons.phone_in_talk_rounded, color: AppColors.teal, size: 18),
+                        icon: const Icon(Icons.phone_in_talk_rounded, color: themeColor, size: 18),
                         tooltip: 'Call Patient',
                         style: IconButton.styleFrom(
-                          backgroundColor: AppColors.teal.withValues(alpha: 0.08),
+                          backgroundColor: themeColor.withValues(alpha: 0.08),
                           padding: const EdgeInsets.all(8),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -538,10 +542,10 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                       const SizedBox(width: 8),
                       IconButton(
                         onPressed: () => _copyToClipboard(patientMobile, 'Mobile number'),
-                        icon: const Icon(Icons.copy_rounded, color: AppColors.teal, size: 18),
+                        icon: const Icon(Icons.copy_rounded, color: themeColor, size: 18),
                         tooltip: 'Copy contact',
                         style: IconButton.styleFrom(
-                          backgroundColor: AppColors.teal.withValues(alpha: 0.08),
+                          backgroundColor: themeColor.withValues(alpha: 0.08),
                           padding: const EdgeInsets.all(8),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -550,10 +554,10 @@ class _CompleteAppointmentsScreenState extends State<CompleteAppointmentsScreen>
                       ),
                     ],
                     const SizedBox(width: 8),
-                    const Icon(
+                    Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 12,
-                      color: AppColors.textSecondary,
+                      color: themeColor,
                     ),
                   ],
                 ),
