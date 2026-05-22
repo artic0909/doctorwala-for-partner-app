@@ -11,8 +11,13 @@ import 'details.dart';
 
 class TodayAppointmentsScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
+  final bool isTab;
 
-  const TodayAppointmentsScreen({super.key, required this.partnerData});
+  const TodayAppointmentsScreen({
+    super.key,
+    required this.partnerData,
+    this.isTab = false,
+  });
 
   @override
   State<TodayAppointmentsScreen> createState() => _TodayAppointmentsScreenState();
@@ -243,28 +248,30 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.navy),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Today's Appointments",
-          style: GoogleFonts.manrope(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            color: AppColors.navy,
-          ),
-        ),
-        shape: Border(
-          bottom: BorderSide(
-            color: Colors.grey.withValues(alpha: 0.1),
-            width: 1.0,
-          ),
-        ),
-      ),
+      appBar: widget.isTab
+          ? null
+          : AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.navy),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                "Today's Appointments",
+                style: GoogleFonts.manrope(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.navy,
+                ),
+              ),
+              shape: Border(
+                bottom: BorderSide(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  width: 1.0,
+                ),
+              ),
+            ),
       body: Column(
         children: [
           // Header section
@@ -365,7 +372,7 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
                     child: _filteredAppointments.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 110),
                             itemCount: _filteredAppointments.length,
                             physics: const AlwaysScrollableScrollPhysics(),
                             itemBuilder: (context, index) {

@@ -286,7 +286,7 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
                     child: _filteredAppointments.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 110),
                             itemCount: _filteredAppointments.length,
                             physics: const AlwaysScrollableScrollPhysics(),
                             itemBuilder: (context, index) {

@@ -27,6 +27,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
   int _totalDoctors = 0;
   int _totalTests = 0;
@@ -100,6 +101,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      extendBody: true,
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -136,6 +139,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ? 'List Myself'
               : _currentIndex == 14
               ? 'Cancelled Appointments'
+              : _currentIndex == 15
+              ? "Today's Bookings"
               : 'Help & Support',
           style: GoogleFonts.manrope(
             fontSize: 18,
@@ -195,10 +200,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: _buildBody(),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
+        partnerData: widget.partnerData,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          if (index == -1) {
+            _scaffoldKey.currentState?.openDrawer();
+          } else {
+            setState(() {
+              _currentIndex = index;
+            });
+          }
         },
       ),
     );
@@ -235,6 +245,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return const DoctorContactScreen();
       case 14:
         return CancelledAppointmentsScreen(partnerData: widget.partnerData);
+      case 15:
+        return TodayAppointmentsScreen(partnerData: widget.partnerData, isTab: true);
       default:
         return _buildHomeTab();
     }
@@ -363,16 +375,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         color: AppColors.teal,
         delayMs: 100,
         isLoading: _isFetchingStats,
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TodayAppointmentsScreen(
-                partnerData: widget.partnerData,
-              ),
-            ),
-          );
-          _fetchStats();
+        onTap: () {
+          setState(() {
+            _currentIndex = 15;
+          });
         },
       ),
       _buildCountCard(
@@ -439,7 +445,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 110),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -905,7 +911,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 110),
       child: FadeInUp(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -377,7 +377,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                         child: _filteredTests.isEmpty
                             ? _buildEmptyState()
                             : ListView.builder(
-                                padding: const EdgeInsets.all(20),
+                                padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 110),
                                 itemCount: _filteredTests.length,
                                 itemBuilder: (context, idx) {
                                   final test = _filteredTests[idx] as Map<String, dynamic>;

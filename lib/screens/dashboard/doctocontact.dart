@@ -480,7 +480,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 110),
         child: Form(
           key: _formKey,
           child: Column(
