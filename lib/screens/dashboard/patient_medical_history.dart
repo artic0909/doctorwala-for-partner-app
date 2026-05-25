@@ -6,6 +6,8 @@ import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'create_prescription_form.dart';
+import 'create_handwritten_prescription_form.dart';
+
 
 class _Theme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
@@ -524,22 +526,15 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
 
       if (response['success'] == true) {
         final doctors = response['data']?['doctors'] as List? ?? [];
+        final patient = Map<String, dynamic>.from(_historyData!['patient'] ?? {});
+        final vitals = Map<String, dynamic>.from(_historyData!['vital'] ?? {});
 
-        final result = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CreatePrescriptionScreen(
-              dwUserId: _historyData!['patient']?['id'] ?? 0,
-              patientData: Map<String, dynamic>.from(_historyData!['patient'] ?? {}),
-              doctors: doctors,
-              vitals: Map<String, dynamic>.from(_historyData!['vital'] ?? {}),
-            ),
-          ),
+        if (!mounted) return;
+        _showPrescriptionTypeBottomSheet(
+          doctors: doctors,
+          patient: patient,
+          vitals: vitals,
         );
-
-        if (result == true) {
-          _fetchHistory();
-        }
       } else {
         CustomAlerts.showError(
           context,
@@ -551,6 +546,198 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
       Navigator.pop(context);
       CustomAlerts.showError(context, 'An unexpected error occurred: ${e.toString()}');
     }
+  }
+
+  void _showPrescriptionTypeBottomSheet({
+    required List<dynamic> doctors,
+    required Map<String, dynamic> patient,
+    required Map<String, dynamic> vitals,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Create Prescription',
+                  style: GoogleFonts.manrope(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: _Theme.primary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Choose the prescription creation method below.',
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _Theme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateHandwrittenPrescriptionScreen(
+                                dwUserId: patient['id'] ?? 0,
+                                patientData: patient,
+                                doctors: doctors,
+                                partnerData: widget.partnerData,
+                              ),
+                            ),
+                          );
+                          if (result == true) {
+                            _fetchHistory();
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: _Theme.border, width: 1.5),
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: const BoxDecoration(
+                                  color: _Theme.accentLight,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.edit_note_rounded,
+                                  color: _Theme.accent,
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Hand Written',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: _Theme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Upload scanned photo',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: _Theme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreatePrescriptionScreen(
+                                dwUserId: patient['id'] ?? 0,
+                                patientData: patient,
+                                doctors: doctors,
+                                vitals: vitals,
+                              ),
+                            ),
+                          );
+                          if (result == true) {
+                            _fetchHistory();
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: _Theme.border, width: 1.5),
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFEFF6FF), // soft blue
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.assignment_outlined,
+                                  color: Color(0xFF3B82F6), // blue
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'System Digital',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: _Theme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Generate prescription panel',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: _Theme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildEmptyState(String title, String desc, {bool isFilterEmpty = false}) {

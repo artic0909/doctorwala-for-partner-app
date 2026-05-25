@@ -1117,4 +1117,55 @@ class ApiService {
       };
     }
   }
+
+  /// Creates a handwritten prescription (uploads images/PDFs) for a patient
+  static Future<Map<String, dynamic>> createHandwrittenPrescription({
+    required int dwUserId,
+    required String dateOfReport,
+    required String heading,
+    int? opdDoctorId,
+    required List<String> imagePaths,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/handwritten/create');
+
+    try {
+      final request = http.MultipartRequest('POST', url);
+      request.headers.addAll({
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      // Add text fields
+      request.fields['dw_user_id'] = dwUserId.toString();
+      request.fields['date_of_report'] = dateOfReport;
+      request.fields['heading'] = heading;
+      if (opdDoctorId != null) {
+        request.fields['opd_doctor_id'] = opdDoctorId.toString();
+      }
+
+      // Add files to "images[]" array
+      for (String path in imagePaths) {
+        final file = await http.MultipartFile.fromPath('images[]', path);
+        request.files.add(file);
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 201 || response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }
+

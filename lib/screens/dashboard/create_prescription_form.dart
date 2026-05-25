@@ -412,6 +412,8 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
                             child: Text(
                               '${doc['doctor_name']} - ${doc['doctor_specialist']}',
                               style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: _Theme.primary),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           );
                         }).toList(),
@@ -668,6 +670,7 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
                                   ),
                                   const SizedBox(height: 10),
                                   DropdownButtonFormField<String>(
+                                    isExpanded: true,
                                     value: test['priority'],
                                     decoration: _inputDecoration('Priority'),
                                     items: const [
@@ -1090,6 +1093,7 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<T>(
+          isExpanded: true,
           value: value,
           items: items,
           onChanged: onChanged,
