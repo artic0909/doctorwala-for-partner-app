@@ -778,12 +778,24 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
     );
   }
 
+  void _openWebPage(String url) async {
+    final Uri uri = Uri.parse(url);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (mounted) {
+        CustomAlerts.showError(context, 'Could not open prescription link.');
+      }
+    }
+  }
+
   Widget _buildSystemPrescriptionCard(Map<String, dynamic> pres) {
     final date = pres['prescription_date'] != null
         ? pres['prescription_date'].toString().split('T')[0]
         : 'N/A';
     final doctorName = pres['doctor_name'] ?? pres['doctor']?['doctor_name'] ?? 'N/A';
     final clinicName = pres['opd']?['partner_clinic_name'] ?? 'N/A';
+    final heading = pres['heading'] ?? 'General Checkup';
 
     final symptomsRaw = pres['symptoms'];
     final testsRaw = pres['recommended_tests'];
@@ -796,11 +808,9 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
       symptoms = [symptomsRaw];
     }
 
-    List<String> tests = [];
+    List<dynamic> tests = [];
     if (testsRaw is List) {
-      tests = testsRaw.map((e) => e.toString()).toList();
-    } else if (testsRaw is String) {
-      tests = [testsRaw];
+      tests = testsRaw;
     }
 
     List<dynamic> medicines = [];
@@ -860,18 +870,26 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
               ),
               const SizedBox(height: 8),
               Text(
-                'Prescribed by $doctorName',
+                heading,
                 style: GoogleFonts.manrope(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
                   color: _Theme.primary,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
+              Text(
+                'Prescribed by Dr. $doctorName',
+                style: GoogleFonts.manrope(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: _Theme.textSecondary,
+                ),
+              ),
               Text(
                 'Clinic: $clinicName',
                 style: GoogleFonts.manrope(
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w600,
                   color: _Theme.textSecondary,
                 ),
@@ -881,6 +899,32 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
           children: [
             const Divider(height: 1, color: Color(0xFFF1F5F9)),
             const SizedBox(height: 12),
+
+            // View PDF Button
+            ElevatedButton.icon(
+              onPressed: () {
+                final encryptedId = pres['encrypted_id'] ?? pres['id'].toString();
+                final url = 'https://www.doctorwala.info/share/prescription/$encryptedId/view';
+                _openWebPage(url);
+              },
+              icon: const Icon(Icons.picture_as_pdf_rounded, size: 16),
+              label: Text(
+                'View Prescription PDF',
+                style: GoogleFonts.manrope(fontWeight: FontWeight.w800, fontSize: 12),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _Theme.accent,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                minimumSize: const Size(double.infinity, 38),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Vitals Grid (Uniform Presentation)
+            _buildVitalsGrid(pres),
+            const SizedBox(height: 14),
 
             // Symptoms
             if (symptoms.isNotEmpty) ...[
@@ -894,6 +938,7 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
                   backgroundColor: _Theme.bgTint,
                   padding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  side: const BorderSide(color: _Theme.border),
                 )).toList(),
               ),
               const SizedBox(height: 14),
@@ -909,10 +954,25 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
                 itemCount: medicines.length,
                 itemBuilder: (context, idx) {
                   final med = medicines[idx];
-                  final mName = med['name'] ?? med['medicine_name'] ?? 'N/A';
-                  final mDosage = med['dosage'] ?? 'N/A';
-                  final mTiming = med['timing'] ?? 'N/A';
-                  final mDuration = med['duration'] ?? 'N/A';
+                  final mName = med['name'] ?? 'N/A';
+                  
+                  final timingRaw = med['timing'];
+                  String mTiming = 'N/A';
+                  if (timingRaw is List) {
+                    mTiming = timingRaw.join(', ');
+                  } else if (timingRaw is String) {
+                    mTiming = timingRaw;
+                  }
+
+                  final eatingRaw = med['eating'];
+                  String mEating = '';
+                  if (eatingRaw is List) {
+                    mEating = eatingRaw.join(', ');
+                  } else if (eatingRaw is String) {
+                    mEating = eatingRaw;
+                  }
+
+                  final mDuration = med['days'] ?? med['duration'] ?? 'N/A';
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
@@ -931,11 +991,14 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
                               ),
                               children: [
                                 TextSpan(
-                                  text: '($mDosage) — $mTiming, for $mDuration',
+                                  text: '\nFrequency: $mTiming'
+                                      '${mEating.isNotEmpty ? ' | Relation: $mEating' : ''}'
+                                      ' | Duration: $mDuration Days',
                                   style: GoogleFonts.manrope(
-                                    fontSize: 12,
+                                    fontSize: 11.5,
                                     fontWeight: FontWeight.w600,
                                     color: _Theme.textSecondary,
+                                    height: 1.4,
                                   ),
                                 ),
                               ],
@@ -953,49 +1016,177 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
             // Recommended Tests
             if (tests.isNotEmpty) ...[
               _buildDetailSectionTitle('Recommended Tests'),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: tests.map((t) => Chip(
-                  label: Text(t, style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade900)),
-                  backgroundColor: const Color(0xFFFAF5FF),
-                  padding: EdgeInsets.zero,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                )).toList(),
+              const SizedBox(height: 8),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: tests.length,
+                itemBuilder: (context, idx) {
+                  final test = tests[idx];
+                  if (test is Map) {
+                    final tName = test['name'] ?? 'N/A';
+                    final tPriority = test['priority'] ?? 'Normal';
+                    final tNotes = test['notes'] ?? '';
+                    
+                    Color priorityColor = Colors.grey;
+                    if (tPriority == 'Urgent') priorityColor = Colors.orangeAccent.shade700;
+                    if (tPriority == 'Critical') priorityColor = Colors.redAccent;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text('• ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple)),
+                              Expanded(
+                                child: Text(
+                                  tName,
+                                  style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w800, color: _Theme.primary),
+                                ),
+                              ),
+                              if (tPriority != 'Normal')
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: priorityColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    tPriority.toUpperCase(),
+                                    style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w800, color: priorityColor),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          if (tNotes.toString().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10, top: 2),
+                              child: Text(
+                                'Note: $tNotes',
+                                style: GoogleFonts.manrope(fontSize: 11.5, fontWeight: FontWeight.w600, color: _Theme.textSecondary),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Text('• ${test.toString()}', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700, color: _Theme.primary)),
+                  );
+                },
               ),
               const SizedBox(height: 14),
             ],
 
-            // Vitals snapshot
-            if (pres['bp'] != null || pres['pulse'] != null || pres['temperature'] != null) ...[
-              _buildDetailSectionTitle('Vitals at Visit'),
+            // Advice / Diet instructions
+            if ((pres['medical_instructions'] != null && pres['medical_instructions'].toString().isNotEmpty) ||
+                (pres['diet_instructions'] != null && pres['diet_instructions'].toString().isNotEmpty)) ...[
+              _buildDetailSectionTitle('Advice & Instructions'),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  if (pres['bp'] != null)
-                    Expanded(child: _buildInlineVital('BP', pres['bp'].toString())),
-                  if (pres['pulse'] != null)
-                    Expanded(child: _buildInlineVital('Pulse', '${pres['pulse']} bpm')),
-                  if (pres['temperature'] != null)
-                    Expanded(child: _buildInlineVital('Temp', '${pres['temperature']} °F')),
-                ],
-              ),
-              const SizedBox(height: 12),
+              if (pres['medical_instructions'] != null && pres['medical_instructions'].toString().isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6.0),
+                  child: Text(
+                    'Medical: ${pres['medical_instructions']}',
+                    style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w600, color: _Theme.textSecondary),
+                  ),
+                ),
+              if (pres['diet_instructions'] != null && pres['diet_instructions'].toString().isNotEmpty)
+                Text(
+                  'Diet: ${pres['diet_instructions']}',
+                  style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w600, color: _Theme.textSecondary),
+                ),
+              const SizedBox(height: 14),
             ],
 
-            // Extra notes
-            if (pres['medical_instructions'] != null && pres['medical_instructions'].toString().isNotEmpty) ...[
-              _buildDetailSectionTitle('Doctor Instructions'),
-              const SizedBox(height: 4),
-              Text(
-                pres['medical_instructions'].toString(),
-                style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w500, color: _Theme.textSecondary),
-              ),
+            // Follow-up
+            if (pres['next_visit_date'] != null || pres['repeat_tests_required'] == true || (pres['emergency_note'] != null && pres['emergency_note'].toString().isNotEmpty)) ...[
+              _buildDetailSectionTitle('Follow Up'),
+              const SizedBox(height: 8),
+              if (pres['next_visit_date'] != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    'Next Visit: ${pres['next_visit_date'].toString().split(' ')[0]}',
+                    style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w700, color: _Theme.primary),
+                  ),
+                ),
+              if (pres['repeat_tests_required'] == true)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    'Repeat Tests Required: Yes',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.redAccent),
+                  ),
+                ),
+              if (pres['emergency_note'] != null && pres['emergency_note'].toString().isNotEmpty)
+                Text(
+                  'Emergency Note: ${pres['emergency_note']}',
+                  style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.redAccent),
+                ),
             ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildVitalsGrid(Map<String, dynamic> pres) {
+    final List<Widget> vitalWidgets = [];
+
+    void addVital(String label, String? value, IconData icon) {
+      if (value != null && value.toString().isNotEmpty) {
+        vitalWidgets.add(
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _Theme.bgTint,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _Theme.border),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 14, color: _Theme.accent),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(label, style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w700, color: _Theme.textSecondary)),
+                      Text(value, style: GoogleFonts.manrope(fontSize: 11.5, fontWeight: FontWeight.w800, color: _Theme.primary)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+
+    addVital('Age', pres['user_age'], Icons.calendar_today_rounded);
+    addVital('Gender', pres['user_gender'], Icons.face_rounded);
+    addVital('Blood', pres['blood_group'], Icons.water_drop_rounded);
+    addVital('BP', pres['bp'], Icons.monitor_heart_rounded);
+    addVital('Pulse', pres['pulse'] != null && pres['pulse'].toString().isNotEmpty ? '${pres['pulse']} bpm' : null, Icons.heart_broken_rounded);
+    addVital('SpO2', pres['spo2'] != null && pres['spo2'].toString().isNotEmpty ? '${pres['spo2']}%' : null, Icons.air_rounded);
+    addVital('Temp', pres['temperature'] != null && pres['temperature'].toString().isNotEmpty ? '${pres['temperature']} °F' : null, Icons.thermostat_rounded);
+    addVital('Weight', pres['weight'] != null && pres['weight'].toString().isNotEmpty ? '${pres['weight']} kg' : null, Icons.scale_rounded);
+
+    if (vitalWidgets.isEmpty) return const SizedBox.shrink();
+
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      childAspectRatio: 2.8,
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      children: vitalWidgets,
     );
   }
 
@@ -1011,21 +1202,6 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
     );
   }
 
-  Widget _buildInlineVital(String label, String val) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: _Theme.textSecondary),
-        ),
-        Text(
-          val,
-          style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w800, color: _Theme.primary),
-        ),
-      ],
-    );
-  }
 
   Widget _buildErrorState() {
     return Center(
