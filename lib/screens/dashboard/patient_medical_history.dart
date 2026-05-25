@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
+import 'create_prescription_form.dart';
 
 class _Theme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
@@ -34,10 +35,25 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
   String? _errorMessage;
   Map<String, dynamic>? _historyData;
 
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  DateTimeRange? _selectedDateRange;
+
   @override
   void initState() {
     super.initState();
     _fetchHistory();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchHistory() async {
@@ -167,6 +183,68 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
     final histories = data['histories'] as List? ?? [];
     final systemPrescriptions = data['systemPrescriptions'] as List? ?? [];
 
+    final filteredHistories = histories.where((record) {
+      final heading = (record['heading'] ?? '').toString().toLowerCase();
+      final doctorName = (record['doctor_name'] ?? record['doctor']?['doctor_name'] ?? '').toString().toLowerCase();
+      final clinicName = (record['clinic_name'] ?? record['opd']?['partner_clinic_name'] ?? '').toString().toLowerCase();
+      final type = (record['type'] ?? '').toString().toLowerCase();
+
+      final matchesSearch = heading.contains(_searchQuery.toLowerCase()) ||
+          doctorName.contains(_searchQuery.toLowerCase()) ||
+          clinicName.contains(_searchQuery.toLowerCase()) ||
+          type.contains(_searchQuery.toLowerCase());
+
+      if (!matchesSearch) return false;
+
+      if (_selectedDateRange != null) {
+        final dateStr = record['date_of_report'] != null
+            ? record['date_of_report'].toString().split('T')[0]
+            : null;
+        if (dateStr == null) return false;
+        try {
+          final date = DateTime.parse(dateStr);
+          final start = DateTime(_selectedDateRange!.start.year, _selectedDateRange!.start.month, _selectedDateRange!.start.day);
+          final end = DateTime(_selectedDateRange!.end.year, _selectedDateRange!.end.month, _selectedDateRange!.end.day, 23, 59, 59);
+          if (date.isBefore(start) || date.isAfter(end)) return false;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
+
+    final filteredSystemPrescriptions = systemPrescriptions.where((pres) {
+      final doctorName = (pres['doctor_name'] ?? pres['doctor']?['doctor_name'] ?? '').toString().toLowerCase();
+      final clinicName = (pres['opd']?['partner_clinic_name'] ?? '').toString().toLowerCase();
+      final heading = (pres['heading'] ?? '').toString().toLowerCase();
+
+      final matchesSearch = doctorName.contains(_searchQuery.toLowerCase()) ||
+          clinicName.contains(_searchQuery.toLowerCase()) ||
+          heading.contains(_searchQuery.toLowerCase());
+
+      if (!matchesSearch) return false;
+
+      if (_selectedDateRange != null) {
+        final dateStr = pres['prescription_date'] != null
+            ? pres['prescription_date'].toString().split('T')[0]
+            : null;
+        if (dateStr == null) return false;
+        try {
+          final date = DateTime.parse(dateStr);
+          final start = DateTime(_selectedDateRange!.start.year, _selectedDateRange!.start.month, _selectedDateRange!.start.day);
+          final end = DateTime(_selectedDateRange!.end.year, _selectedDateRange!.end.month, _selectedDateRange!.end.day, 23, 59, 59);
+          if (date.isBefore(start) || date.isAfter(end)) return false;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
+
+    final bool isFiltered = _searchQuery.isNotEmpty || _selectedDateRange != null;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -211,53 +289,271 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
             ],
           ),
         ),
-        body: TabBarView(
-          physics: const BouncingScrollPhysics(),
+        body: Column(
           children: [
-            // Tab 1: Uploaded Medical Files
-            RefreshIndicator(
-              onRefresh: _fetchHistory,
-              color: _Theme.accent,
-              child: histories.isEmpty
-                  ? _buildEmptyState('No Uploaded Files', 'There are no external reports or prescription files uploaded for this patient.')
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
-                      itemCount: histories.length,
-                      itemBuilder: (context, index) {
-                        final record = histories[index] as Map<String, dynamic>;
-                        return FadeInUp(
-                          duration: const Duration(milliseconds: 300),
-                          child: _buildHistoryRecordCard(record),
-                        );
-                      },
-                    ),
-            ),
+            _buildFilterBar(),
+            Expanded(
+              child: TabBarView(
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  // Tab 1: Uploaded Medical Files
+                  RefreshIndicator(
+                    onRefresh: _fetchHistory,
+                    color: _Theme.accent,
+                    child: filteredHistories.isEmpty
+                        ? _buildEmptyState(
+                            isFiltered ? 'No Matches Found' : 'No Uploaded Files',
+                            isFiltered
+                                ? 'No external reports match your active search queries or date filters.'
+                                : 'There are no external reports or prescription files uploaded for this patient.',
+                            isFilterEmpty: isFiltered,
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
+                            itemCount: filteredHistories.length,
+                            itemBuilder: (context, index) {
+                              final record = filteredHistories[index] as Map<String, dynamic>;
+                              return FadeInUp(
+                                duration: const Duration(milliseconds: 300),
+                                child: _buildHistoryRecordCard(record),
+                              );
+                            },
+                          ),
+                  ),
 
-            // Tab 2: System Prescriptions
-            RefreshIndicator(
-              onRefresh: _fetchHistory,
-              color: _Theme.accent,
-              child: systemPrescriptions.isEmpty
-                  ? _buildEmptyState('No Prescriptions', 'There are no system-generated digital prescriptions found in history.')
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
-                      itemCount: systemPrescriptions.length,
-                      itemBuilder: (context, index) {
-                        final pres = systemPrescriptions[index] as Map<String, dynamic>;
-                        return FadeInUp(
-                          duration: const Duration(milliseconds: 300),
-                          child: _buildSystemPrescriptionCard(pres),
-                        );
-                      },
-                    ),
+                  // Tab 2: System Prescriptions
+                  RefreshIndicator(
+                    onRefresh: _fetchHistory,
+                    color: _Theme.accent,
+                    child: filteredSystemPrescriptions.isEmpty
+                        ? _buildEmptyState(
+                            isFiltered ? 'No Matches Found' : 'No Prescriptions',
+                            isFiltered
+                                ? 'No system-generated digital prescriptions match your active search queries or date filters.'
+                                : 'There are no system-generated digital prescriptions found in history.',
+                            isFilterEmpty: isFiltered,
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
+                            itemCount: filteredSystemPrescriptions.length,
+                            itemBuilder: (context, index) {
+                              final pres = filteredSystemPrescriptions[index] as Map<String, dynamic>;
+                              return FadeInUp(
+                                duration: const Duration(milliseconds: 300),
+                                child: _buildSystemPrescriptionCard(pres),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _navigateToCreatePrescription,
+          backgroundColor: _Theme.accent,
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(String title, String desc) {
+  Widget _buildFilterBar() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+      child: Column(
+        children: [
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search by heading, doctor or clinic...',
+              hintStyle: GoogleFonts.manrope(
+                fontSize: 13,
+                color: _Theme.textSecondary.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w600,
+              ),
+              prefixIcon: const Icon(Icons.search_rounded, color: _Theme.accent, size: 20),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? GestureDetector(
+                      onTap: () => _searchController.clear(),
+                      child: const Icon(Icons.clear_rounded, color: _Theme.textSecondary, size: 18),
+                    )
+                  : null,
+              filled: true,
+              fillColor: _Theme.bgTint,
+              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: _Theme.accent, width: 1.2),
+              ),
+            ),
+            style: GoogleFonts.manrope(
+              fontSize: 13.5,
+              color: _Theme.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: _selectDateRange,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _selectedDateRange == null ? _Theme.bgTint : _Theme.accentLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _selectedDateRange == null ? _Theme.border : _Theme.accent.withValues(alpha: 0.3),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_month_rounded,
+                          size: 15,
+                          color: _selectedDateRange == null ? _Theme.textSecondary : _Theme.accent,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _selectedDateRange == null
+                                ? 'Filter by Date Range'
+                                : '${_selectedDateRange!.start.toString().split(' ')[0]}  to  ${_selectedDateRange!.end.toString().split(' ')[0]}',
+                            style: GoogleFonts.manrope(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: _selectedDateRange == null ? _Theme.textSecondary : _Theme.accent,
+                            ),
+                          ),
+                        ),
+                        if (_selectedDateRange != null)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedDateRange = null;
+                              });
+                            },
+                            child: const Icon(
+                              Icons.cancel_rounded,
+                              size: 15,
+                              color: _Theme.accent,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDateRange: _selectedDateRange,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: _Theme.accent,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: _Theme.primary,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: _Theme.accent,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _selectedDateRange) {
+      setState(() {
+        _selectedDateRange = picked;
+      });
+    }
+  }
+
+  Future<void> _navigateToCreatePrescription() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: _Theme.accent),
+      ),
+    );
+
+    try {
+      final token = await SessionManager.getToken();
+      if (!mounted) return;
+      if (token == null) {
+        Navigator.pop(context);
+        CustomAlerts.showError(context, 'Authentication token missing.');
+        return;
+      }
+
+      final response = await ApiService.getMedicalCardAccessMeta(token: token);
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (response['success'] == true) {
+        final doctors = response['data']?['doctors'] as List? ?? [];
+
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreatePrescriptionScreen(
+              dwUserId: _historyData!['patient']?['id'] ?? 0,
+              patientData: _historyData!['patient'] ?? {},
+              doctors: doctors,
+              vitals: _historyData!['vital'] ?? {},
+            ),
+          ),
+        );
+
+        if (result == true) {
+          _fetchHistory();
+        }
+      } else {
+        CustomAlerts.showError(
+          context,
+          response['message'] ?? 'Failed to retrieve metadata.',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      CustomAlerts.showError(context, 'An unexpected error occurred: ${e.toString()}');
+    }
+  }
+
+  Widget _buildEmptyState(String title, String desc, {bool isFilterEmpty = false}) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Container(

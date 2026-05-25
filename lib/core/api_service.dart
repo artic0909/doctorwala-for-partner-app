@@ -1084,4 +1084,37 @@ class ApiService {
       };
     }
   }
+
+  /// Creates a digital prescription for a patient
+  static Future<Map<String, dynamic>> createPrescription({
+    required Map<String, dynamic> payload,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/prescription/create');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(payload),
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 201 || response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }
