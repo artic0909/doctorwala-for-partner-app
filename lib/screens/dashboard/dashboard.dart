@@ -119,122 +119,133 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      extendBody: true,
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        shape: Border(
-          bottom: BorderSide(
-            color: Colors.grey.withValues(alpha: 0.1),
-            width: 1.0,
-          ),
-        ),
-        iconTheme: const IconThemeData(color: AppColors.navy),
-        title: Text(
-          _currentIndex == 0
-              ? 'Dashboard'
-              : _currentIndex == 1
-              ? 'Upcoming Appointments'
-              : _currentIndex == 2
-              ? 'Account Settings'
-              : _currentIndex == 3
-              ? 'Add Doctor Chamber'
-              : _currentIndex == 4
-              ? 'Add Pathology Clinic'
-              : _currentIndex == 5
-              ? 'Doctors Directory'
-              : _currentIndex == 6
-              ? 'Tests Catalog'
-              : _currentIndex == 7
-              ? 'Medical Card Access'
-              : _currentIndex == 8
-              ? 'Patient Lists'
-              : _currentIndex == 9
-              ? 'Complete Appointments'
-              : _currentIndex == 11
-              ? 'List Myself'
-              : _currentIndex == 14
-              ? 'Cancelled Appointments'
-              : _currentIndex == 15
-              ? "Today's Bookings"
-              : 'Help & Support',
-          style: GoogleFonts.manrope(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            color: AppColors.navy,
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.notifications_none_rounded,
-                    color: AppColors.navy,
-                    size: 24,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotificationsScreen(partnerData: _partnerData),
-                      ),
-                    ).then((_) => _fetchStats());
-                  },
-                ),
-                if (_hasUnreadNotifications)
-                  Positioned(
-                    right: 12,
-                    top: 12,
-                    child: Container(
-                      height: 8,
-                      width: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.redAccent.withValues(alpha: 0.4),
-                            blurRadius: 4,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+    return PopScope(
+      canPop: _currentIndex == 0,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (didPop) return;
+        if (_currentIndex != 0) {
+          setState(() {
+            _currentIndex = 0;
+          });
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        extendBody: true,
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          shape: Border(
+            bottom: BorderSide(
+              color: Colors.grey.withValues(alpha: 0.1),
+              width: 1.0,
             ),
           ),
-        ],
-      ),
-      drawer: CustomSidebar(
-        partnerData: _partnerData,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
-      body: _buildBody(),
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentIndex,
-        partnerData: _partnerData,
-        onTap: (index) {
-          if (index == -1) {
-            _scaffoldKey.currentState?.openDrawer();
-          } else {
+          iconTheme: const IconThemeData(color: AppColors.navy),
+          title: Text(
+            _currentIndex == 0
+                ? 'Dashboard'
+                : _currentIndex == 1
+                ? 'Upcoming Appointments'
+                : _currentIndex == 2
+                ? 'Account Settings'
+                : _currentIndex == 3
+                ? 'Add Doctor Chamber'
+                : _currentIndex == 4
+                ? 'Add Pathology Clinic'
+                : _currentIndex == 5
+                ? 'Doctors Directory'
+                : _currentIndex == 6
+                ? 'Tests Catalog'
+                : _currentIndex == 7
+                ? 'Medical Card Access'
+                : _currentIndex == 8
+                ? 'Patient Lists'
+                : _currentIndex == 9
+                ? 'Complete Appointments'
+                : _currentIndex == 11
+                ? 'List Myself'
+                : _currentIndex == 14
+                ? 'Cancelled Appointments'
+                : _currentIndex == 15
+                ? "Today's Bookings"
+                : 'Help & Support',
+            style: GoogleFonts.manrope(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: AppColors.navy,
+            ),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                      color: AppColors.navy,
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationsScreen(partnerData: _partnerData),
+                        ),
+                      ).then((_) => _fetchStats());
+                    },
+                  ),
+                  if (_hasUnreadNotifications)
+                    Positioned(
+                      right: 12,
+                      top: 12,
+                      child: Container(
+                        height: 8,
+                        width: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.redAccent.withValues(alpha: 0.4),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        drawer: CustomSidebar(
+          partnerData: _partnerData,
+          currentIndex: _currentIndex,
+          onTap: (index) {
             setState(() {
               _currentIndex = index;
             });
-          }
-        },
+          },
+        ),
+        body: _buildBody(),
+        bottomNavigationBar: CustomBottomNav(
+          currentIndex: _currentIndex,
+          partnerData: _partnerData,
+          onTap: (index) {
+            if (index == -1) {
+              _scaffoldKey.currentState?.openDrawer();
+            } else {
+              setState(() {
+                _currentIndex = index;
+              });
+            }
+          },
+        ),
       ),
     );
   }
