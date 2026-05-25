@@ -18,6 +18,7 @@ import 'appointments/cancel.dart';
 import 'appointments/today.dart';
 import 'account_settings.dart';
 import 'notifications.dart';
+import 'help.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -266,10 +267,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 9:
         return CompleteAppointmentsScreen(partnerData: _partnerData);
       case 10:
-        return _buildPlaceholderTab(
-          'Help & Support',
-          Icons.help_outline_rounded,
-        );
+        return HelpScreen(partnerData: _partnerData);
       case 11:
         return const DoctorContactScreen();
       case 14:

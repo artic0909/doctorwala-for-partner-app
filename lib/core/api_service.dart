@@ -826,4 +826,31 @@ class ApiService {
       };
     }
   }
+
+  /// Retrieves the Super About Us details from the database (Public, GET)
+  static Future<Map<String, dynamic>> getAboutUs() async {
+    final url = Uri.parse('$baseUrl/about-us');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to retrieve help details. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }

@@ -130,9 +130,8 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
       path: phoneNumber.replaceAll(RegExp(r'\s+'), ''),
     );
     try {
-      if (await canLaunchUrl(launchUri)) {
-        await launchUrl(launchUri);
-      } else {
+      final launched = await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+      if (!launched) {
         throw 'Could not launch $launchUri';
       }
     } catch (_) {
