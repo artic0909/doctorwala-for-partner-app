@@ -1167,5 +1167,32 @@ class ApiService {
       };
     }
   }
+
+  /// Retrieves partner carousels for the login screen (GET)
+  static Future<Map<String, dynamic>> getPartnerCarousels() async {
+    final url = Uri.parse('$baseUrl/partner-carousels');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to retrieve partner carousels.',
+        'error': e.toString(),
+      };
+    }
+  }
 }
 

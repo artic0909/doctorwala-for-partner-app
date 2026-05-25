@@ -28,7 +28,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   int _currentCarouselIndex = 0;
   late AnimationController _floatController;
 
-  final List<Map<String, dynamic>> _carouselItems = [
+  bool _isLoadingCarousels = true;
+  List<Map<String, dynamic>> _carouselItems = [];
+
+  final List<Map<String, dynamic>> _fallbackCarouselItems = [
     {
       'title': 'Manage Your\nPractice Smartly',
       'subtitle': 'Appointments, Patients,\nReports & More',
@@ -56,6 +59,46 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+    
+    _fetchCarousels();
+  }
+
+  Future<void> _fetchCarousels() async {
+    final response = await ApiService.getPartnerCarousels();
+    if (response['success'] == true && response['data'] != null) {
+      final List<dynamic> data = response['data'];
+      final List<Color> colors = [
+        const Color(0xFFF0F9F8),
+        const Color(0xFFF0F7FF),
+        const Color(0xFFF9F0FF),
+      ];
+      
+      if (data.isNotEmpty) {
+        setState(() {
+          _carouselItems = data.asMap().entries.map((entry) {
+            int idx = entry.key;
+            var item = entry.value;
+            return {
+              'title': item['title'] ?? '',
+              'subtitle': item['description'] ?? '',
+              'image': 'https://www.doctorwala.info/storage/${item['image']}',
+              'isNetwork': true,
+              'color': colors[idx % colors.length],
+            };
+          }).toList();
+          _isLoadingCarousels = false;
+        });
+        return;
+      }
+    }
+    
+    // Fallback if API fails or returns empty
+    if (mounted) {
+      setState(() {
+        _carouselItems = _fallbackCarouselItems;
+        _isLoadingCarousels = false;
+      });
+    }
   }
 
   @override
@@ -150,7 +193,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     // CAROUSEL
                     FadeIn(
                       delay: const Duration(milliseconds: 300),
-                      child: CarouselSlider(
+                      child: _isLoadingCarousels 
+                        ? Container(
+                            height: 155,
+                            alignment: Alignment.center,
+                            child: const CircularProgressIndicator(),
+                          )
+                        : CarouselSlider(
                         options: CarouselOptions(
                           height: 155,
                           viewportFraction: 0.88,
@@ -219,7 +268,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 const SizedBox(width: 8),
                                 Expanded(
                                   flex: 2,
-                                  child: Image.asset(item['image'], fit: BoxFit.contain),
+                                  child: (item['isNetwork'] == true)
+                                      ? Image.network(item['image'], fit: BoxFit.contain,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.image_not_supported, color: Colors.grey))
+                                      : Image.asset(item['image'], fit: BoxFit.contain),
                                 ),
                               ],
                             ),
