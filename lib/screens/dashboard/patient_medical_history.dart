@@ -530,9 +530,9 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
           MaterialPageRoute(
             builder: (context) => CreatePrescriptionScreen(
               dwUserId: _historyData!['patient']?['id'] ?? 0,
-              patientData: _historyData!['patient'] ?? {},
+              patientData: Map<String, dynamic>.from(_historyData!['patient'] ?? {}),
               doctors: doctors,
-              vitals: _historyData!['vital'] ?? {},
+              vitals: Map<String, dynamic>.from(_historyData!['vital'] ?? {}),
             ),
           ),
         );

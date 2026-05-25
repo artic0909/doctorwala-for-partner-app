@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
+import '../../core/custom_alerts.dart';
 import 'patient_medical_history.dart';
+import 'create_prescription_form.dart';
 
 class _Theme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
@@ -89,6 +91,63 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _navigateToCreatePrescription() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: _Theme.accent),
+      ),
+    );
+
+    try {
+      final token = await SessionManager.getToken();
+      if (!mounted) return;
+      if (token == null) {
+        Navigator.pop(context);
+        CustomAlerts.showError(context, 'Authentication token missing.');
+        return;
+      }
+
+      final response = await ApiService.getMedicalCardAccessMeta(token: token);
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (response['success'] == true) {
+        final doctors = response['data']?['doctors'] as List? ?? [];
+        final data = _profileData!;
+        final patient = Map<String, dynamic>.from(data['patient'] ?? {});
+        final vitals = Map<String, dynamic>.from(data['vital'] ?? {});
+
+        if (!mounted) return;
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreatePrescriptionScreen(
+              dwUserId: patient['id'] ?? 0,
+              patientData: patient,
+              doctors: doctors,
+              vitals: vitals,
+            ),
+          ),
+        );
+
+        if (result == true) {
+          _fetchProfile();
+        }
+      } else {
+        CustomAlerts.showError(
+          context,
+          response['message'] ?? 'Failed to retrieve metadata.',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      CustomAlerts.showError(context, 'An unexpected error occurred: ${e.toString()}');
+    }
   }
 
   @override
@@ -193,6 +252,34 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Highlighted "Create Prescription" Button
+              FadeInUp(
+                duration: const Duration(milliseconds: 380),
+                child: ElevatedButton.icon(
+                  onPressed: _navigateToCreatePrescription,
+                  icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                  label: Text(
+                    'CREATE PRESCRIPTION',
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _Theme.accent,
+                    foregroundColor: Colors.white,
+                    elevation: 1,
+                    shadowColor: _Theme.accent.withValues(alpha: 0.2),
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
