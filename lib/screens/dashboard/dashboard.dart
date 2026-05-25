@@ -19,6 +19,8 @@ import 'appointments/today.dart';
 import 'account_settings.dart';
 import 'notifications.dart';
 import 'help.dart';
+import 'medical_card_access.dart';
+import 'patient_lists.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -261,9 +263,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 6:
         return const ShowTestsScreen();
       case 7:
-        return _buildPlaceholderTab('Medical Card Access', Icons.badge_rounded);
+        return MedicalCardAccessTab(
+          partnerData: _partnerData,
+          onRequestSent: () {
+            setState(() {
+              _currentIndex = 8;
+            });
+          },
+        );
       case 8:
-        return _buildPlaceholderTab('Patient Lists', Icons.assignment_rounded);
+        return PatientListsTab(partnerData: _partnerData);
       case 9:
         return CompleteAppointmentsScreen(partnerData: _partnerData);
       case 10:
@@ -914,44 +923,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
 
-  // GENERIC PLACEHOLDER TAB
-  Widget _buildPlaceholderTab(String title, IconData icon) {
-    return Center(
-      child: FadeIn(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.teal.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.teal, size: 60),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              style: GoogleFonts.manrope(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.navy,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'This section is coming soon.',
-              style: GoogleFonts.manrope(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
 
 

@@ -853,4 +853,235 @@ class ApiService {
       };
     }
   }
+
+  /// Retrieves initial metadata (banners and doctor dropdown) for medical card access
+  static Future<Map<String, dynamic>> getMedicalCardAccessMeta({
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/meta');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Looks up a patient by their Medical Card No and Member ID
+  static Future<Map<String, dynamic>> lookupPatient({
+    required String medicalId,
+    required String memberId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/lookup');
+    final Map<String, String> body = {
+      'dw_medical_id': medicalId,
+      'dw_member_id': memberId,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Sends a patient profile access request
+  static Future<Map<String, dynamic>> sendMedicalCardAccessRequest({
+    required int dwUserId,
+    required int doctorId,
+    required String medicalId,
+    required String memberId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/request');
+    final Map<String, String> body = {
+      'dw_user_id': dwUserId.toString(),
+      'doctor_id': doctorId.toString(),
+      'dw_medical_id': medicalId,
+      'dw_member_id': memberId,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 201 || response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Retrieves all medical card access requests sent by the partner
+  static Future<Map<String, dynamic>> getMedicalCardAccessRequests({
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/requests');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Retrieves the profile details of a patient
+  static Future<Map<String, dynamic>> getPatientProfile({
+    required String encryptedId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/patient/$encryptedId');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Retrieves the medical history of a patient
+  static Future<Map<String, dynamic>> getPatientMedicalHistory({
+    required String encryptedId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/patient/$encryptedId/history');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Retrieves details of a specific medical report
+  static Future<Map<String, dynamic>> getPatientReportDetails({
+    required String encryptedId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/medical-card-access/report/$encryptedId');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to the server. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
 }
