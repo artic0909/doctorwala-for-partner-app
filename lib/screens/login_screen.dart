@@ -363,37 +363,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           
                           // REGISTER CTA - Moved right after Login button
                           FadeInUp(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Don't have an account? ",
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const RegisterScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
-                                    "Create Account",
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w900,
-                                      color: AppColors.teal,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            child: _buildCreateAccountButton(),
                           ),
                         ],
                       ),
@@ -608,6 +578,57 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildCreateAccountButton() {
+    return Container(
+      width: double.infinity,
+      height: 58,
+      decoration: BoxDecoration(
+        color: AppColors.teal.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.teal.withValues(alpha: 0.3), width: 1.5),
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const RegisterScreen(),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Don't have account ? ",
+              style: GoogleFonts.manrope(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.navy,
+              ),
+            ),
+            Text(
+              "Click me",
+              style: GoogleFonts.manrope(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppColors.teal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
