@@ -805,16 +805,16 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                 icon: Icons.science_rounded,
               ),
               _buildTypeCard(
-                id: 'doctor',
-                title: 'Individual Doctor',
-                description: 'For independent medical specialists, private practitioners, or consultants.',
-                icon: Icons.person_pin_rounded,
-              ),
-              _buildTypeCard(
                 id: 'both',
                 title: 'Doctor Chamber & Pathology Both',
                 description: 'Manage integrated clinics offering both expert doctor consultations and diagnostic testing in one center.',
                 icon: Icons.domain_rounded,
+              ),
+              _buildTypeCard(
+                id: 'doctor',
+                title: 'Individual Doctor',
+                description: 'For independent medical specialists, private practitioners, or consultants.',
+                icon: Icons.person_pin_rounded,
               ),
             ],
           ),
