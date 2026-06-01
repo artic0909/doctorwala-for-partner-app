@@ -8,7 +8,7 @@
 PRODUCT_NAME = doctorwala_for_partner
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.doctorwalaForPartner
+PRODUCT_BUNDLE_IDENTIFIER = info.doctorwala.partner
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
