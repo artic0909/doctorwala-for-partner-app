@@ -1,4 +1,4 @@
-package info.doctorwala.partner
+package com.doctorwala.partner
 
 import io.flutter.embedding.android.FlutterActivity
 
