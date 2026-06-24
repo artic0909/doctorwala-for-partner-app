@@ -15,8 +15,8 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  int _currentStep = 1; // 1: Email, 2: OTP & New Password
-  final _emailController = TextEditingController();
+  int _currentStep = 1; // 1: Mobile, 2: OTP & New Password
+  final _mobileController = TextEditingController();
   final _otpController = TextEditingController();
   final _passwordController = TextEditingController();
   
@@ -25,22 +25,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _mobileController.dispose();
     _otpController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   void _sendOtp() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      CustomAlerts.showError(context, 'Please enter your email');
+    final mobile = _mobileController.text.trim();
+    if (mobile.isEmpty) {
+      CustomAlerts.showError(context, 'Please enter your mobile number');
       return;
     }
 
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      CustomAlerts.showError(context, 'Please enter a valid email address');
+    if (mobile.length != 10) {
+      CustomAlerts.showError(context, 'Please enter a valid 10-digit mobile number');
       return;
     }
 
@@ -49,7 +48,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     });
 
     try {
-      final response = await ApiService.forgotPasswordSendOtp(email: email);
+      final response = await ApiService.forgotPasswordSendOtp(mobileNumber: mobile);
       
       setState(() {
         _isLoading = false;
@@ -75,7 +74,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   void _resetPassword() async {
-    final email = _emailController.text.trim();
+    final mobile = _mobileController.text.trim();
     final otp = _otpController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -95,7 +94,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     try {
       final response = await ApiService.forgotPasswordReset(
-        email: email,
+        mobileNumber: mobile,
         otp: otp,
         password: password,
       );
@@ -275,8 +274,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             const SizedBox(height: 8),
                             Text(
                               _currentStep == 1
-                                  ? 'Enter your registered email address to receive an OTP.'
-                                  : 'Enter the OTP sent to your email and your new password.',
+                                  ? 'Enter your registered mobile number to receive an OTP on WhatsApp.'
+                                  : 'Enter the OTP sent to your WhatsApp and your new password.',
                               style: GoogleFonts.manrope(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -293,11 +292,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       if (_currentStep == 1) ...[
                         FadeInUp(
                           child: _buildInputField(
-                            controller: _emailController,
-                            label: 'Email ID',
-                            hint: 'Enter your registered email',
-                            icon: Icons.email_rounded,
-                            keyboardType: TextInputType.emailAddress,
+                            controller: _mobileController,
+                            label: 'Mobile Number',
+                            hint: 'Enter your registered mobile number',
+                            icon: Icons.phone_android_rounded,
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
                           ),
                         ),
                         const SizedBox(height: 30),
