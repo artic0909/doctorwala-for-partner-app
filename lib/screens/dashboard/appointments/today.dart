@@ -148,7 +148,7 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
         return;
       }
 
-      final response = await ApiService.getAppointments(token: token, status: 'Upcoming');
+      final response = await ApiService.getAppointments(token: token, status: 'Upcoming,Confirmed');
       if (!mounted) return;
 
       if (response['success'] == true) {

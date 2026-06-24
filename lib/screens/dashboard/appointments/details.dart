@@ -114,7 +114,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           borderRadius: BorderRadius.circular(20),
         ),
         title: Text(
-          newStatus == 'Completed' ? 'Complete Appointment' : 'Cancel Appointment',
+          newStatus == 'Completed' 
+              ? 'Complete Appointment' 
+              : newStatus == 'Confirmed' 
+                  ? 'Confirm Appointment' 
+                  : 'Cancel Appointment',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.w800,
             color: AppColors.navy,
@@ -123,7 +127,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         content: Text(
           newStatus == 'Completed'
               ? 'Are you sure you want to mark this appointment as Completed? This action cannot be undone.'
-              : 'Are you sure you want to cancel this appointment? The patient will be notified.',
+              : newStatus == 'Confirmed'
+                  ? 'Are you sure you want to confirm this appointment? The patient will be notified via WhatsApp.'
+                  : 'Are you sure you want to cancel this appointment? The patient will be notified.',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
@@ -143,13 +149,17 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: newStatus == 'Completed' ? AppColors.teal : Colors.redAccent,
+              backgroundColor: newStatus == 'Completed' || newStatus == 'Confirmed' ? AppColors.teal : Colors.redAccent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             child: Text(
-              newStatus == 'Completed' ? 'Complete' : 'Yes, Cancel',
+              newStatus == 'Completed' 
+                  ? 'Complete' 
+                  : newStatus == 'Confirmed'
+                      ? 'Confirm'
+                      : 'Yes, Cancel',
               style: GoogleFonts.manrope(
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -211,7 +221,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final status = _appointment['status'] ?? 'Upcoming';
+    final status = _appointment['status'] ?? 'Pending';
     final date = _appointment['booking_date'] ?? 'N/A';
     final time = _appointment['booking_time'] ?? 'N/A';
     final visitMode = _appointment['visit_mode'] ?? 'N/A';
@@ -250,6 +260,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       themeLight = const Color(0xFFFFF1F2);
       themeBorder = const Color(0xFFFECDD3);
       statusIcon = Icons.cancel_rounded;
+    } else if (status == 'Confirmed') {
+      themeColor = const Color(0xFF0284C7);
+      themeLight = const Color(0xFFF0F9FF);
+      themeBorder = const Color(0xFFBAE6FD);
+      statusIcon = Icons.verified_rounded;
     } else {
       themeColor = const Color(0xFFD97706);
       themeLight = const Color(0xFFFFF9EE);
@@ -470,8 +485,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Actions Section (Only for Upcoming status)
-                  if (status == 'Upcoming')
+                  // Actions Section
+                  if (status == 'Upcoming' || status == 'Pending')
                     FadeInUp(
                       duration: const Duration(milliseconds: 450),
                       child: Column(
@@ -480,10 +495,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton.icon(
-                              onPressed: () => _updateStatus('Completed'),
+                              onPressed: () => _updateStatus('Confirmed'),
                               icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
                               label: Text(
-                                'Mark as Completed',
+                                'Confirm Appointment',
                                 style: GoogleFonts.manrope(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w800,
@@ -517,6 +532,38 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                               ),
                               style: OutlinedButton.styleFrom(
                                 side: const BorderSide(color: Colors.redAccent, width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (status == 'Confirmed')
+                    FadeInUp(
+                      duration: const Duration(milliseconds: 450),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton.icon(
+                              onPressed: () => _updateStatus('Completed'),
+                              icon: const Icon(Icons.task_alt_rounded, color: Colors.white),
+                              label: Text(
+                                'Mark as Completed',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.navy,
+                                elevation: 2,
+                                shadowColor: AppColors.navy.withValues(alpha: 0.3),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
