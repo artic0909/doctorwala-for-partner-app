@@ -325,7 +325,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             controller: _emailController,
                             label: 'Mobile Number / Email ID',
                             hint: 'Enter mobile number or email',
-                            icon: Icons.alternate_email_rounded,
+                            icon: Icons.phone_android_rounded,
                           ),
                           const SizedBox(height: 18),
                           _buildInputField(
