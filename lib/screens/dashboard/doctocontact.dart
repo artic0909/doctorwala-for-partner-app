@@ -785,7 +785,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButtonFormField<String>(
-          value: _selectedState,
+          initialValue: _selectedState,
           isExpanded: true,
           hint: Row(
             children: [

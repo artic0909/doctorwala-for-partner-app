@@ -568,7 +568,7 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
         const SizedBox(height: 6),
         DropdownButtonFormField<T>(
           isExpanded: true,
-          value: value,
+          initialValue: value,
           items: items,
           onChanged: onChanged,
           decoration: _inputDecoration('Select Option'),

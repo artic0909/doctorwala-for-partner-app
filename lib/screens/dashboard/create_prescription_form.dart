@@ -671,7 +671,7 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
                                   const SizedBox(height: 10),
                                   DropdownButtonFormField<String>(
                                     isExpanded: true,
-                                    value: test['priority'],
+                                    initialValue: test['priority'],
                                     decoration: _inputDecoration('Priority'),
                                     items: const [
                                       DropdownMenuItem(value: 'Normal', child: Text('Normal')),
@@ -927,38 +927,34 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
                               letterSpacing: 0.5,
                             ),
                           ),
-                          Row(
-                            children: [
-                              Radio<String>(
-                                value: 'yes',
-                                groupValue: _repeatTestsRequired,
-                                activeColor: _Theme.accent,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _repeatTestsRequired = val!;
-                                  });
-                                },
-                              ),
-                              Text(
-                                'Yes',
-                                style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: _Theme.primary),
-                              ),
-                              const SizedBox(width: 20),
-                              Radio<String>(
-                                value: 'no',
-                                groupValue: _repeatTestsRequired,
-                                activeColor: _Theme.accent,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _repeatTestsRequired = val!;
-                                  });
-                                },
-                              ),
-                              Text(
-                                'No',
-                                style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: _Theme.primary),
-                              ),
-                            ],
+                          RadioGroup<String>(
+                            groupValue: _repeatTestsRequired,
+                            onChanged: (val) {
+                              setState(() {
+                                _repeatTestsRequired = val!;
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Radio<String>(
+                                  value: 'yes',
+                                  activeColor: _Theme.accent,
+                                ),
+                                Text(
+                                  'Yes',
+                                  style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: _Theme.primary),
+                                ),
+                                const SizedBox(width: 20),
+                                Radio<String>(
+                                  value: 'no',
+                                  activeColor: _Theme.accent,
+                                ),
+                                Text(
+                                  'No',
+                                  style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.bold, color: _Theme.primary),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -1094,7 +1090,7 @@ class _CreatePrescriptionScreenState extends State<CreatePrescriptionScreen> {
         const SizedBox(height: 6),
         DropdownButtonFormField<T>(
           isExpanded: true,
-          value: value,
+          initialValue: value,
           items: items,
           onChanged: onChanged,
           decoration: _inputDecoration('Select Option'),
