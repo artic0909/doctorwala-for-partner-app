@@ -1194,5 +1194,69 @@ class ApiService {
       };
     }
   }
-}
 
+  /// Generates an Agora RTC Video Call Token for an appointment
+  static Future<Map<String, dynamic>> getVideoCallToken({
+    required int appointmentId,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/appointments/$appointmentId/video-token');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['status'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to connect to video service. Please check your internet connection.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Updates the video status of an appointment
+  static Future<Map<String, dynamic>> updateVideoStatus({
+    required int appointmentId,
+    required String videoStatus,
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/appointments/$appointmentId/video-status');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'video_status': videoStatus}),
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['status'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to update video status.',
+        'error': e.toString(),
+      };
+    }
+  }
+}

@@ -44,6 +44,9 @@ dependencies:
   shared_preferences: ^2.2.3
   image_picker: ^1.2.1
   url_launcher: ^6.3.2
+  agora_rtc_engine: ^6.6.4
+  permission_handler: ^13.0.2
+  wakelock_plus: ^1.8.0
 
 dev_dependencies:
   flutter_test:
