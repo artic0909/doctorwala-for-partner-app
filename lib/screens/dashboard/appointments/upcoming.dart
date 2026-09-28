@@ -169,9 +169,12 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
   }
 
   bool _isVideoCall(Map<String, dynamic> appt) {
+    final visitMode = (appt['visit_mode'] ?? '').toString().toLowerCase().trim();
+    if (visitMode == 'offline' || visitMode == 'physical' || visitMode == 'in_person') {
+      return false;
+    }
     final isVideo = appt['is_video'] == true || appt['is_video'] == 1 || appt['is_video'] == '1' || appt['is_video'] == 'true';
-    final visitMode = (appt['visit_mode'] ?? '').toString().toLowerCase();
-    return isVideo || visitMode == 'online' || visitMode == 'video';
+    return visitMode == 'online' || visitMode == 'video' || visitMode == 'video call' || isVideo;
   }
 
   bool _isWindowOpen(Map<String, dynamic> appt) {
@@ -307,23 +310,7 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(
-          'Appointments',
-          style: GoogleFonts.manrope(
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+
       body: Column(
         children: [
           // Header Stats & Search

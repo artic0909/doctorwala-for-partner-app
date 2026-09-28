@@ -8,6 +8,7 @@ import '../../../core/api_service.dart';
 import '../../../core/session_manager.dart';
 import '../../../core/custom_alerts.dart';
 import 'details.dart';
+import '../video_call/video_call_screen.dart';
 
 class TodayAppointmentsScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -220,6 +221,132 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
       return '$hour:$minuteStr $period';
     } catch (_) {
       return time24h;
+    }
+  }
+
+
+  bool _isVideoCall(Map<String, dynamic> appt) {
+    final visitMode = (appt['visit_mode'] ?? '').toString().toLowerCase().trim();
+    if (visitMode == 'offline' || visitMode == 'physical' || visitMode == 'in_person') {
+      return false;
+    }
+    final isVideo = appt['is_video'] == true || appt['is_video'] == 1 || appt['is_video'] == '1' || appt['is_video'] == 'true';
+    return visitMode == 'online' || visitMode == 'video' || visitMode == 'video call' || isVideo;
+  }
+
+  bool _isWindowOpen(Map<String, dynamic> appt) {
+    final bookingDate = appt['booking_date']?.toString();
+    final bookingTime = appt['booking_time']?.toString();
+    if (bookingDate == null || bookingTime == null || bookingDate.isEmpty || bookingTime.isEmpty) return true;
+    try {
+      final date = DateTime.parse(bookingDate);
+      final rawTime = bookingTime.trim();
+      final timeParts = rawTime.split(' ');
+      final hms = timeParts[0].split(':');
+      int hour = int.parse(hms[0]);
+      int minute = hms.length > 1 ? int.parse(hms[1]) : 0;
+      if (timeParts.length > 1) {
+        final period = timeParts[1].toUpperCase();
+        if (period == 'PM' && hour < 12) hour += 12;
+        if (period == 'AM' && hour == 12) hour = 0;
+      }
+      final scheduled = DateTime(date.year, date.month, date.day, hour, minute);
+      final now = DateTime.now();
+      final windowStart = scheduled.subtract(const Duration(minutes: 10));
+      final windowEnd = scheduled.add(const Duration(minutes: 60));
+      return now.isAfter(windowStart) && now.isBefore(windowEnd);
+    } catch (_) {
+      return true;
+    }
+  }
+
+  String _getWindowStartFormatted(Map<String, dynamic> appt) {
+    final bookingTime = appt['booking_time']?.toString();
+    if (bookingTime == null || bookingTime.isEmpty) return 'Opens 10m before';
+    try {
+      final rawTime = bookingTime.trim();
+      final timeParts = rawTime.split(' ');
+      final hms = timeParts[0].split(':');
+      int hour = int.parse(hms[0]);
+      int minute = hms.length > 1 ? int.parse(hms[1]) : 0;
+      if (timeParts.length > 1) {
+        final period = timeParts[1].toUpperCase();
+        if (period == 'PM' && hour < 12) hour += 12;
+        if (period == 'AM' && hour == 12) hour = 0;
+      }
+      final now = DateTime.now();
+      final scheduled = DateTime(now.year, now.month, now.day, hour, minute);
+      final start = scheduled.subtract(const Duration(minutes: 10));
+      final h = start.hour > 12 ? start.hour - 12 : (start.hour == 0 ? 12 : start.hour);
+      final m = start.minute.toString().padLeft(2, '0');
+      final p = start.hour >= 12 ? 'PM' : 'AM';
+      return 'Opens at $h:$m $p';
+    } catch (_) {
+      return 'Opens 10m before';
+    }
+  }
+
+  Future<void> _startVideoCall(Map<String, dynamic> appt) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: AppColors.teal),
+      ),
+    );
+
+    try {
+      final token = await SessionManager.getToken();
+      if (!mounted) return;
+      if (token == null) {
+        Navigator.pop(context);
+        CustomAlerts.showError(context, 'Authentication session expired.');
+        return;
+      }
+
+      final id = int.tryParse(appt['id'].toString()) ?? 0;
+      final response = await ApiService.getVideoCallToken(appointmentId: id, token: token);
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (response['success'] == true && response['data'] != null) {
+        final data = response['data'];
+        final appId = data['app_id']?.toString() ?? '';
+        final channel = data['channel']?.toString() ?? '';
+        final agoraToken = data['token']?.toString() ?? '';
+        final uid = int.tryParse(data['uid'].toString()) ?? 0;
+        final patientName = data['patient_name']?.toString() ?? appt['user_name'] ?? 'Patient';
+
+        if (appId.isEmpty || channel.isEmpty || agoraToken.isEmpty) {
+          CustomAlerts.showError(context, 'Invalid video call token received from server.');
+          return;
+        }
+
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VideoCallScreen(
+              appId: appId,
+              channelName: channel,
+              token: agoraToken,
+              uid: uid,
+              appointmentId: id,
+              participantName: patientName,
+              role: 'doctor',
+            ),
+          ),
+        );
+        if (mounted) {
+          _fetchAppointments();
+        }
+      } else {
+        CustomAlerts.showError(context, response['message'] ?? 'Unable to connect to video session.');
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        CustomAlerts.showError(context, 'Failed to connect to video session.');
+      }
     }
   }
 
@@ -644,6 +771,72 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
                     ),
                   ],
                 ),
+
+                // Video Call Button on Card if Video Appointment
+                if (_isVideoCall(appt)) ...[
+                  const SizedBox(height: 12),
+                  _isWindowOpen(appt)
+                      ? InkWell(
+                          onTap: () => _startVideoCall(appt),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF0D9488).withValues(alpha: 0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.videocam_rounded, color: Colors.white, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Start Video Consultation',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.2)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.videocam_outlined, color: Colors.blueGrey[400], size: 16),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Video Call: ${_getWindowStartFormatted(appt)}',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.blueGrey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                ],
               ],
             ),
           ),
