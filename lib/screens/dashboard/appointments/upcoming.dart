@@ -237,15 +237,17 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
 
     try {
       final token = await SessionManager.getToken();
+      if (!mounted) return;
       if (token == null) {
-        if (mounted) Navigator.pop(context);
+        Navigator.pop(context);
         CustomAlerts.showError(context, 'Authentication session expired.');
         return;
       }
 
       final id = int.tryParse(appt['id'].toString()) ?? 0;
       final response = await ApiService.getVideoCallToken(appointmentId: id, token: token);
-      if (mounted) Navigator.pop(context);
+      if (!mounted) return;
+      Navigator.pop(context);
 
       if (response['success'] == true && response['data'] != null) {
         final data = response['data'];
@@ -260,29 +262,31 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
           return;
         }
 
-        if (mounted) {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VideoCallScreen(
-                appId: appId,
-                channelName: channel,
-                token: agoraToken,
-                uid: uid,
-                appointmentId: id,
-                participantName: patientName,
-                role: 'doctor',
-              ),
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VideoCallScreen(
+              appId: appId,
+              channelName: channel,
+              token: agoraToken,
+              uid: uid,
+              appointmentId: id,
+              participantName: patientName,
+              role: 'doctor',
             ),
-          );
+          ),
+        );
+        if (mounted) {
           _fetchAppointments();
         }
       } else {
         CustomAlerts.showError(context, response['message'] ?? 'Unable to connect to video session.');
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context);
-      CustomAlerts.showError(context, 'Failed to connect to video session.');
+      if (mounted) {
+        Navigator.pop(context);
+        CustomAlerts.showError(context, 'Failed to connect to video session.');
+      }
     }
   }
 
@@ -731,7 +735,7 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF0D9488).withOpacity(0.3),
+                                  color: const Color(0xFF0D9488).withValues(alpha: 0.3),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -758,9 +762,9 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 9),
                           decoration: BoxDecoration(
-                            color: Colors.blueGrey.withOpacity(0.08),
+                            color: Colors.blueGrey.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.blueGrey.withOpacity(0.2)),
+                            border: Border.all(color: Colors.blueGrey.withValues(alpha: 0.2)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
