@@ -33,6 +33,7 @@ class ApiService {
     required String address,
     required String password,
     required String clientCategory,
+    String? epCode,
   }) async {
     final url = Uri.parse('$baseUrl/register');
     
@@ -51,6 +52,10 @@ class ApiService {
       'partner_address': address,
       'partner_password': password,
     };
+
+    if (epCode != null && epCode.trim().isNotEmpty) {
+      body['ep_code'] = epCode.trim();
+    }
 
     // Encode PHP-compliant arrays for form url-encoded format
     for (int i = 0; i < dbCategories.length; i++) {

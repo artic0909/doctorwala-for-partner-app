@@ -32,6 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   final _pinCodeController = TextEditingController();
   final _landmarkController = TextEditingController();
   final _addressController = TextEditingController();
+  final _epCodeController = TextEditingController();
   final _passwordController = TextEditingController();
   final _captchaInputController = TextEditingController();
 
@@ -69,6 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     _pinCodeController.dispose();
     _landmarkController.dispose();
     _addressController.dispose();
+    _epCodeController.dispose();
     _passwordController.dispose();
     _captchaInputController.dispose();
     super.dispose();
@@ -146,6 +148,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         address: _addressController.text.trim(),
         password: _passwordController.text.trim(),
         clientCategory: _selectedType,
+        epCode: _epCodeController.text.trim(),
       );
 
       setState(() {
@@ -397,10 +400,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    Color? borderColor,
+    Color? backgroundColor,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: backgroundColor ?? Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -409,7 +415,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey[200]!, width: 1.5),
+        border: Border.all(
+          color: borderColor ?? Colors.grey[200]!,
+          width: 1.5,
+        ),
       ),
       child: TextField(
         controller: controller,
@@ -417,6 +426,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         maxLines: maxLines,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
+        textCapitalization: textCapitalization,
         style: GoogleFonts.manrope(
           fontSize: 14, 
           fontWeight: FontWeight.w600,
@@ -994,6 +1004,15 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     hint: 'Full Address *',
                     icon: Icons.home_work_outlined,
                     maxLines: 3,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildFormInput(
+                    controller: _epCodeController,
+                    hint: 'EP Code (Optional)',
+                    icon: Icons.qr_code_rounded,
+                    textCapitalization: TextCapitalization.characters,
+                    borderColor: AppColors.teal.withValues(alpha: 0.5),
+                    backgroundColor: AppColors.teal.withValues(alpha: 0.02),
                   ),
                 ],
               ),
