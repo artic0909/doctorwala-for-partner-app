@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,17 +7,20 @@ import '../../../core/app_colors.dart';
 class OnboardingTutorialDialog extends StatefulWidget {
   final VoidCallback onStartSetup;
   final bool autoTriggered;
+  final Map<String, dynamic>? partnerData;
 
   const OnboardingTutorialDialog({
     super.key,
     required this.onStartSetup,
     this.autoTriggered = false,
+    this.partnerData,
   });
 
   static Future<void> show(
     BuildContext context, {
     required VoidCallback onStartSetup,
     bool autoTriggered = false,
+    Map<String, dynamic>? partnerData,
   }) async {
     await showModalBottomSheet(
       context: context,
@@ -25,6 +29,7 @@ class OnboardingTutorialDialog extends StatefulWidget {
       builder: (ctx) => OnboardingTutorialDialog(
         onStartSetup: onStartSetup,
         autoTriggered: autoTriggered,
+        partnerData: partnerData,
       ),
     );
   }
@@ -38,61 +43,271 @@ class _OnboardingTutorialDialogState extends State<OnboardingTutorialDialog> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _dontShowAgain = false;
+  late final List<Map<String, dynamic>> _steps;
 
-  final List<Map<String, dynamic>> _steps = [
-    {
-      'step': 1,
-      'badge': 'STEP 1 OF 4',
-      'title': 'Doctor Profile & Specialty',
-      'subtitle': 'Name, Degree & Specialty',
-      'icon': Icons.badge_rounded,
-      'iconColor': const Color(0xFF4F46E5),
-      'bgColor': const Color(0xFFEEF2FF),
-      'shortText':
-          'Enter your official name, medical degree (e.g. MBBS, MD) and specialization so patients find you in search.',
-      'actionLabel': 'Open Doctor Details ➔',
-      'tag': 'Official practice listing',
-    },
-    {
-      'step': 2,
-      'badge': 'STEP 2 OF 4',
-      'title': 'Set Consultation Fees',
-      'subtitle': 'OPD Patient Charges',
-      'icon': Icons.payments_rounded,
-      'iconColor': const Color(0xFF0284C7),
-      'bgColor': const Color(0xFFE0F2FE),
-      'shortText':
-          'Set your consultation fee in ₹ (INR). Patients will see this transparent fee when booking appointments.',
-      'actionLabel': 'Set Consultation Fees ➔',
-      'tag': 'Transparent booking fees',
-    },
-    {
-      'step': 3,
-      'badge': 'STEP 3 OF 4',
-      'title': 'Weekly Visiting Schedule',
-      'subtitle': 'Chamber Days & Timetable',
-      'icon': Icons.calendar_month_rounded,
-      'iconColor': const Color(0xFF0D9488),
-      'bgColor': const Color(0xFFCCFBF1),
-      'shortText':
-          'Select your available weekdays (e.g. Mon, Wed, Fri) with consulting start and end time slots.',
-      'actionLabel': 'Configure Timetable ➔',
-      'tag': 'Automated appointment slots',
-    },
-    {
-      'step': 4,
-      'badge': 'STEP 4 OF 4',
-      'title': '100% Unlock All Features',
-      'subtitle': 'Appointments, Patients & Cards',
-      'icon': Icons.verified_rounded,
-      'iconColor': const Color(0xFF16A34A),
-      'bgColor': const Color(0xFFDCFCE7),
-      'shortText':
-          'Hit "Save Details". Reaching 100% automatically unlocks Appointments, Patient Records and Medical Cards!',
-      'actionLabel': 'Start Profile Setup 🚀',
-      'tag': 'Instant portal unlock',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _steps = _buildTypeSpecificSteps();
+  }
+
+  List<String> _parseRegistrationTypes(dynamic rawType) {
+    if (rawType == null) return [];
+    if (rawType is List) {
+      return rawType.map((e) => e.toString().trim()).toList();
+    }
+    final str = rawType.toString().trim();
+    if (str.startsWith('[') && str.endsWith(']')) {
+      try {
+        final decoded = jsonDecode(str);
+        if (decoded is List) {
+          return decoded.map((e) => e.toString().trim()).toList();
+        }
+      } catch (_) {}
+      final clean = str
+          .replaceAll('[', '')
+          .replaceAll(']', '')
+          .replaceAll('"', '')
+          .replaceAll("'", '')
+          .replaceAll('\\', '');
+      return clean
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+    return [str];
+  }
+
+  List<Map<String, dynamic>> _buildTypeSpecificSteps() {
+    final rawRegType = widget.partnerData?['registration_type'];
+    final types = _parseRegistrationTypes(rawRegType);
+    final hasOPD = types.contains('OPD');
+    final hasPathology = types.contains('Pathology');
+
+    if (hasOPD && hasPathology) {
+      return [
+        {
+          'step': 1,
+          'badge': 'STEP 1 OF 4',
+          'title': 'OPD Chamber Setup',
+          'subtitle': 'Clinic Name & Registration',
+          'icon': Icons.local_hospital_rounded,
+          'iconColor': const Color(0xFF0D9488),
+          'bgColor': const Color(0xFFCCFBF1),
+          'shortText':
+              'Complete your clinic contact details, GSTIN, and registration type under Doctor Chamber.',
+          'actionLabel': 'Setup OPD Chamber ➔',
+          'tag': 'Clinic Practice Setup',
+        },
+        {
+          'step': 2,
+          'badge': 'STEP 2 OF 4',
+          'title': 'Pathology Lab Profile',
+          'subtitle': 'Diagnostic Center & Address',
+          'icon': Icons.biotech_rounded,
+          'iconColor': const Color(0xFF9333EA),
+          'bgColor': const Color(0xFFF3E8FF),
+          'shortText':
+              'Fill in your laboratory contact details, registration type, and accurate diagnostic center location.',
+          'actionLabel': 'Setup Pathology Lab ➔',
+          'tag': 'Diagnostic Center Setup',
+        },
+        {
+          'step': 3,
+          'badge': 'STEP 3 OF 4',
+          'title': 'Add Doctors & Tests',
+          'subtitle': 'Specialists & Test Catalog',
+          'icon': Icons.groups_rounded,
+          'iconColor': const Color(0xFF2563EB),
+          'bgColor': const Color(0xFFDBEAFE),
+          'shortText':
+              'Add visiting specialist doctors with days & fees to OPD, and medical tests with rates to Pathology.',
+          'actionLabel': 'Add Doctors & Tests ➔',
+          'tag': 'Active Services',
+        },
+        {
+          'step': 4,
+          'badge': 'STEP 4 OF 4',
+          'title': '100% Unlock All Features',
+          'subtitle': 'Appointments, Lab & Medical Cards',
+          'icon': Icons.verified_rounded,
+          'iconColor': const Color(0xFF16A34A),
+          'bgColor': const Color(0xFFDCFCE7),
+          'shortText':
+              'Completing both setups automatically unlocks OPD Appointments, Pathology Bookings, and Patient Medical Cards!',
+          'actionLabel': 'Start Combined Setup 🚀',
+          'tag': 'Full Portal Unlock',
+        },
+      ];
+    } else if (hasOPD) {
+      return [
+        {
+          'step': 1,
+          'badge': 'STEP 1 OF 4',
+          'title': 'OPD Chamber Details',
+          'subtitle': 'Clinic Name & Contact Person',
+          'icon': Icons.local_hospital_rounded,
+          'iconColor': const Color(0xFF0D9488),
+          'bgColor': const Color(0xFFCCFBF1),
+          'shortText':
+              'Fill in your clinic name, contact person name, mobile number, and clinic registration type under Doctor Chamber.',
+          'actionLabel': 'Open Doctor Chamber ➔',
+          'tag': 'Official Clinic Listing',
+        },
+        {
+          'step': 2,
+          'badge': 'STEP 2 OF 4',
+          'title': 'Chamber Location & Address',
+          'subtitle': 'State, City, Pin & Map Link',
+          'icon': Icons.location_on_rounded,
+          'iconColor': const Color(0xFF0284C7),
+          'bgColor': const Color(0xFFE0F2FE),
+          'shortText':
+              'Provide full clinic address, city, pincode, landmark, and optional Google Map link for seamless patient visits.',
+          'actionLabel': 'Set Clinic Address ➔',
+          'tag': 'Patient Navigation',
+        },
+        {
+          'step': 3,
+          'badge': 'STEP 3 OF 4',
+          'title': 'Add Chamber Doctors',
+          'subtitle': 'Visiting Specialists & Timetable',
+          'icon': Icons.person_add_rounded,
+          'iconColor': const Color(0xFF2563EB),
+          'bgColor': const Color(0xFFDBEAFE),
+          'shortText':
+              'Add the visiting doctors practicing in your clinic along with their degrees, visiting days, timings, and fees.',
+          'actionLabel': 'Add Chamber Doctors ➔',
+          'tag': 'Doctor Directory',
+        },
+        {
+          'step': 4,
+          'badge': 'STEP 4 OF 4',
+          'title': '100% Unlock OPD Portal',
+          'subtitle': 'Bookings, Patient Lists & Cards',
+          'icon': Icons.verified_rounded,
+          'iconColor': const Color(0xFF16A34A),
+          'bgColor': const Color(0xFFDCFCE7),
+          'shortText':
+              'Saving your OPD details and adding doctors reaches 100% to unlock OPD Appointments, Patient Records, and Cards!',
+          'actionLabel': 'Start OPD Setup 🚀',
+          'tag': 'Instant Portal Unlock',
+        },
+      ];
+    } else if (hasPathology) {
+      return [
+        {
+          'step': 1,
+          'badge': 'STEP 1 OF 4',
+          'title': 'Pathology Lab Profile',
+          'subtitle': 'Diagnostic Center & Reg Type',
+          'icon': Icons.biotech_rounded,
+          'iconColor': const Color(0xFF9333EA),
+          'bgColor': const Color(0xFFF3E8FF),
+          'shortText':
+              'Enter your diagnostic center name, registration type, contact person, and mobile number under Pathology Clinic.',
+          'actionLabel': 'Open Pathology Clinic ➔',
+          'tag': 'Diagnostic Center Listing',
+        },
+        {
+          'step': 2,
+          'badge': 'STEP 2 OF 4',
+          'title': 'Laboratory Address & Location',
+          'subtitle': 'State, City, Pin & Landmark',
+          'icon': Icons.location_on_rounded,
+          'iconColor': const Color(0xFF0284C7),
+          'bgColor': const Color(0xFFE0F2FE),
+          'shortText':
+              'Provide accurate laboratory location details, city, pincode, and landmark for patient sample collection.',
+          'actionLabel': 'Set Lab Address ➔',
+          'tag': 'Center Navigation',
+        },
+        {
+          'step': 3,
+          'badge': 'STEP 3 OF 4',
+          'title': 'Add Diagnostic Tests',
+          'subtitle': 'Test Catalog, Samples & Prices',
+          'icon': Icons.science_rounded,
+          'iconColor': const Color(0xFFEA580C),
+          'bgColor': const Color(0xFFFFEDD5),
+          'shortText':
+              'Add the pathology and diagnostic tests offered at your center with transparent test fees and duration.',
+          'actionLabel': 'Add Medical Tests ➔',
+          'tag': 'Test Catalog',
+        },
+        {
+          'step': 4,
+          'badge': 'STEP 4 OF 4',
+          'title': '100% Unlock Lab Portal',
+          'subtitle': 'Online Test Bookings & Reports',
+          'icon': Icons.verified_rounded,
+          'iconColor': const Color(0xFF16A34A),
+          'bgColor': const Color(0xFFDCFCE7),
+          'shortText':
+              'Saving pathology details and adding tests reaches 100% to unlock test bookings, digital report management, and cards!',
+          'actionLabel': 'Start Lab Setup 🚀',
+          'tag': 'Instant Portal Unlock',
+        },
+      ];
+    } else {
+      // Default: Doctor Setup
+      return [
+        {
+          'step': 1,
+          'badge': 'STEP 1 OF 4',
+          'title': 'Doctor Profile & Specialty',
+          'subtitle': 'Name, Degree & Specialty',
+          'icon': Icons.badge_rounded,
+          'iconColor': const Color(0xFF4F46E5),
+          'bgColor': const Color(0xFFEEF2FF),
+          'shortText':
+              'Enter your official name, medical degree (e.g. MBBS, MD) and specialization so patients find you in search.',
+          'actionLabel': 'Open Doctor Details ➔',
+          'tag': 'Official practice listing',
+        },
+        {
+          'step': 2,
+          'badge': 'STEP 2 OF 4',
+          'title': 'Set Consultation Fees',
+          'subtitle': 'OPD Patient Charges',
+          'icon': Icons.payments_rounded,
+          'iconColor': const Color(0xFF0284C7),
+          'bgColor': const Color(0xFFE0F2FE),
+          'shortText':
+              'Set your consultation fee in ₹ (INR). Patients will see this transparent fee when booking appointments.',
+          'actionLabel': 'Set Consultation Fees ➔',
+          'tag': 'Transparent booking fees',
+        },
+        {
+          'step': 3,
+          'badge': 'STEP 3 OF 4',
+          'title': 'Weekly Visiting Schedule',
+          'subtitle': 'Chamber Days & Timetable',
+          'icon': Icons.calendar_month_rounded,
+          'iconColor': const Color(0xFF0D9488),
+          'bgColor': const Color(0xFFCCFBF1),
+          'shortText':
+              'Select your available weekdays (e.g. Mon, Wed, Fri) with consulting start and end time slots.',
+          'actionLabel': 'Configure Timetable ➔',
+          'tag': 'Automated appointment slots',
+        },
+        {
+          'step': 4,
+          'badge': 'STEP 4 OF 4',
+          'title': '100% Unlock All Features',
+          'subtitle': 'Appointments, Patients & Cards',
+          'icon': Icons.verified_rounded,
+          'iconColor': const Color(0xFF16A34A),
+          'bgColor': const Color(0xFFDCFCE7),
+          'shortText':
+              'Hit "Save Details". Reaching 100% automatically unlocks Appointments, Patient Records and Medical Cards!',
+          'actionLabel': 'Start Profile Setup 🚀',
+          'tag': 'Instant portal unlock',
+        },
+      ];
+    }
+  }
 
   Future<void> _handleClose() async {
     if (_dontShowAgain) {

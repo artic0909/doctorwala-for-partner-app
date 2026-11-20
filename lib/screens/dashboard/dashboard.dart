@@ -23,6 +23,18 @@ import 'medical_card_access.dart';
 import 'patient_lists.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class _MilestoneItem {
+  final String label;
+  final bool isDone;
+  final int targetIndex;
+
+  const _MilestoneItem({
+    required this.label,
+    required this.isDone,
+    required this.targetIndex,
+  });
+}
+
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
 
@@ -44,10 +56,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _hasUnreadNotifications = false;
   bool _isTutorialBannerDismissed = false;
   int _profileCompletionPercent = 0;
-  bool _hasDoctorInfo = false;
-  bool _hasFees = false;
-  bool _hasAddress = false;
-  bool _hasSchedule = false;
+  bool _step1Done = false;
+  bool _step2Done = false;
+  bool _step3Done = false;
+  bool _step4Done = false;
   late Map<String, dynamic> _partnerData;
 
   @override
@@ -61,17 +73,195 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  List<_MilestoneItem> _getMilestones() {
+    final types = _parseRegistrationTypes(_partnerData['registration_type']);
+    final hasOPD = types.contains('OPD');
+    final hasPathology = types.contains('Pathology');
+
+    if (hasOPD && hasPathology) {
+      return [
+        _MilestoneItem(
+          label: 'OPD Chamber',
+          isDone: _step1Done,
+          targetIndex: 3,
+        ),
+        _MilestoneItem(
+          label: 'Pathology Lab',
+          isDone: _step2Done,
+          targetIndex: 4,
+        ),
+        _MilestoneItem(
+          label: 'Add Doctors',
+          isDone: _step3Done,
+          targetIndex: 5,
+        ),
+        _MilestoneItem(
+          label: 'Add Tests',
+          isDone: _step4Done,
+          targetIndex: 6,
+        ),
+      ];
+    } else if (hasOPD) {
+      return [
+        _MilestoneItem(
+          label: 'Clinic Info',
+          isDone: _step1Done,
+          targetIndex: 3,
+        ),
+        _MilestoneItem(
+          label: 'Contact Details',
+          isDone: _step2Done,
+          targetIndex: 3,
+        ),
+        _MilestoneItem(
+          label: 'Chamber Address',
+          isDone: _step3Done,
+          targetIndex: 3,
+        ),
+        _MilestoneItem(
+          label: 'Add Doctors',
+          isDone: _step4Done,
+          targetIndex: 5,
+        ),
+      ];
+    } else if (hasPathology) {
+      return [
+        _MilestoneItem(
+          label: 'Lab Info',
+          isDone: _step1Done,
+          targetIndex: 4,
+        ),
+        _MilestoneItem(
+          label: 'Contact Details',
+          isDone: _step2Done,
+          targetIndex: 4,
+        ),
+        _MilestoneItem(
+          label: 'Lab Address',
+          isDone: _step3Done,
+          targetIndex: 4,
+        ),
+        _MilestoneItem(
+          label: 'Add Tests',
+          isDone: _step4Done,
+          targetIndex: 6,
+        ),
+      ];
+    } else {
+      return [
+        _MilestoneItem(
+          label: 'Doctor Info',
+          isDone: _step1Done,
+          targetIndex: 11,
+        ),
+        _MilestoneItem(
+          label: 'Fees (INR)',
+          isDone: _step2Done,
+          targetIndex: 11,
+        ),
+        _MilestoneItem(
+          label: 'Chamber Address',
+          isDone: _step3Done,
+          targetIndex: 11,
+        ),
+        _MilestoneItem(
+          label: 'Visiting Schedule',
+          isDone: _step4Done,
+          targetIndex: 11,
+        ),
+      ];
+    }
+  }
+
+  int _getSetupTargetIndex() {
+    final types = _parseRegistrationTypes(_partnerData['registration_type']);
+    final hasOPD = types.contains('OPD');
+    final hasPathology = types.contains('Pathology');
+
+    if (hasOPD && hasPathology) {
+      if (!_step1Done) return 3; // OpdContactScreen
+      if (!_step2Done) return 4; // PathologyContactScreen
+      if (!_step3Done) return 5; // ShowDoctorsScreen
+      if (!_step4Done) return 6; // ShowTestsScreen
+      return 3;
+    } else if (hasOPD) {
+      if (!_step1Done || !_step2Done || !_step3Done) return 3; // OpdContactScreen
+      if (!_step4Done) return 5; // ShowDoctorsScreen
+      return 3;
+    } else if (hasPathology) {
+      if (!_step1Done || !_step2Done || !_step3Done) return 4; // PathologyContactScreen
+      if (!_step4Done) return 6; // ShowTestsScreen
+      return 4;
+    } else {
+      return 11; // DoctorContactScreen
+    }
+  }
+
+  String _getProfileSetupTitle() {
+    final types = _parseRegistrationTypes(_partnerData['registration_type']);
+    if (types.contains('OPD') && types.contains('Pathology')) {
+      return 'Clinic & Lab Profile Setup';
+    } else if (types.contains('OPD')) {
+      return 'OPD Chamber Profile Setup';
+    } else if (types.contains('Pathology')) {
+      return 'Pathology Lab Profile Setup';
+    } else {
+      return 'Doctor Profile Setup';
+    }
+  }
+
+  String _getProfileSetupSubtitle() {
+    final types = _parseRegistrationTypes(_partnerData['registration_type']);
+    if (types.contains('OPD') && types.contains('Pathology')) {
+      return 'Complete OPD & Lab contact details and add services to unlock bookings';
+    } else if (types.contains('OPD')) {
+      return 'Complete chamber details & add doctors to unlock patient bookings';
+    } else if (types.contains('Pathology')) {
+      return 'Complete laboratory details & add tests to unlock diagnostic bookings';
+    } else {
+      return 'Complete all 4 steps to unlock Appointments and Patient Records';
+    }
+  }
+
   Future<void> _loadCachedProfileState() async {
     final prefs = await SharedPreferences.getInstance();
     final partnerId = _partnerData['id']?.toString() ?? 'default';
+    final types = _parseRegistrationTypes(_partnerData['registration_type']);
+    final hasOPD = types.contains('OPD');
+    final hasPathology = types.contains('Pathology');
+
     if (mounted) {
       final pct = prefs.getInt('profile_completion_percent_$partnerId') ?? 0;
+      bool s1 = false, s2 = false, s3 = false, s4 = false;
+
+      if (hasOPD && hasPathology) {
+        s1 = prefs.getBool('opd_contact_saved_$partnerId') ?? false;
+        s2 = prefs.getBool('pathology_contact_saved_$partnerId') ?? false;
+        s3 = prefs.getBool('has_doc_added_$partnerId') ?? false;
+        s4 = prefs.getBool('has_test_added_$partnerId') ?? false;
+      } else if (hasOPD) {
+        s1 = prefs.getBool('has_opd_info_$partnerId') ?? (prefs.getBool('opd_contact_saved_$partnerId') ?? false);
+        s2 = prefs.getBool('has_opd_contact_$partnerId') ?? (prefs.getBool('opd_contact_saved_$partnerId') ?? false);
+        s3 = prefs.getBool('has_opd_addr_$partnerId') ?? (prefs.getBool('opd_contact_saved_$partnerId') ?? false);
+        s4 = prefs.getBool('has_doc_added_$partnerId') ?? false;
+      } else if (hasPathology) {
+        s1 = prefs.getBool('has_path_info_$partnerId') ?? (prefs.getBool('pathology_contact_saved_$partnerId') ?? false);
+        s2 = prefs.getBool('has_path_contact_$partnerId') ?? (prefs.getBool('pathology_contact_saved_$partnerId') ?? false);
+        s3 = prefs.getBool('has_path_addr_$partnerId') ?? (prefs.getBool('pathology_contact_saved_$partnerId') ?? false);
+        s4 = prefs.getBool('has_test_added_$partnerId') ?? false;
+      } else {
+        s1 = prefs.getBool('has_doc_info_$partnerId') ?? false;
+        s2 = prefs.getBool('has_fee_$partnerId') ?? false;
+        s3 = prefs.getBool('has_addr_$partnerId') ?? false;
+        s4 = prefs.getBool('has_sched_$partnerId') ?? false;
+      }
+
       setState(() {
         _profileCompletionPercent = pct;
-        _hasDoctorInfo = prefs.getBool('has_doc_info_$partnerId') ?? false;
-        _hasFees = prefs.getBool('has_fee_$partnerId') ?? false;
-        _hasAddress = prefs.getBool('has_addr_$partnerId') ?? false;
-        _hasSchedule = prefs.getBool('has_sched_$partnerId') ?? false;
+        _step1Done = s1;
+        _step2Done = s2;
+        _step3Done = s3;
+        _step4Done = s4;
       });
     }
   }
@@ -86,10 +276,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (!dismissed && pct < 100 && mounted) {
       OnboardingTutorialDialog.show(
         context,
+        partnerData: _partnerData,
         autoTriggered: true,
         onStartSetup: () {
           setState(() {
-            _currentIndex = 11;
+            _currentIndex = _getSetupTargetIndex();
           });
         },
       );
@@ -106,19 +297,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return;
       }
 
-      final results = await Future.wait([
+      final types = _parseRegistrationTypes(_partnerData['registration_type']);
+      final hasOPD = types.contains('OPD');
+      final hasPathology = types.contains('Pathology');
+      final hasDoctor = types.contains('Doctor');
+
+      final apiCalls = <Future<dynamic>>[
         ApiService.getDoctors(token: token).catchError((_) => {'success': false}),
         ApiService.getTests(token: token).catchError((_) => {'success': false}),
         ApiService.getAppointmentsStats(token: token).catchError((_) => {'success': false}),
         ApiService.getAppointments(token: token).catchError((_) => {'success': false}),
-        ApiService.getClinicProfile(type: 'doctor', token: token).catchError((_) => {'success': false}),
-      ]);
+      ];
+
+      if (hasDoctor) {
+        apiCalls.add(ApiService.getClinicProfile(type: 'doctor', token: token).catchError((_) => {'success': false}));
+      }
+      if (hasOPD) {
+        apiCalls.add(ApiService.getClinicProfile(type: 'opd', token: token).catchError((_) => {'success': false}));
+      }
+      if (hasPathology) {
+        apiCalls.add(ApiService.getClinicProfile(type: 'pathology', token: token).catchError((_) => {'success': false}));
+      }
+
+      final results = await Future.wait(apiCalls);
 
       final doctorsRes = results[0];
       final testsRes = results[1];
       final statsRes = results[2];
       final apptsRes = results[3];
-      final profileRes = results[4];
 
       int docCount = 0;
       int testCount = 0;
@@ -146,52 +352,197 @@ class _DashboardScreenState extends State<DashboardScreen> {
         hasUnread = appts.any((appt) => !readIds.contains(appt['id']?.toString() ?? ''));
       }
 
-      // Check accurate 4-milestone doctor profile completion
+      int nextProfileIdx = 4;
+      Map<String, dynamic>? docProfile;
+      Map<String, dynamic>? opdProfile;
+      Map<String, dynamic>? pathProfile;
+
+      if (hasDoctor && nextProfileIdx < results.length) {
+        docProfile = results[nextProfileIdx] is Map<String, dynamic> ? results[nextProfileIdx] : null;
+        nextProfileIdx++;
+      }
+      if (hasOPD && nextProfileIdx < results.length) {
+        opdProfile = results[nextProfileIdx] is Map<String, dynamic> ? results[nextProfileIdx] : null;
+        nextProfileIdx++;
+      }
+      if (hasPathology && nextProfileIdx < results.length) {
+        pathProfile = results[nextProfileIdx] is Map<String, dynamic> ? results[nextProfileIdx] : null;
+        nextProfileIdx++;
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final partnerId = _partnerData['id']?.toString() ?? 'default';
 
-      int percent = prefs.getInt('profile_completion_percent_$partnerId') ?? 0;
-      bool hasDoc = prefs.getBool('has_doc_info_$partnerId') ?? false;
-      bool hasFee = prefs.getBool('has_fee_$partnerId') ?? false;
-      bool hasAddr = prefs.getBool('has_addr_$partnerId') ?? false;
-      bool hasSched = prefs.getBool('has_sched_$partnerId') ?? false;
+      bool s1 = false, s2 = false, s3 = false, s4 = false;
+      int percent = 0;
 
-      if (profileRes['success'] == true && profileRes['contact_details'] != null) {
-        final cd = profileRes['contact_details'] as Map<String, dynamic>;
-
-        final name = (cd['partner_doctor_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
-        final spec = (cd['partner_doctor_specialist'] ?? '').toString().trim();
-        final desig = (cd['partner_doctor_designation'] ?? '').toString().trim();
-        hasDoc = name.isNotEmpty && spec.isNotEmpty && desig.isNotEmpty;
-
-        final fees = double.tryParse((cd['partner_doctor_fees'] ?? '').toString().trim()) ?? 0;
-        hasFee = fees > 0;
-
-        final addr = (cd['partner_doctor_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
-        final city = (cd['partner_doctor_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
-        final pin = (cd['partner_doctor_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
-        hasAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
-
-        hasSched = false;
-        if (cd['visit_day_time'] != null && cd['visit_day_time'] is List) {
-          final list = cd['visit_day_time'] as List;
-          if (list.isNotEmpty) {
-            hasSched = true;
-          }
+      if (hasOPD && hasPathology) {
+        bool opdDone = prefs.getBool('opd_contact_saved_$partnerId') ?? false;
+        if (opdProfile != null && opdProfile['success'] == true && opdProfile['contact_details'] != null) {
+          final cd = opdProfile['contact_details'] as Map<String, dynamic>;
+          final name = (cd['clinic_name'] ?? '').toString().trim();
+          final addr = (cd['clinic_address'] ?? '').toString().trim();
+          if (name.isNotEmpty && addr.isNotEmpty) opdDone = true;
         }
 
+        bool pathDone = prefs.getBool('pathology_contact_saved_$partnerId') ?? false;
+        if (pathProfile != null && pathProfile['success'] == true && pathProfile['contact_details'] != null) {
+          final cd = pathProfile['contact_details'] as Map<String, dynamic>;
+          final name = (cd['clinic_name'] ?? '').toString().trim();
+          final addr = (cd['clinic_address'] ?? '').toString().trim();
+          if (name.isNotEmpty && addr.isNotEmpty) pathDone = true;
+        }
+
+        final bool docAdded = docCount > 0;
+        final bool testAdded = testCount > 0;
+
+        s1 = opdDone;
+        s2 = pathDone;
+        s3 = docAdded;
+        s4 = testAdded;
+
         int steps = 0;
-        if (hasDoc) steps++;
-        if (hasFee) steps++;
-        if (hasAddr) steps++;
-        if (hasSched) steps++;
+        if (s1) steps++;
+        if (s2) steps++;
+        if (s3) steps++;
+        if (s4) steps++;
         percent = steps * 25;
 
         await prefs.setInt('profile_completion_percent_$partnerId', percent);
-        await prefs.setBool('has_doc_info_$partnerId', hasDoc);
-        await prefs.setBool('has_fee_$partnerId', hasFee);
-        await prefs.setBool('has_addr_$partnerId', hasAddr);
-        await prefs.setBool('has_sched_$partnerId', hasSched);
+        await prefs.setBool('opd_contact_saved_$partnerId', s1);
+        await prefs.setBool('pathology_contact_saved_$partnerId', s2);
+        await prefs.setBool('has_doc_added_$partnerId', s3);
+        await prefs.setBool('has_test_added_$partnerId', s4);
+      } else if (hasOPD) {
+        bool opdInfo = prefs.getBool('has_opd_info_$partnerId') ?? false;
+        bool opdContact = prefs.getBool('has_opd_contact_$partnerId') ?? false;
+        bool opdAddr = prefs.getBool('has_opd_addr_$partnerId') ?? false;
+
+        if (opdProfile != null && opdProfile['success'] == true && opdProfile['contact_details'] != null) {
+          final cd = opdProfile['contact_details'] as Map<String, dynamic>;
+          final name = (cd['clinic_name'] ?? _partnerData['partner_clinic_name'] ?? '').toString().trim();
+          final regType = (cd['clinic_registration_type'] ?? '').toString().trim();
+          opdInfo = name.isNotEmpty && regType.isNotEmpty;
+
+          final person = (cd['clinic_contact_person_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
+          final phone = (cd['clinic_mobile_number'] ?? _partnerData['partner_mobile_number'] ?? '').toString().trim();
+          opdContact = person.isNotEmpty && phone.isNotEmpty;
+
+          final addr = (cd['clinic_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
+          final city = (cd['clinic_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
+          final pin = (cd['clinic_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
+          opdAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+        }
+
+        final bool docAdded = docCount > 0;
+
+        s1 = opdInfo;
+        s2 = opdContact;
+        s3 = opdAddr;
+        s4 = docAdded;
+
+        int steps = 0;
+        if (s1) steps++;
+        if (s2) steps++;
+        if (s3) steps++;
+        if (s4) steps++;
+        percent = steps * 25;
+
+        await prefs.setInt('profile_completion_percent_$partnerId', percent);
+        await prefs.setBool('has_opd_info_$partnerId', s1);
+        await prefs.setBool('has_opd_contact_$partnerId', s2);
+        await prefs.setBool('has_opd_addr_$partnerId', s3);
+        await prefs.setBool('has_doc_added_$partnerId', s4);
+        await prefs.setBool('opd_contact_saved_$partnerId', s1 && s2 && s3);
+      } else if (hasPathology) {
+        bool pathInfo = prefs.getBool('has_path_info_$partnerId') ?? false;
+        bool pathContact = prefs.getBool('has_path_contact_$partnerId') ?? false;
+        bool pathAddr = prefs.getBool('has_path_addr_$partnerId') ?? false;
+
+        if (pathProfile != null && pathProfile['success'] == true && pathProfile['contact_details'] != null) {
+          final cd = pathProfile['contact_details'] as Map<String, dynamic>;
+          final name = (cd['clinic_name'] ?? _partnerData['partner_clinic_name'] ?? '').toString().trim();
+          final regType = (cd['clinic_registration_type'] ?? '').toString().trim();
+          pathInfo = name.isNotEmpty && regType.isNotEmpty;
+
+          final person = (cd['clinic_contact_person_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
+          final phone = (cd['clinic_mobile_number'] ?? _partnerData['partner_mobile_number'] ?? '').toString().trim();
+          pathContact = person.isNotEmpty && phone.isNotEmpty;
+
+          final addr = (cd['clinic_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
+          final city = (cd['clinic_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
+          final pin = (cd['clinic_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
+          pathAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+        }
+
+        final bool testAdded = testCount > 0;
+
+        s1 = pathInfo;
+        s2 = pathContact;
+        s3 = pathAddr;
+        s4 = testAdded;
+
+        int steps = 0;
+        if (s1) steps++;
+        if (s2) steps++;
+        if (s3) steps++;
+        if (s4) steps++;
+        percent = steps * 25;
+
+        await prefs.setInt('profile_completion_percent_$partnerId', percent);
+        await prefs.setBool('has_path_info_$partnerId', s1);
+        await prefs.setBool('has_path_contact_$partnerId', s2);
+        await prefs.setBool('has_path_addr_$partnerId', s3);
+        await prefs.setBool('has_test_added_$partnerId', s4);
+        await prefs.setBool('pathology_contact_saved_$partnerId', s1 && s2 && s3);
+      } else {
+        bool hasDoc = prefs.getBool('has_doc_info_$partnerId') ?? false;
+        bool hasFee = prefs.getBool('has_fee_$partnerId') ?? false;
+        bool hasAddr = prefs.getBool('has_addr_$partnerId') ?? false;
+        bool hasSched = prefs.getBool('has_sched_$partnerId') ?? false;
+
+        if (docProfile != null && docProfile['success'] == true && docProfile['contact_details'] != null) {
+          final cd = docProfile['contact_details'] as Map<String, dynamic>;
+
+          final name = (cd['partner_doctor_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
+          final spec = (cd['partner_doctor_specialist'] ?? '').toString().trim();
+          final desig = (cd['partner_doctor_designation'] ?? '').toString().trim();
+          hasDoc = name.isNotEmpty && spec.isNotEmpty && desig.isNotEmpty;
+
+          final fees = double.tryParse((cd['partner_doctor_fees'] ?? '').toString().trim()) ?? 0;
+          hasFee = fees > 0;
+
+          final addr = (cd['partner_doctor_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
+          final city = (cd['partner_doctor_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
+          final pin = (cd['partner_doctor_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
+          hasAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+
+          hasSched = false;
+          if (cd['visit_day_time'] != null && cd['visit_day_time'] is List) {
+            final list = cd['visit_day_time'] as List;
+            if (list.isNotEmpty) {
+              hasSched = true;
+            }
+          }
+        }
+
+        s1 = hasDoc;
+        s2 = hasFee;
+        s3 = hasAddr;
+        s4 = hasSched;
+
+        int steps = 0;
+        if (s1) steps++;
+        if (s2) steps++;
+        if (s3) steps++;
+        if (s4) steps++;
+        percent = steps * 25;
+
+        await prefs.setInt('profile_completion_percent_$partnerId', percent);
+        await prefs.setBool('has_doc_info_$partnerId', s1);
+        await prefs.setBool('has_fee_$partnerId', s2);
+        await prefs.setBool('has_addr_$partnerId', s3);
+        await prefs.setBool('has_sched_$partnerId', s4);
         await prefs.setBool('doctor_contact_saved_$partnerId', percent == 100);
       }
 
@@ -204,10 +555,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _todayCount = today;
           _hasUnreadNotifications = hasUnread;
           _profileCompletionPercent = percent;
-          _hasDoctorInfo = hasDoc;
-          _hasFees = hasFee;
-          _hasAddress = hasAddr;
-          _hasSchedule = hasSched;
+          _step1Done = s1;
+          _step2Done = s2;
+          _step3Done = s3;
+          _step4Done = s4;
           _isFetchingStats = false;
         });
       }
@@ -1016,7 +1367,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               _profileCompletionPercent == 100
                                   ? 'Profile 100% Completed 🎉'
-                                  : 'Profile Completion: $_profileCompletionPercent%',
+                                  : _getProfileSetupTitle(),
                               style: GoogleFonts.manrope(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w800,
@@ -1026,7 +1377,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               _profileCompletionPercent == 100
                                   ? 'All services unlocked & ready to use'
-                                  : 'Complete 4 steps to unlock all features',
+                                  : _getProfileSetupSubtitle(),
                               style: GoogleFonts.manrope(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -1088,28 +1439,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children: [
-                      _buildRedirectableChip(
-                        label: 'Doctor Info',
-                        isDone: _hasDoctorInfo,
-                        onTap: () => setState(() => _currentIndex = 11),
-                      ),
-                      _buildRedirectableChip(
-                        label: 'Fees (INR)',
-                        isDone: _hasFees,
-                        onTap: () => setState(() => _currentIndex = 11),
-                      ),
-                      _buildRedirectableChip(
-                        label: 'Chamber Address',
-                        isDone: _hasAddress,
-                        onTap: () => setState(() => _currentIndex = 11),
-                      ),
-                      _buildRedirectableChip(
-                        label: 'Visiting Schedule',
-                        isDone: _hasSchedule,
-                        onTap: () => setState(() => _currentIndex = 11),
-                      ),
-                    ],
+                    children: _getMilestones().map((m) {
+                      return _buildRedirectableChip(
+                        label: m.label,
+                        isDone: m.isDone,
+                        onTap: () => setState(() => _currentIndex = m.targetIndex),
+                      );
+                    }).toList(),
                   ),
                   const SizedBox(height: 12),
 
@@ -1120,8 +1456,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         onPressed: () {
                           OnboardingTutorialDialog.show(
                             context,
+                            partnerData: _partnerData,
                             onStartSetup: () {
-                              setState(() => _currentIndex = 11);
+                              setState(() => _currentIndex = _getSetupTargetIndex());
                             },
                           );
                         },
@@ -1149,7 +1486,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            setState(() => _currentIndex = 11);
+                            setState(() => _currentIndex = _getSetupTargetIndex());
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _profileCompletionPercent == 100
@@ -1170,7 +1507,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           label: Text(
                             _profileCompletionPercent == 100
-                                ? 'Update Profile'
+                                ? 'Update Details'
                                 : 'Complete Setup Now',
                             style: GoogleFonts.manrope(
                               fontSize: 11.5,
@@ -1219,8 +1556,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 onTap: () {
                   OnboardingTutorialDialog.show(
                     context,
+                    partnerData: _partnerData,
                     onStartSetup: () {
-                      setState(() => _currentIndex = 11);
+                      setState(() => _currentIndex = _getSetupTargetIndex());
                     },
                   );
                 },
@@ -1311,38 +1649,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 // 2. Doctor Chamber (if OPD)
                 if (hasOPD) {
+                  final bool opdContactDone = (hasOPD && hasPathology)
+                      ? _step1Done
+                      : (_step1Done && _step2Done && _step3Done);
                   shortcutWidgets.add(
                     _buildRoundShortcutItem(
                       icon: Icons.local_hospital_rounded,
                       title: 'Doctor\nChamber',
                       color: const Color(0xFF0D9488),
-                      isLocked: isLocked,
-                      onTap: () {
-                        if (isLocked) {
-                          _showProfileRequiredDialog('Doctor Chamber');
-                          return;
-                        }
-                        setState(() => _currentIndex = 3);
-                      },
+                      isLocked: false,
+                      badge: opdContactDone ? '100%' : null,
+                      onTap: () => setState(() => _currentIndex = 3),
                     ),
                   );
                 }
 
                 // 3. Pathology Clinic (if Pathology)
                 if (hasPathology) {
+                  final bool pathContactDone = (hasOPD && hasPathology)
+                      ? _step2Done
+                      : (_step1Done && _step2Done && _step3Done);
                   shortcutWidgets.add(
                     _buildRoundShortcutItem(
                       icon: Icons.medical_services_rounded,
                       title: 'Pathology\nClinic',
                       color: const Color(0xFF9333EA),
-                      isLocked: isLocked,
-                      onTap: () {
-                        if (isLocked) {
-                          _showProfileRequiredDialog('Pathology Clinic');
-                          return;
-                        }
-                        setState(() => _currentIndex = 4);
-                      },
+                      isLocked: false,
+                      badge: pathContactDone ? '100%' : null,
+                      onTap: () => setState(() => _currentIndex = 4),
                     ),
                   );
                 }
@@ -1354,14 +1688,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.person_add_rounded,
                       title: 'Add\nDoctors',
                       color: const Color(0xFF2563EB),
-                      isLocked: isLocked,
-                      onTap: () {
-                        if (isLocked) {
-                          _showProfileRequiredDialog('Doctors Directory');
-                          return;
-                        }
-                        setState(() => _currentIndex = 5);
-                      },
+                      isLocked: false,
+                      onTap: () => setState(() => _currentIndex = 5),
                     ),
                   );
                 }
@@ -1373,14 +1701,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       icon: Icons.science_rounded,
                       title: 'Add\nTests',
                       color: const Color(0xFF7C3AED),
-                      isLocked: isLocked,
-                      onTap: () {
-                        if (isLocked) {
-                          _showProfileRequiredDialog('Tests Catalog');
-                          return;
-                        }
-                        setState(() => _currentIndex = 6);
-                      },
+                      isLocked: false,
+                      onTap: () => setState(() => _currentIndex = 6),
                     ),
                   );
                 }
@@ -1737,6 +2059,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _showProfileRequiredDialog(String featureName) {
+    final targetIndex = _getSetupTargetIndex();
+    final types = _parseRegistrationTypes(_partnerData['registration_type']);
+    final String sectionName = types.contains('Doctor')
+        ? 'List Myself'
+        : (types.contains('OPD') ? 'Doctor Chamber' : 'Pathology Clinic');
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -1763,7 +2091,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         content: Text(
-          'Your profile is currently $_profileCompletionPercent% complete.\n\nPlease complete all 4 steps to 100% under "List Myself" to unlock $featureName and access all partner features.',
+          'Your profile is currently $_profileCompletionPercent% complete.\n\nPlease complete your setup under "$sectionName" to unlock $featureName and access all partner features.',
           style: GoogleFonts.manrope(
             fontSize: 13,
             color: AppColors.textSecondary,
@@ -1786,8 +2114,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.pop(ctx);
               OnboardingTutorialDialog.show(
                 context,
+                partnerData: _partnerData,
                 onStartSetup: () {
-                  setState(() => _currentIndex = 11);
+                  setState(() => _currentIndex = targetIndex);
                 },
               );
             },
@@ -1809,7 +2138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              setState(() => _currentIndex = 11);
+              setState(() => _currentIndex = targetIndex);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4F46E5),
@@ -1818,7 +2147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             child: Text(
-              'List Myself Now',
+              'Complete Setup Now',
               style: GoogleFonts.manrope(
                 fontWeight: FontWeight.w800,
                 color: Colors.white,

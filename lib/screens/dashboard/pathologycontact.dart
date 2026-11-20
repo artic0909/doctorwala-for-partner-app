@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
@@ -245,6 +246,15 @@ class _PathologyContactScreenState extends State<PathologyContactScreen> {
       if (!mounted) return;
 
       if (response['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+        final pData = await SessionManager.getPartnerData();
+        final pid = pData?['id']?.toString() ?? 'default';
+        await prefs.setBool('pathology_contact_saved_$pid', true);
+        await prefs.setBool('has_path_info_$pid', true);
+        await prefs.setBool('has_path_contact_$pid', true);
+        await prefs.setBool('has_path_addr_$pid', true);
+
+        if (!mounted) return;
         CustomAlerts.showSuccessLoader(context, response['message'] ?? 'Pathology details saved successfully!');
         await Future.delayed(const Duration(milliseconds: 1500));
         if (!mounted) return;

@@ -399,20 +399,21 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     Color? borderColor,
     Color? backgroundColor,
   }) {
+    final bool isMultiline = maxLines > 1;
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: AppColors.navy.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
         border: Border.all(
           color: borderColor ?? Colors.grey[200]!,
-          width: 1.5,
+          width: 1.2,
         ),
       ),
       child: TextField(
@@ -423,18 +424,28 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         inputFormatters: inputFormatters,
         textCapitalization: textCapitalization,
         style: GoogleFonts.manrope(
-          fontSize: 14, 
+          fontSize: 13, 
           fontWeight: FontWeight.w600,
           color: AppColors.navy,
         ),
         decoration: InputDecoration(
+          isDense: true,
           hintText: hint,
           hintStyle: GoogleFonts.manrope(
             color: Colors.grey[400], 
-            fontSize: 13,
+            fontSize: 12.5,
             fontWeight: FontWeight.w500,
           ),
-          prefixIcon: Icon(icon, color: AppColors.teal, size: 18),
+          prefixIcon: isMultiline
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Icon(icon, color: AppColors.teal, size: 17),
+                )
+              : Icon(icon, color: AppColors.teal, size: 17),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 38,
+            minHeight: 38,
+          ),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
@@ -442,11 +453,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     color: Colors.grey[400],
                     size: 18,
                   ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
                   onPressed: onToggle,
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10.5),
         ),
       ),
     );
@@ -466,30 +479,30 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           });
         }
       },
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10.5),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: AppColors.navy.withValues(alpha: 0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ],
           border: Border.all(
             color: _selectedState != null
                 ? AppColors.teal.withValues(alpha: 0.6)
                 : Colors.grey[200]!,
-            width: 1.5,
+            width: 1.2,
           ),
         ),
         child: Row(
           children: [
-            const Icon(Icons.map_rounded, color: AppColors.teal, size: 18),
+            const Icon(Icons.map_rounded, color: AppColors.teal, size: 17),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -498,12 +511,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.manrope(
                   color: _selectedState != null ? AppColors.navy : Colors.grey[400],
-                  fontSize: 13.5,
+                  fontSize: 12.5,
                   fontWeight: _selectedState != null ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.teal, size: 22),
+            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.teal, size: 20),
           ],
         ),
       ),
@@ -516,10 +529,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         // Textured Captcha Graphic Block
         Expanded(
           child: Container(
-            height: 52,
+            height: 44,
             decoration: BoxDecoration(
               color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey[300]!, width: 1.2),
             ),
             child: Stack(
@@ -534,7 +547,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   child: Text(
                     _captchaText,
                     style: GoogleFonts.specialElite(
-                      fontSize: 24,
+                      fontSize: 21,
                       fontWeight: FontWeight.bold,
                       color: AppColors.navy,
                       letterSpacing: 4.0,
@@ -545,18 +558,19 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         // Refresh Captcha Button
         Container(
-          height: 52,
-          width: 52,
+          height: 44,
+          width: 44,
           decoration: BoxDecoration(
             color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey[200]!, width: 1.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!, width: 1.2),
           ),
           child: IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.teal, size: 22),
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.teal, size: 20),
+            padding: EdgeInsets.zero,
             onPressed: _generateCaptcha,
           ),
         ),
@@ -571,16 +585,16 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   }) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey[100]!, width: 1.5),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.grey[200]!, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: AppColors.navy.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -589,12 +603,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         children: [
           // Section Title Accent Bar
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: AppColors.navy.withValues(alpha: 0.02),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
               ),
               border: Border(
                 bottom: BorderSide(color: Colors.grey[100]!, width: 1),
@@ -602,15 +616,15 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             ),
             child: Row(
               children: [
-                Icon(icon, color: AppColors.teal, size: 20),
-                const SizedBox(width: 10),
+                Icon(icon, color: AppColors.teal, size: 17),
+                const SizedBox(width: 8),
                 Text(
                   title.toUpperCase(),
                   style: GoogleFonts.manrope(
-                    fontSize: 12,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w800,
                     color: AppColors.navy,
-                    letterSpacing: 1.0,
+                    letterSpacing: 0.8,
                   ),
                 ),
               ],
@@ -619,7 +633,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           
           // Section Contents
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(13),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: children,
@@ -950,7 +964,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     hint: nameLabel,
                     icon: isDoctorType ? Icons.person_rounded : Icons.apartment_rounded,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _contactPersonController,
                     hint: 'Contact Person *',
@@ -971,7 +985,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     keyboardType: TextInputType.phone,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _emailController,
                     hint: 'Email ID *',
@@ -987,13 +1001,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                 icon: Icons.location_on_rounded,
                 children: [
                   _buildStateDropdown(),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _cityController,
                     hint: 'City *',
                     icon: Icons.location_city_rounded,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _pinCodeController,
                     hint: 'Pin Code *',
@@ -1001,20 +1015,20 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _landmarkController,
                     hint: 'Landmark *',
                     icon: Icons.assistant_navigation,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _addressController,
                     hint: 'Full Address *',
                     icon: Icons.home_work_outlined,
                     maxLines: 3,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _epCodeController,
                     hint: 'EP Code (Optional)',
@@ -1039,9 +1053,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     isObscure: _isObscure,
                     onToggle: () => setState(() => _isObscure = !_isObscure),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   _buildCaptchaBox(),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   _buildFormInput(
                     controller: _captchaInputController,
                     hint: 'Enter Captcha *',
@@ -1050,20 +1064,20 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
               // SUBMIT BUTTON
               Container(
                 width: double.infinity,
-                height: 58,
+                height: 48,
                 decoration: BoxDecoration(
                   gradient: AppColors.getStartedGradient,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.teal.withValues(alpha: 0.35),
-                      blurRadius: 15,
-                      offset: const Offset(0, 6),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -1073,13 +1087,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: _isLoading
                       ? const SizedBox(
-                          width: 22,
-                          height: 22,
+                          width: 20,
+                          height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -1091,14 +1105,14 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                             Text(
                               'Register Now',
                               style: GoogleFonts.manrope(
-                                fontSize: 17,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
                                 letterSpacing: 0.5,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
                           ],
                         ),
                 ),
