@@ -6,7 +6,6 @@ import '../../core/app_colors.dart';
 import '../../core/session_manager.dart';
 import '../../core/api_service.dart';
 import 'widgets/bottom_nav.dart';
-import 'widgets/onboarding_tutorial_dialog.dart';
 import 'opdcontact.dart';
 import 'pathologycontact.dart';
 import 'doctocontact.dart';
@@ -46,7 +45,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _step1Done = false;
   bool _step2Done = false;
   bool _step3Done = false;
-  bool _step4Done = false;
   late Map<String, dynamic> _partnerData;
 
   @override
@@ -55,33 +53,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _partnerData = widget.partnerData;
     _loadCachedProfileState();
     _fetchStats();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAndShowTutorial();
-    });
-  }
-
-  int _getSetupTargetIndex() {
-    final types = _parseRegistrationTypes(_partnerData['registration_type']);
-    final hasOPD = types.contains('OPD');
-    final hasPathology = types.contains('Pathology');
-
-    if (hasOPD && hasPathology) {
-      if (!_step1Done) return 3; // OpdContactScreen
-      if (!_step2Done) return 4; // PathologyContactScreen
-      if (!_step3Done) return 5; // ShowDoctorsScreen
-      if (!_step4Done) return 6; // ShowTestsScreen
-      return 3;
-    } else if (hasOPD) {
-      if (!_step1Done || !_step2Done || !_step3Done) return 3; // OpdContactScreen
-      if (!_step4Done) return 5; // ShowDoctorsScreen
-      return 3;
-    } else if (hasPathology) {
-      if (!_step1Done || !_step2Done || !_step3Done) return 4; // PathologyContactScreen
-      if (!_step4Done) return 6; // ShowTestsScreen
-      return 4;
-    } else {
-      return 11; // DoctorContactScreen
-    }
   }
 
   Future<void> _loadCachedProfileState() async {
@@ -93,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (mounted) {
       final pct = prefs.getInt('profile_completion_percent_$partnerId') ?? 0;
-      bool s1 = false, s2 = false, s3 = false, s4 = false;
+      bool s1 = false, s2 = false, s3 = false;
 
       if (hasOPD && hasPathology) {
         s1 = (prefs.getBool('has_opd_info_$partnerId') ?? false) &&
@@ -105,22 +76,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             (prefs.getBool('has_path_map_$partnerId') ?? false) &&
             (prefs.getBool('has_path_banner_$partnerId') ?? false);
         s3 = prefs.getBool('has_doc_added_$partnerId') ?? false;
-        s4 = prefs.getBool('has_test_added_$partnerId') ?? false;
       } else if (hasOPD) {
         s1 = prefs.getBool('has_opd_info_$partnerId') ?? false;
         s2 = (prefs.getBool('has_opd_addr_$partnerId') ?? false) && (prefs.getBool('has_opd_map_$partnerId') ?? false);
         s3 = prefs.getBool('has_opd_banner_$partnerId') ?? false;
-        s4 = prefs.getBool('has_doc_added_$partnerId') ?? false;
       } else if (hasPathology) {
         s1 = prefs.getBool('has_path_info_$partnerId') ?? false;
         s2 = (prefs.getBool('has_path_addr_$partnerId') ?? false) && (prefs.getBool('has_path_map_$partnerId') ?? false);
         s3 = prefs.getBool('has_path_banner_$partnerId') ?? false;
-        s4 = prefs.getBool('has_test_added_$partnerId') ?? false;
       } else {
         s1 = prefs.getBool('has_doc_info_$partnerId') ?? false;
         s2 = (prefs.getBool('has_fee_$partnerId') ?? false) && (prefs.getBool('has_sched_$partnerId') ?? false);
         s3 = (prefs.getBool('has_addr_$partnerId') ?? false) && (prefs.getBool('has_map_$partnerId') ?? false);
-        s4 = prefs.getBool('has_banner_$partnerId') ?? false;
       }
 
       setState(() {
@@ -128,29 +95,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _step1Done = s1;
         _step2Done = s2;
         _step3Done = s3;
-        _step4Done = s4;
       });
-    }
-  }
-
-  Future<void> _checkAndShowTutorial() async {
-    final prefs = await SharedPreferences.getInstance();
-    final bool dismissed =
-        prefs.getBool('dismiss_onboarding_tutorial_v1') ?? false;
-    final partnerId = _partnerData['id']?.toString() ?? 'default';
-    final int pct = prefs.getInt('profile_completion_percent_$partnerId') ?? 0;
-
-    if (!dismissed && pct < 100 && mounted) {
-      OnboardingTutorialDialog.show(
-        context,
-        partnerData: _partnerData,
-        autoTriggered: true,
-        onStartSetup: () {
-          setState(() {
-            _currentIndex = _getSetupTargetIndex();
-          });
-        },
-      );
     }
   }
 
@@ -476,7 +421,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _step1Done = s1;
           _step2Done = s2;
           _step3Done = s3;
-          _step4Done = s4;
           _isFetchingStats = false;
         });
       }
@@ -528,40 +472,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           iconTheme: const IconThemeData(color: AppColors.navy),
-          title: Text(
-            _currentIndex == 0
-                ? 'Dashboard'
-                : _currentIndex == 1
-                ? 'Upcoming Appointments'
-                : _currentIndex == 2
-                ? 'Account Settings'
-                : _currentIndex == 3
-                ? 'Add Doctor Chamber'
-                : _currentIndex == 4
-                ? 'Add Pathology Clinic'
-                : _currentIndex == 5
-                ? 'Doctors Directory'
-                : _currentIndex == 6
-                ? 'Tests Catalog'
-                : _currentIndex == 7
-                ? 'Medical Card Access'
-                : _currentIndex == 8
-                ? 'Patient Lists'
-                : _currentIndex == 9
-                ? 'Complete Appointments'
-                : _currentIndex == 11
-                ? 'List Myself'
-                : _currentIndex == 14
-                ? 'Cancelled Appointments'
-                : _currentIndex == 15
-                ? "Today's Bookings"
-                : 'Help & Support',
-            style: GoogleFonts.manrope(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: AppColors.navy,
-            ),
-          ),
+          title: _currentIndex == 0
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(width: 9),
+                    Flexible(
+                      child: RichText(
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Doctorwala ',
+                              style: GoogleFonts.manrope(
+                                fontSize: 16.5,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.navy,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'For Partner',
+                              style: GoogleFonts.manrope(
+                                fontSize: 15.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.teal,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Text(
+                  _currentIndex == 1
+                      ? 'Upcoming Appointments'
+                      : _currentIndex == 2
+                      ? 'Account Settings'
+                      : _currentIndex == 3
+                      ? 'Add Doctor Chamber'
+                      : _currentIndex == 4
+                      ? 'Add Pathology Clinic'
+                      : _currentIndex == 5
+                      ? 'Doctors Directory'
+                      : _currentIndex == 6
+                      ? 'Tests Catalog'
+                      : _currentIndex == 7
+                      ? 'Medical Card Access'
+                      : _currentIndex == 8
+                      ? 'Patient Lists'
+                      : _currentIndex == 9
+                      ? 'Complete Appointments'
+                      : _currentIndex == 11
+                      ? 'List Myself'
+                      : _currentIndex == 14
+                      ? 'Cancelled Appointments'
+                      : _currentIndex == 15
+                      ? "Today's Bookings"
+                      : 'Help & Support',
+                  style: GoogleFonts.manrope(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.navy,
+                  ),
+                ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
@@ -1222,71 +1208,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
         FadeInUp(
           duration: const Duration(milliseconds: 350),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1), // Royal Indigo
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Quick Shortcuts',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.navy,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ],
+              Container(
+                width: 4,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6366F1), // Royal Indigo
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              // TUTORIAL & GUIDE POPUP BUTTON
-              InkWell(
-                onTap: () {
-                  OnboardingTutorialDialog.show(
-                    context,
-                    partnerData: _partnerData,
-                    onStartSetup: () {
-                      setState(() => _currentIndex = _getSetupTargetIndex());
-                    },
-                  );
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFF6366F1).withValues(alpha: 0.25),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.help_outline_rounded,
-                        size: 13,
-                        color: Color(0xFF4F46E5),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Tutorial & Guide',
-                        style: GoogleFonts.manrope(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF4F46E5),
-                        ),
-                      ),
-                    ],
-                  ),
+              const SizedBox(width: 8),
+              Text(
+                'Quick Shortcuts',
+                style: GoogleFonts.manrope(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.navy,
+                  letterSpacing: -0.3,
                 ),
               ),
             ],
