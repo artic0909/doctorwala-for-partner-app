@@ -187,22 +187,22 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               const SizedBox(height: 12),
                               _buildAudienceItem(
                                 icon: Icons.medical_services_rounded,
-                                title: 'For Specialized Doctors',
+                                title: 'Specialized Doctors',
                                 color: AppColors.teal,
                               ),
                               _buildAudienceItem(
                                 icon: Icons.accessibility_new_rounded,
-                                title: 'For Physiotherapist & Allied Care',
+                                title: 'Physiotherapist & Allied Care',
                                 color: const Color(0xFF2563EB),
                               ),
                               _buildAudienceItem(
                                 icon: Icons.apartment_rounded,
-                                title: 'For OPD Chambers',
+                                title: 'OPD Chambers',
                                 color: AppColors.navy,
                               ),
                               _buildAudienceItem(
                                 icon: Icons.biotech_rounded,
-                                title: 'For Lab Tests Provider',
+                                title: 'Lab Tests Provider',
                                 color: const Color(0xFF0D9488),
                               ),
                             ],

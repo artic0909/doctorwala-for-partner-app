@@ -20,7 +20,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProviderStateMixin {
   int _currentStep = 1; // 1: Type Selection, 2: Form Details
-  String _selectedType = 'clinic'; // 'clinic', 'lab', 'doctor', 'both'
+  String _selectedType = 'doctor'; // 'doctor', 'physiotherapist', 'clinic', 'lab', 'both'
   late AnimationController _floatController;
 
   // Form Controllers
@@ -274,113 +274,108 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   Widget _buildTypeCard({
     required String id,
     required String title,
-    required String description,
     required IconData icon,
+    required Color color,
+    String? subtitle,
   }) {
     final isSelected = _selectedType == id;
+
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedType = id;
         });
       },
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.navy : Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? const Color(0xFFF0FDF9) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.teal : Colors.grey[200]!,
-            width: isSelected ? 2 : 1.5,
+            color: isSelected ? AppColors.teal : const Color(0xFFE5EDF5),
+            width: isSelected ? 1.8 : 1.2,
           ),
           boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: AppColors.navy.withValues(alpha: 0.12),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              )
-            else
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
+            BoxShadow(
+              color: isSelected
+                  ? AppColors.teal.withValues(alpha: 0.08)
+                  : AppColors.navy.withValues(alpha: 0.02),
+              blurRadius: isSelected ? 10 : 4,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Row(
           children: [
-            // Circular Icon Container
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              padding: const EdgeInsets.all(12),
+            // Left medical icon container styled exactly like welcome page
+            Container(
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? AppColors.teal.withValues(alpha: 0.15) 
-                    : Colors.grey[50]!,
-                shape: BoxShape.circle,
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
-                color: isSelected ? AppColors.teal : AppColors.textSecondary,
-                size: 24,
+                color: color,
+                size: 20,
               ),
             ),
-            const SizedBox(width: 16),
-            
-            // Text Details
+            const SizedBox(width: 14),
+
+            // Title and optional subtitle
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
                     style: GoogleFonts.manrope(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : AppColors.navy,
+                      fontSize: 14.5,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                      color: AppColors.navy,
                       letterSpacing: -0.2,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: GoogleFonts.manrope(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected 
-                          ? Colors.white.withValues(alpha: 0.65) 
-                          : AppColors.textSecondary,
-                      height: 1.3,
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
-            
-            const SizedBox(width: 8),
-            
-            // Circular Checkmark Indicator
+
+            const SizedBox(width: 10),
+
+            // Circular Checkmark Indicator on right
             AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 200),
               width: 22,
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppColors.teal : Colors.transparent,
+                color: isSelected ? AppColors.teal.withValues(alpha: 0.15) : Colors.transparent,
                 border: Border.all(
-                  color: isSelected ? AppColors.teal : Colors.grey[300]!,
-                  width: 2,
+                  color: isSelected ? AppColors.teal : Colors.grey.withValues(alpha: 0.35),
+                  width: 1.5,
                 ),
               ),
               child: isSelected
                   ? const Icon(
                       Icons.check_rounded,
-                      color: Colors.white,
-                      size: 13,
+                      color: AppColors.teal,
+                      size: 14,
                     )
                   : null,
             ),
@@ -635,15 +630,17 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   String _getFormTitle() {
     switch (_selectedType) {
-      case 'clinic':
-        return 'Chamber Partner';
-      case 'lab':
-        return 'Laboratory Partner';
       case 'doctor':
-        return 'Doctor Partner';
+        return 'Specialized Doctor Partner';
+      case 'physiotherapist':
+        return 'Physiotherapy & Allied Partner';
+      case 'clinic':
+        return 'OPD Chamber Partner';
+      case 'lab':
+        return 'Lab Tests Partner';
       case 'both':
       default:
-        return 'Medical Partner';
+        return 'Both OPD & Lab Tests Partner';
     }
   }
 
@@ -778,7 +775,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           child: Column(
             children: [
               Text(
-                'Choose Partner Type',
+                'Choose Service Type',
                 style: GoogleFonts.manrope(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
@@ -806,28 +803,34 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           child: Column(
             children: [
               _buildTypeCard(
+                id: 'doctor',
+                title: 'Specialized Doctors',
+                icon: Icons.medical_services_rounded,
+                color: AppColors.teal,
+              ),
+              _buildTypeCard(
+                id: 'physiotherapist',
+                title: 'Physiotherapist & Allied Care',
+                icon: Icons.accessibility_new_rounded,
+                color: const Color(0xFF2563EB),
+              ),
+              _buildTypeCard(
                 id: 'clinic',
-                title: 'Doctors Chamber',
-                description: 'Manage clinical chambers where doctors consult patients and provide healthcare checkups.',
+                title: 'OPD Chambers',
                 icon: Icons.apartment_rounded,
+                color: AppColors.navy,
               ),
               _buildTypeCard(
                 id: 'lab',
-                title: 'Pathology Lab',
-                description: 'Manage diagnostic laboratories conducting blood tests, pathology & clinical reporting.',
-                icon: Icons.science_rounded,
+                title: 'Lab Tests Provider',
+                icon: Icons.biotech_rounded,
+                color: const Color(0xFF0D9488),
               ),
               _buildTypeCard(
                 id: 'both',
-                title: 'Doctor Chamber & Pathology Both',
-                description: 'Manage integrated clinics offering both expert doctor consultations and diagnostic testing in one center.',
+                title: 'Both OPD & Lab Tests Provider',
                 icon: Icons.domain_rounded,
-              ),
-              _buildTypeCard(
-                id: 'doctor',
-                title: 'Individual Doctor',
-                description: 'For independent medical specialists, private practitioners, or consultants.',
-                icon: Icons.person_pin_rounded,
+                color: const Color(0xFF4F46E5),
               ),
             ],
           ),
@@ -891,7 +894,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   // STEP 2: REGISTRATION ACCOUNT FORM
   Widget _buildFormStep() {
     final title = _getFormTitle();
-    final nameLabel = _selectedType == 'doctor' ? 'Doctor Name *' : 'Clinic / Lab Name *';
+    final isDoctorType = _selectedType == 'doctor' || _selectedType == 'physiotherapist';
+    final nameLabel = isDoctorType ? 'Doctor / Specialist Name *' : 'Facility / Center Name *';
 
     return Column(
       key: const ValueKey(2),
@@ -942,7 +946,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                   _buildFormInput(
                     controller: _clinicNameController,
                     hint: nameLabel,
-                    icon: _selectedType == 'doctor' ? Icons.person_rounded : Icons.apartment_rounded,
+                    icon: isDoctorType ? Icons.person_rounded : Icons.apartment_rounded,
                   ),
                   const SizedBox(height: 14),
                   _buildFormInput(

@@ -12,6 +12,7 @@ class ApiService {
       case 'lab':
         return ['Pathology'];
       case 'doctor':
+      case 'physiotherapist':
         return ['Doctor'];
       case 'both':
         return ['OPD', 'Pathology'];
