@@ -396,7 +396,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                     _buildCompactField(
                       label: 'New Password',
                       controller: _newPasswordController,
-                      hint: 'Min. 6 characters',
+                      hint: 'Min. 8 characters',
                       icon: Icons.key_rounded,
                       obscureText: _isNewPasswordObscure,
                       suffixIcon: IconButton(
