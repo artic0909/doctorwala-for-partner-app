@@ -6,7 +6,6 @@ import '../../core/app_colors.dart';
 import '../../core/session_manager.dart';
 import '../../core/api_service.dart';
 import 'widgets/bottom_nav.dart';
-import 'widgets/sidebar.dart';
 import 'widgets/onboarding_tutorial_dialog.dart';
 import 'opdcontact.dart';
 import 'pathologycontact.dart';
@@ -238,6 +237,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
+          automaticallyImplyLeading: false,
+          leading: _currentIndex != 0
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    color: AppColors.navy,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _currentIndex = 0;
+                    });
+                  },
+                )
+              : null,
           shape: Border(
             bottom: BorderSide(
               color: Colors.grey.withValues(alpha: 0.1),
@@ -325,27 +339,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        drawer: CustomSidebar(
-          partnerData: _partnerData,
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-        ),
         body: _buildBody(),
         bottomNavigationBar: CustomBottomNav(
           currentIndex: _currentIndex,
           partnerData: _partnerData,
           onTap: (index) {
-            if (index == -1) {
-              _scaffoldKey.currentState?.openDrawer();
-            } else {
-              setState(() {
-                _currentIndex = index;
-              });
-            }
+            setState(() {
+              _currentIndex = index;
+            });
           },
         ),
       ),
@@ -626,17 +627,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 110),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome Header
             _buildWelcomeHeader(clinicName, contactPerson),
-            const SizedBox(height: 18),
+            const SizedBox(height: 12),
 
             // ROUND SHORTCUTS & TUTORIAL ONBOARDING SECTION
             _buildRoundShortcutsSection(),
-            const SizedBox(height: 22),
+            const SizedBox(height: 14),
 
             // Overview Header
             FadeInUp(
@@ -664,7 +665,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // Counting Cards Grid
             GridView.count(
@@ -678,7 +679,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   : (MediaQuery.sizeOf(context).width < 400 ? 1.45 : 1.55),
               children: cards,
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 14),
 
             // Certificate Section Label
             FadeInUp(
@@ -706,7 +707,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // Header / Welcome Certificate banner
             FadeInDown(
@@ -928,7 +929,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -1251,85 +1252,280 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         const SizedBox(height: 14),
 
-        // 4 ROUND ICONS WITH TEXT CONTAINER CARD
+        // ALL ROUND SHORTCUTS FROM SIDEBAR GRID CONTAINER (Patient App Style)
         FadeInUp(
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 350),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 14),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFFE8EEF5),
-                width: 1.2,
+                color: Colors.blueGrey.withAlpha(20),
+                width: 1.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.navy.withValues(alpha: 0.03),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withAlpha(6),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRoundShortcutItem(
-                  icon: Icons.assignment_ind_rounded,
-                  title: 'Complete\nProfile',
-                  color: const Color(0xFF6366F1), // Indigo
-                  isLocked: false, // Always accessible to list doctor
-                  badge: _profileCompletionPercent == 100
-                      ? '100%'
-                      : '$_profileCompletionPercent%',
-                  onTap: () {
-                    setState(() {
-                      _currentIndex = 11; // List Myself (Doctor setup)
-                    });
-                  },
-                ),
-                _buildRoundShortcutItem(
-                  icon: Icons.calendar_month_rounded,
-                  title: 'Appoint-\nments',
-                  color: AppColors.teal,
-                  isLocked: _profileCompletionPercent < 100,
-                  onTap: () {
-                    if (_profileCompletionPercent < 100) {
-                      _showProfileRequiredDialog('Appointments');
-                      return;
-                    }
-                    setState(() => _currentIndex = 1);
-                  },
-                ),
-                _buildRoundShortcutItem(
-                  icon: Icons.people_alt_rounded,
-                  title: 'Patients\nLists',
-                  color: const Color(0xFF0284C7),
-                  isLocked: _profileCompletionPercent < 100,
-                  onTap: () {
-                    if (_profileCompletionPercent < 100) {
-                      _showProfileRequiredDialog('Patient Lists');
-                      return;
-                    }
-                    setState(() => _currentIndex = 8);
-                  },
-                ),
-                _buildRoundShortcutItem(
-                  icon: Icons.credit_card_rounded,
-                  title: 'Medical\nCard',
-                  color: const Color(0xFFE11D48),
-                  isLocked: _profileCompletionPercent < 100,
-                  onTap: () {
-                    if (_profileCompletionPercent < 100) {
-                      _showProfileRequiredDialog('Medical Card Access');
-                      return;
-                    }
-                    setState(() => _currentIndex = 7);
-                  },
-                ),
-              ],
+            child: Builder(
+              builder: (context) {
+                final rawRegType = _partnerData['registration_type'];
+                final types = _parseRegistrationTypes(rawRegType);
+                final hasOPD = types.contains('OPD');
+                final hasPathology = types.contains('Pathology');
+                final hasDoctor = types.contains('Doctor');
+                final isLocked = _profileCompletionPercent < 100;
+
+                final List<Widget> shortcutWidgets = [];
+
+                // 1. Doctor Profile / Complete Profile
+                if (hasDoctor) {
+                  shortcutWidgets.add(
+                    _buildRoundShortcutItem(
+                      icon: Icons.assignment_ind_rounded,
+                      title: 'Complete\nProfile',
+                      color: const Color(0xFF4F46E5),
+                      isLocked: false,
+                      badge: _profileCompletionPercent == 100
+                          ? '100%'
+                          : '$_profileCompletionPercent%',
+                      onTap: () => setState(() => _currentIndex = 11),
+                    ),
+                  );
+                }
+
+                // 2. Doctor Chamber (if OPD)
+                if (hasOPD) {
+                  shortcutWidgets.add(
+                    _buildRoundShortcutItem(
+                      icon: Icons.local_hospital_rounded,
+                      title: 'Doctor\nChamber',
+                      color: const Color(0xFF0D9488),
+                      isLocked: isLocked,
+                      onTap: () {
+                        if (isLocked) {
+                          _showProfileRequiredDialog('Doctor Chamber');
+                          return;
+                        }
+                        setState(() => _currentIndex = 3);
+                      },
+                    ),
+                  );
+                }
+
+                // 3. Pathology Clinic (if Pathology)
+                if (hasPathology) {
+                  shortcutWidgets.add(
+                    _buildRoundShortcutItem(
+                      icon: Icons.medical_services_rounded,
+                      title: 'Pathology\nClinic',
+                      color: const Color(0xFF9333EA),
+                      isLocked: isLocked,
+                      onTap: () {
+                        if (isLocked) {
+                          _showProfileRequiredDialog('Pathology Clinic');
+                          return;
+                        }
+                        setState(() => _currentIndex = 4);
+                      },
+                    ),
+                  );
+                }
+
+                // 4. Add Doctors (if OPD)
+                if (hasOPD) {
+                  shortcutWidgets.add(
+                    _buildRoundShortcutItem(
+                      icon: Icons.person_add_rounded,
+                      title: 'Add\nDoctors',
+                      color: const Color(0xFF2563EB),
+                      isLocked: isLocked,
+                      onTap: () {
+                        if (isLocked) {
+                          _showProfileRequiredDialog('Doctors Directory');
+                          return;
+                        }
+                        setState(() => _currentIndex = 5);
+                      },
+                    ),
+                  );
+                }
+
+                // 5. Add Tests (if Pathology)
+                if (hasPathology) {
+                  shortcutWidgets.add(
+                    _buildRoundShortcutItem(
+                      icon: Icons.science_rounded,
+                      title: 'Add\nTests',
+                      color: const Color(0xFF7C3AED),
+                      isLocked: isLocked,
+                      onTap: () {
+                        if (isLocked) {
+                          _showProfileRequiredDialog('Tests Catalog');
+                          return;
+                        }
+                        setState(() => _currentIndex = 6);
+                      },
+                    ),
+                  );
+                }
+
+                // 6. Medical Card Access
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.credit_card_rounded,
+                    title: 'Medical\nCard',
+                    color: const Color(0xFFE11D48),
+                    isLocked: isLocked,
+                    onTap: () {
+                      if (isLocked) {
+                        _showProfileRequiredDialog('Medical Card Access');
+                        return;
+                      }
+                      setState(() => _currentIndex = 7);
+                    },
+                  ),
+                );
+
+                // 7. Patient Lists
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.people_alt_rounded,
+                    title: 'Patient\nLists',
+                    color: const Color(0xFF0284C7),
+                    isLocked: isLocked,
+                    onTap: () {
+                      if (isLocked) {
+                        _showProfileRequiredDialog('Patient Lists');
+                        return;
+                      }
+                      setState(() => _currentIndex = 8);
+                    },
+                  ),
+                );
+
+                // 8. Upcoming Appointments
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.pending_actions_rounded,
+                    title: 'Upcoming\nAppts',
+                    color: const Color(0xFFD97706),
+                    isLocked: isLocked,
+                    onTap: () {
+                      if (isLocked) {
+                        _showProfileRequiredDialog('Upcoming Appointments');
+                        return;
+                      }
+                      setState(() => _currentIndex = 1);
+                    },
+                  ),
+                );
+
+                // 9. Today's Bookings
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.calendar_month_rounded,
+                    title: "Today's\nBookings",
+                    color: const Color(0xFF059669),
+                    isLocked: isLocked,
+                    onTap: () {
+                      if (isLocked) {
+                        _showProfileRequiredDialog("Today's Bookings");
+                        return;
+                      }
+                      setState(() => _currentIndex = 15);
+                    },
+                  ),
+                );
+
+                // 10. Completed Appointments
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.task_alt_rounded,
+                    title: 'Completed\nAppts',
+                    color: const Color(0xFF10B981),
+                    isLocked: isLocked,
+                    onTap: () {
+                      if (isLocked) {
+                        _showProfileRequiredDialog('Completed Appointments');
+                        return;
+                      }
+                      setState(() => _currentIndex = 9);
+                    },
+                  ),
+                );
+
+                // 11. Cancelled Appointments
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.cancel_rounded,
+                    title: 'Cancelled\nAppts',
+                    color: const Color(0xFFDC2626),
+                    isLocked: isLocked,
+                    onTap: () {
+                      if (isLocked) {
+                        _showProfileRequiredDialog('Cancelled Appointments');
+                        return;
+                      }
+                      setState(() => _currentIndex = 14);
+                    },
+                  ),
+                );
+
+                // 12. Account Settings
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.manage_accounts_rounded,
+                    title: 'Account\nSettings',
+                    color: const Color(0xFF475569),
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 2),
+                  ),
+                );
+
+                // 13. Help & Support
+                shortcutWidgets.add(
+                  _buildRoundShortcutItem(
+                    icon: Icons.help_outline_rounded,
+                    title: 'Help &\nSupport',
+                    color: const Color(0xFF6366F1),
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 10),
+                  ),
+                );
+
+                // Group into rows of 4 items each (like patient app)
+                final List<List<Widget>> rows = [];
+                for (var i = 0; i < shortcutWidgets.length; i += 4) {
+                  final end = (i + 4 < shortcutWidgets.length)
+                      ? i + 4
+                      : shortcutWidgets.length;
+                  final chunk = shortcutWidgets.sublist(i, end);
+                  while (chunk.length < 4) {
+                    chunk.add(const Expanded(child: SizedBox()));
+                  }
+                  rows.add(chunk);
+                }
+
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int r = 0; r < rows.length; r++) ...[
+                      if (r > 0) const SizedBox(height: 14),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: rows[r],
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -1394,14 +1590,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 360;
-    final iconCircleSize = isCompact ? 48.0 : 54.0;
-    final iconSize = isCompact ? 22.0 : 25.0;
+    final outerSize = isCompact ? 50.0 : 54.0;
+    final innerSize = isCompact ? 36.0 : 40.0;
+    final iconSize = isCompact ? 19.0 : 21.5;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: isCompact ? 68.0 : 76.0,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1410,36 +1606,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
-                // Round Circular Icon Container
+                // Patient app style: Pure white outer circle with soft shadow & neutral border (no outer color tint)
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
-                  width: iconCircleSize,
-                  height: iconCircleSize,
+                  width: outerSize,
+                  height: outerSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isLocked
-                        ? const Color(0xFFF1F5F9)
-                        : color.withValues(alpha: 0.12),
+                    color: Colors.white,
                     border: Border.all(
                       color: isLocked
                           ? const Color(0xFFE2E8F0)
-                          : color.withValues(alpha: 0.3),
-                      width: 1.5,
+                          : Colors.blueGrey.withAlpha(20),
+                      width: 1.0,
                     ),
                     boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(8),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
                       if (!isLocked)
                         BoxShadow(
-                          color: color.withValues(alpha: 0.15),
+                          color: color.withAlpha(18),
                           blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          offset: const Offset(0, 3),
                         ),
                     ],
                   ),
                   child: Center(
-                    child: Icon(
-                      icon,
-                      color: isLocked ? const Color(0xFF94A3B8) : color,
-                      size: iconSize,
+                    child: Container(
+                      width: innerSize,
+                      height: innerSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isLocked
+                            ? const Color(0xFFF1F5F9)
+                            : color.withAlpha(18),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          icon,
+                          color: isLocked ? const Color(0xFF94A3B8) : color,
+                          size: iconSize,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -1447,34 +1658,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 // Lock badge on bottom-right if locked
                 if (isLocked)
                   Positioned(
-                    bottom: -2,
-                    right: -2,
+                    bottom: -1,
+                    right: -1,
                     child: Container(
-                      padding: const EdgeInsets.all(3.5),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF64748B),
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF64748B),
                         shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
                       ),
                       child: const Icon(
                         Icons.lock_rounded,
-                        size: 11,
+                        size: 9.5,
                         color: Colors.white,
                       ),
                     ),
                   ),
 
-                // Top badge (e.g. START or DONE)
+                // Top badge (e.g. START or 100%)
                 if (badge != null)
                   Positioned(
-                    top: -5,
+                    top: -6,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                       decoration: BoxDecoration(
                         color: badge == 'START' ? const Color(0xFF4F46E5) : AppColors.teal,
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: Colors.black.withAlpha(25),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -1493,17 +1705,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
               ],
             ),
-            const SizedBox(height: 7),
+            const SizedBox(height: 6),
 
-            // Text Label below icon
+            // Text Label below icon (matching patient app font and styling)
             Text(
               title,
               textAlign: TextAlign.center,
               maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.manrope(
-                fontSize: isCompact ? 10.5 : 11.5,
+                fontSize: isCompact ? 9.5 : 10.5,
                 fontWeight: isLocked ? FontWeight.w600 : FontWeight.w700,
-                color: isLocked ? const Color(0xFF94A3B8) : AppColors.navy,
+                color: isLocked ? const Color(0xFF94A3B8) : const Color(0xFF1E293B),
                 height: 1.15,
                 letterSpacing: -0.2,
               ),

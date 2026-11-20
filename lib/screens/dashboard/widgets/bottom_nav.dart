@@ -69,7 +69,54 @@ class _CustomBottomNavState extends State<CustomBottomNav>
   }
 
   int _findNavPos(int targetIndex, List<_BottomNavItem> items) {
-    return items.indexWhere((item) => item.index == targetIndex);
+    // 1. Direct match with items in bottom nav
+    final direct = items.indexWhere((item) => item.index == targetIndex);
+    if (direct != -1) return direct;
+
+    // 2. Map all sub-pages / shortcuts to their parent bottom nav tab:
+    int mappedIndex = targetIndex;
+
+    // Appointments/Bookings family:
+    // 1: Upcoming Appointments
+    // 9: Completed Appointments
+    // 14: Cancelled Appointments
+    // 15: Today's Bookings
+    if (targetIndex == 1 || targetIndex == 9 || targetIndex == 14 || targetIndex == 15) {
+      mappedIndex = 15;
+    }
+    // Patients / Medical Card family:
+    // 7: Medical Card Access
+    // 8: Patient Lists
+    else if (targetIndex == 7 || targetIndex == 8) {
+      mappedIndex = 8;
+    }
+    // Account / Settings / Help family:
+    // 2: Account Settings
+    // 10: Help & Support
+    else if (targetIndex == 2 || targetIndex == 10) {
+      mappedIndex = 2;
+    }
+    // Doctor / Chamber / Pathology / Services family:
+    // 3: Doctor Chamber
+    // 4: Pathology Clinic
+    // 5: Show/Add Doctors
+    // 6: Show/Add Tests
+    // 11: List Myself / Doctor Profile
+    else if (targetIndex == 3 || targetIndex == 4 || targetIndex == 5 || targetIndex == 6 || targetIndex == 11) {
+      if (items.any((item) => item.index == 11)) {
+        mappedIndex = 11;
+      } else if (items.any((item) => item.index == 5)) {
+        mappedIndex = 5;
+      } else if (items.any((item) => item.index == 6)) {
+        mappedIndex = 6;
+      }
+    }
+
+    final mappedPos = items.indexWhere((item) => item.index == mappedIndex);
+    if (mappedPos != -1) return mappedPos;
+
+    // Fallback to Home (pos 0) if no mapping found, so the notch is never empty
+    return 0;
   }
 
   List<String> _parseRegistrationTypes(dynamic rawType) {
@@ -159,10 +206,10 @@ class _CustomBottomNavState extends State<CustomBottomNav>
         color: const Color(0xFFEA580C), // Sunset Orange
       ),
       _BottomNavItem(
-        activeIcon: Icons.menu_rounded,
-        inactiveIcon: Icons.menu_rounded,
-        label: 'More',
-        index: -1, // Drawer
+        activeIcon: Icons.person_rounded,
+        inactiveIcon: Icons.person_outline_rounded,
+        label: 'Account',
+        index: 2, // Account Settings
         color: const Color(0xFF7C3AED), // Purple
       ),
     ]);
@@ -171,11 +218,6 @@ class _CustomBottomNavState extends State<CustomBottomNav>
   }
 
   void _onTabSelected(int targetIndex, int navPos) {
-    if (targetIndex == -1) {
-      widget.onTap(-1); // Open drawer without animating notch
-      return;
-    }
-
     if (widget.currentIndex != targetIndex) {
       _notchAnim = Tween<double>(
         begin: _notchAnim.value,
@@ -220,15 +262,13 @@ class _CustomBottomNavState extends State<CustomBottomNav>
         final fontSize = (10.0 * scale).clamp(9.5, 12.0);
 
         final activePos = _findNavPos(widget.currentIndex, navItems);
-        final hasActiveNotch = activePos != -1;
-        final effectivePos = hasActiveNotch ? activePos : _lastActiveNavPos;
-        final activeItem = navItems[effectivePos.clamp(0, itemCount - 1)];
+        final effectivePos = activePos.clamp(0, itemCount - 1);
+        final activeItem = navItems[effectivePos];
 
         return AnimatedBuilder(
           animation: _notchController,
           builder: (context, child) {
-            final currentPos = hasActiveNotch ? _notchAnim.value : _lastActiveNavPos.toDouble();
-            final cx = (currentPos + 0.5) * itemWidth;
+            final cx = (_notchAnim.value + 0.5) * itemWidth;
 
             return SizedBox(
               width: w,
@@ -257,7 +297,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                         child: Row(
                           children: List.generate(itemCount, (i) {
                             final item = navItems[i];
-                            final isSelected = widget.currentIndex == item.index;
+                            final isSelected = effectivePos == i;
 
                             return Expanded(
                               child: GestureDetector(
@@ -305,12 +345,11 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                   ),
 
                   // Raised Active Circular Floating Button
-                  if (hasActiveNotch)
-                    Positioned(
-                      left: cx - (activeBtnSize / 2),
-                      top: -(activeBtnSize * 0.3),
-                      child: GestureDetector(
-                        onTap: () => _onTabSelected(activeItem.index, effectivePos),
+                  Positioned(
+                    left: cx - (activeBtnSize / 2),
+                    top: -(activeBtnSize * 0.3),
+                    child: GestureDetector(
+                      onTap: () => _onTabSelected(activeItem.index, effectivePos),
                         behavior: HitTestBehavior.opaque,
                         child: Container(
                           width: activeBtnSize,
