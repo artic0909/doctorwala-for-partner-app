@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
@@ -187,6 +188,63 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
 
       if (response['success'] == true && response['contact_details'] != null) {
         final data = response['contact_details'] as Map<String, dynamic>;
+        final dName = (data['partner_doctor_name'] ??
+                partnerData?['partner_contact_person_name'] ??
+                '')
+            .toString()
+            .trim();
+        final dSpec =
+            (data['partner_doctor_specialist'] ?? '').toString().trim();
+        final dDesig =
+            (data['partner_doctor_designation'] ?? '').toString().trim();
+        final hasDoc = dName.isNotEmpty && dSpec.isNotEmpty && dDesig.isNotEmpty;
+
+        final feesVal = double.tryParse(
+                (data['partner_doctor_fees'] ?? '').toString().trim()) ??
+            0;
+        final hasFee = feesVal > 0;
+
+        final addrVal = (data['partner_doctor_address'] ??
+                partnerData?['partner_address'] ??
+                '')
+            .toString()
+            .trim();
+        final cityVal = (data['partner_doctor_city'] ??
+                partnerData?['partner_city'] ??
+                '')
+            .toString()
+            .trim();
+        final pinVal = (data['partner_doctor_pincode'] ??
+                partnerData?['partner_pincode'] ??
+                '')
+            .toString()
+            .trim();
+        final hasAddr =
+            addrVal.isNotEmpty && cityVal.isNotEmpty && pinVal.isNotEmpty;
+
+        bool hasSched = false;
+        if (data['visit_day_time'] != null && data['visit_day_time'] is List) {
+          final list = data['visit_day_time'] as List;
+          if (list.isNotEmpty) {
+            hasSched = true;
+          }
+        }
+
+        int stepsCount = 0;
+        if (hasDoc) stepsCount++;
+        if (hasFee) stepsCount++;
+        if (hasAddr) stepsCount++;
+        if (hasSched) stepsCount++;
+        final calcPct = stepsCount * 25;
+
+        final prefs = await SharedPreferences.getInstance();
+        final pid = partnerData?['id']?.toString() ?? 'default';
+        await prefs.setInt('profile_completion_percent_$pid', calcPct);
+        await prefs.setBool('has_doc_info_$pid', hasDoc);
+        await prefs.setBool('has_fee_$pid', hasFee);
+        await prefs.setBool('has_addr_$pid', hasAddr);
+        await prefs.setBool('has_sched_$pid', hasSched);
+        await prefs.setBool('doctor_contact_saved_$pid', calcPct == 100);
         setState(() {
           _serverBannerUrl = response['doctor_banner'];
           _doctorNameController.text =
@@ -435,6 +493,18 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       if (!mounted) return;
 
       if (response['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+        final pData = await SessionManager.getPartnerData();
+        final pid = pData?['id']?.toString() ?? 'default';
+        await prefs.setInt('profile_completion_percent_$pid', 100);
+        await prefs.setBool('has_doc_info_$pid', true);
+        await prefs.setBool('has_fee_$pid', true);
+        await prefs.setBool('has_addr_$pid', true);
+        await prefs.setBool('has_sched_$pid', true);
+        await prefs.setBool('doctor_contact_saved_$pid', true);
+
+        if (!mounted) return;
+
         CustomAlerts.showSuccessLoader(
           context,
           response['message'] ?? 'Doctor contact saved successfully!',
@@ -511,6 +581,68 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                 ),
               ),
               const SizedBox(height: 25),
+
+              // Step-by-Step Onboarding Roadmap Card
+              FadeInDown(
+                duration: const Duration(milliseconds: 400),
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFF0FDF4), Color(0xFFF8FAFC)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFF86EFAC),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF22C55E),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.verified_rounded,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Step-by-Step Profile Listing',
+                            style: GoogleFonts.manrope(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF15803D),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '1. Fill Doctor Info  ➔  2. Chamber Details  ➔  3. Set Visiting Schedule  ➔  4. Save Details to unlock all features.',
+                        style: GoogleFonts.manrope(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF334155),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
               // Banner Image Upload Card
               FadeInUp(
