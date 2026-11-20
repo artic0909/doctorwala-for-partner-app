@@ -100,6 +100,9 @@ class CustomBottomNav extends StatelessWidget {
       ),
     ]);
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 370 || navItems.length > 5;
+
     return ClipRRect(
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(24),
@@ -131,14 +134,19 @@ class CustomBottomNav extends StatelessWidget {
           child: SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth < 360 ? 4 : 8,
+                vertical: 6,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: navItems.map((item) {
                   return _buildNavItem(
+                    context: context,
                     icon: item.icon,
                     label: item.label,
                     index: item.index,
+                    isCompact: isCompact,
                   );
                 }).toList(),
               ),
@@ -150,11 +158,18 @@ class CustomBottomNav extends StatelessWidget {
   }
 
   Widget _buildNavItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required int index,
+    required bool isCompact,
   }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isSelected = currentIndex == index;
+    final itemHPad = isCompact ? (screenWidth < 340 ? 4.0 : 6.0) : 10.0;
+    final itemVPad = isCompact ? 4.0 : 6.0;
+    final iconSize = isCompact ? (screenWidth < 340 ? 17.0 : 18.5) : 20.0;
+    final fontSize = isCompact ? (screenWidth < 340 ? 7.5 : 8.5) : 9.0;
 
     return Expanded(
       child: GestureDetector(
@@ -167,7 +182,7 @@ class CustomBottomNav extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: itemHPad, vertical: itemVPad),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.teal.withValues(alpha: 0.1) : Colors.transparent,
                 borderRadius: BorderRadius.circular(14),
@@ -175,7 +190,7 @@ class CustomBottomNav extends StatelessWidget {
               child: Icon(
                 icon,
                 color: isSelected ? AppColors.teal : AppColors.textSecondary.withValues(alpha: 0.6),
-                size: 20,
+                size: iconSize,
               ),
             ),
             const SizedBox(height: 3),
@@ -184,7 +199,7 @@ class CustomBottomNav extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.manrope(
-                fontSize: 9,
+                fontSize: fontSize,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected ? AppColors.teal : AppColors.textSecondary.withValues(alpha: 0.6),
               ),

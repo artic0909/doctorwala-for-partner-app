@@ -763,11 +763,11 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: vitalItems.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.9,
+        childAspectRatio: MediaQuery.sizeOf(context).width < 360 ? 0.82 : 0.9,
       ),
       itemBuilder: (context, index) => vitalItems[index],
     );

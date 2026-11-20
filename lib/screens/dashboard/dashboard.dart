@@ -567,7 +567,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 1.45,
+              childAspectRatio: MediaQuery.sizeOf(context).width < 360
+                  ? 1.30
+                  : (MediaQuery.sizeOf(context).width < 400 ? 1.45 : 1.55),
               children: cards,
             ),
             const SizedBox(height: 25),
@@ -836,6 +838,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     bool isLoading = false,
     VoidCallback? onTap,
   }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompact = screenWidth < 360;
+    final cardHPad = isCompact ? 9.0 : 12.0;
+    final cardVPad = isCompact ? 9.0 : 12.0;
+    final countFontSize = isCompact ? 19.0 : 22.0;
+
     return FadeInUp(
       delay: Duration(milliseconds: delayMs),
       child: Material(
@@ -844,7 +852,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: cardHPad, vertical: cardVPad),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -906,7 +914,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         : Text(
                             count,
                             style: GoogleFonts.manrope(
-                              fontSize: 22,
+                              fontSize: countFontSize,
                               fontWeight: FontWeight.w900,
                               color: AppColors.navy,
                               height: 1.1,

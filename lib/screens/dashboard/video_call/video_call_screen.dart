@@ -501,9 +501,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
 
             // 5. Bottom Control Bar (Mic, Camera, Switch, Speaker, End)
             Positioned(
-              bottom: MediaQuery.of(context).padding.bottom + 20,
-              left: 24,
-              right: 24,
+              bottom: MediaQuery.paddingOf(context).bottom + 20,
+              left: screenSize.width < 360 ? 12 : 24,
+              right: screenSize.width < 360 ? 12 : 24,
               child: _buildControlBar(),
             ),
           ],

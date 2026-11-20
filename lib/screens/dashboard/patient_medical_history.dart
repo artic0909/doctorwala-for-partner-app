@@ -1370,7 +1370,7 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      childAspectRatio: 2.8,
+      childAspectRatio: MediaQuery.sizeOf(context).width < 360 ? 2.3 : 2.7,
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
       children: vitalWidgets,

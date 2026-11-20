@@ -111,7 +111,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final isCompact = screenWidth < 360;
+    final carouselHeight = (screenHeight * 0.18).clamp(130.0, 160.0);
+    final formPadding = isCompact ? 16.0 : 25.0;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -134,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             right: 0,
             child: Image.asset(
               AppAssets.splashBottom,
-              width: MediaQuery.of(context).size.width,
+              width: screenWidth,
               fit: BoxFit.fitWidth,
               alignment: Alignment.bottomCenter,
             ),
@@ -145,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               physics: const ClampingScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: screenHeight - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                  minHeight: screenHeight - MediaQuery.paddingOf(context).top - MediaQuery.paddingOf(context).bottom,
                 ),
                 child: Column(
                   children: [
@@ -153,38 +157,45 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     
                     // HEADER
                     FadeInDown(
-                      child: Column(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              style: GoogleFonts.manrope(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.navy,
-                                letterSpacing: -0.8,
-                              ),
-                              children: [
-                                TextSpan(text: widget.isClinic ? 'Clinic ' : 'Doctor '),
-                                TextSpan(
-                                  text: 'Partner',
-                                  style: TextStyle(color: AppColors.teal),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          children: [
+                            RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                style: GoogleFonts.manrope(
+                                  fontSize: isCompact ? 24 : 28,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.navy,
+                                  letterSpacing: -0.8,
                                 ),
-                              ],
+                                children: [
+                                  TextSpan(text: widget.isClinic ? 'Clinic ' : 'Doctor '),
+                                  TextSpan(
+                                    text: 'Partner',
+                                    style: const TextStyle(color: AppColors.teal),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            widget.isClinic
-                                ? 'DOCTOR CHAMBER & PATHOLOGY CLINICS PORTAL'
-                                : 'INDIVIDUAL DOCTORS CONSULTATION PORTAL',
-                            style: GoogleFonts.manrope(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textSecondary,
-                              letterSpacing: 1.0,
+                            const SizedBox(height: 6),
+                            Text(
+                              widget.isClinic
+                                  ? 'DOCTOR CHAMBER & PATHOLOGY CLINICS PORTAL'
+                                  : 'INDIVIDUAL DOCTORS CONSULTATION PORTAL',
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.manrope(
+                                fontSize: isCompact ? 9 : 10,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textSecondary,
+                                letterSpacing: 0.8,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
 
@@ -195,13 +206,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       delay: const Duration(milliseconds: 300),
                       child: _isLoadingCarousels 
                         ? Container(
-                            height: 155,
+                            height: carouselHeight,
                             alignment: Alignment.center,
                             child: const CircularProgressIndicator(),
                           )
                         : CarouselSlider(
                         options: CarouselOptions(
-                          height: 155,
+                          height: carouselHeight,
                           viewportFraction: 0.88,
                           enlargeCenterPage: true,
                           autoPlay: true,
@@ -307,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                     // FORM SECTION
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      padding: EdgeInsets.symmetric(horizontal: formPadding),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

@@ -33,6 +33,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final isCompact = screenWidth < 360;
+    final heroHeight = (screenHeight * 0.28).clamp(175.0, 270.0);
+    final horizontalPad = isCompact ? 18.0 : 26.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -56,7 +62,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             right: 0,
             child: Image.asset(
               AppAssets.splashBottom,
-              width: MediaQuery.of(context).size.width,
+              width: screenWidth,
               fit: BoxFit.fitWidth,
               alignment: Alignment.bottomCenter,
             ),
@@ -64,20 +70,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
           // FLOATING LOGO
           Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
-            right: 25,
+            top: MediaQuery.paddingOf(context).top + 8,
+            right: isCompact ? 16 : 24,
             child: AnimatedBuilder(
               animation: _floatController,
               builder: (context, child) {
                 return Transform.translate(
-                  offset: Offset(0, 10 * _floatController.value),
+                  offset: Offset(0, 8 * _floatController.value),
                   child: child,
                 );
               },
               child: FadeInRight(
                 child: Image.asset(
                   AppAssets.logo,
-                  height: 55,
+                  height: isCompact ? 46 : 54,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -98,7 +104,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Image.asset(
                         AppAssets.splash,
-                        height: 280,
+                        height: heroHeight,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -106,7 +112,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                   // Marketing Content
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    padding: EdgeInsets.symmetric(horizontal: horizontalPad),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -117,7 +123,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               Text(
                                 'WELCOME TO',
                                 style: GoogleFonts.manrope(
-                                  fontSize: 12,
+                                  fontSize: isCompact ? 11 : 12,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.teal,
                                   letterSpacing: 2.0,
@@ -127,7 +133,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               Text(
                                 'Doctorwala',
                                 style: GoogleFonts.manrope(
-                                  fontSize: 44,
+                                  fontSize: (screenWidth * 0.105).clamp(30.0, 42.0),
                                   fontWeight: FontWeight.w900,
                                   color: AppColors.navy,
                                   height: 1.1,
@@ -138,7 +144,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               Text(
                                 'Medical Ecosystem Partner Portal',
                                 style: GoogleFonts.manrope(
-                                  fontSize: 14,
+                                  fontSize: isCompact ? 12.5 : 14,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textSecondary,
                                   letterSpacing: -0.2,

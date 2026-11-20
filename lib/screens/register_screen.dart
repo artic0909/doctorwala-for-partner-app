@@ -649,7 +649,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final isCompact = screenWidth < 360;
+    final horizontalPad = isCompact ? 16.0 : 25.0;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -672,7 +675,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             right: 0,
             child: Image.asset(
               AppAssets.splashBottom,
-              width: MediaQuery.of(context).size.width,
+              width: screenWidth,
               fit: BoxFit.fitWidth,
               alignment: Alignment.bottomCenter,
             ),
@@ -684,10 +687,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               physics: const ClampingScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: screenHeight - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                  minHeight: screenHeight - MediaQuery.paddingOf(context).top - MediaQuery.paddingOf(context).bottom,
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPad),
                   child: Column(
                     children: [
                       const SizedBox(height: 70), // Header spacing

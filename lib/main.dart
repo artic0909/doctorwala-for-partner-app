@@ -20,6 +20,19 @@ class DoctorWalaPartnerApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
       ),
+      builder: (context, child) {
+        // Enforce safe responsive text scaling so system accessibility settings
+        // do not break mobile UI layouts across varying phone screen sizes
+        final mediaQueryData = MediaQuery.of(context);
+        final clampedScale = mediaQueryData.textScaler.clamp(
+          minScaleFactor: 0.85,
+          maxScaleFactor: 1.15,
+        );
+        return MediaQuery(
+          data: mediaQueryData.copyWith(textScaler: clampedScale),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: const SplashScreen(),
     );
   }
