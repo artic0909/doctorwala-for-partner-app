@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/app_colors.dart';
 
 class CustomBottomNav extends StatefulWidget {
@@ -166,24 +167,24 @@ class _CustomBottomNavState extends State<CustomBottomNav>
 
     if (hasDoctor) {
       items.add(_BottomNavItem(
-        activeIcon: Icons.assignment_ind_rounded,
-        inactiveIcon: Icons.assignment_ind_outlined,
+        activeIcon: Icons.medical_information_rounded,
+        inactiveIcon: Icons.medical_information_outlined,
         label: 'List Myself',
         index: 11,
         color: const Color(0xFF4F46E5), // Indigo
       ));
     } else if (hasOPD) {
       items.add(_BottomNavItem(
-        activeIcon: Icons.person_add_rounded,
-        inactiveIcon: Icons.person_add_outlined,
+        activeIcon: Icons.medical_services_rounded,
+        inactiveIcon: Icons.medical_services_outlined,
         label: 'Doctors',
         index: 5,
         color: const Color(0xFF4F46E5), // Indigo
       ));
     } else if (hasPathology) {
       items.add(_BottomNavItem(
-        activeIcon: Icons.science_rounded,
-        inactiveIcon: Icons.science_outlined,
+        activeIcon: Icons.biotech_rounded,
+        inactiveIcon: Icons.biotech_outlined,
         label: 'Tests',
         index: 6,
         color: const Color(0xFF4F46E5), // Indigo
@@ -192,22 +193,22 @@ class _CustomBottomNavState extends State<CustomBottomNav>
 
     items.addAll([
       _BottomNavItem(
-        activeIcon: Icons.calendar_month_rounded,
-        inactiveIcon: Icons.calendar_today_outlined,
+        activeIcon: Icons.event_available_rounded,
+        inactiveIcon: Icons.event_available_outlined,
         label: 'Bookings',
         index: 15,
         color: const Color(0xFF00897B), // Teal
       ),
       _BottomNavItem(
-        activeIcon: Icons.people_rounded,
-        inactiveIcon: Icons.people_outline_rounded,
+        activeIcon: Icons.people_alt_rounded,
+        inactiveIcon: Icons.people_alt_outlined,
         label: 'Patients',
         index: 8,
         color: const Color(0xFFEA580C), // Sunset Orange
       ),
       _BottomNavItem(
-        activeIcon: Icons.person_rounded,
-        inactiveIcon: Icons.person_outline_rounded,
+        activeIcon: Icons.account_circle_rounded,
+        inactiveIcon: Icons.account_circle_outlined,
         label: 'Account',
         index: 2, // Account Settings
         color: const Color(0xFF7C3AED), // Purple
@@ -322,7 +323,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                                         item.label,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
+                                        style: GoogleFonts.manrope(
                                           color: isSelected
                                               ? item.color
                                               : const Color(0xFF64748B),
@@ -330,7 +331,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                                           fontWeight: isSelected
                                               ? FontWeight.w800
                                               : FontWeight.w600,
-                                          letterSpacing: 0.1,
+                                          letterSpacing: -0.1,
                                         ),
                                       ),
                                     ],
