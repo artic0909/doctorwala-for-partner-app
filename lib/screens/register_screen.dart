@@ -9,7 +9,7 @@ import '../core/api_service.dart';
 import '../core/session_manager.dart';
 import '../core/custom_alerts.dart';
 import 'login_screen.dart';
-import 'coupon_screen.dart';
+import 'dashboard/dashboard.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -176,9 +176,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => CouponScreen(
-              partnerData: response['partner'],
-              token: response['token'] ?? '',
+            builder: (context) => DashboardScreen(
+              partnerData: response['partner'] as Map<String, dynamic>,
             ),
           ),
         );

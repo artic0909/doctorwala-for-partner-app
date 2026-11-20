@@ -10,7 +10,6 @@ import '../core/custom_alerts.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import 'dashboard/dashboard.dart';
-import 'coupon_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isClinic;
@@ -489,7 +488,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       if (response['success'] == true) {
         CustomAlerts.showSuccessLoader(context, response['message'] ?? 'Login successful!');
         final partnerData = response['partner'] as Map<String, dynamic>;
-        final String status = partnerData['status']?.toString() ?? 'Pending';
         final String token = response['token'] ?? '';
 
         // Save persistent session locally
@@ -505,24 +503,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         if (!mounted) return;
         Navigator.pop(context); // Dismiss loader
 
-        if (status.toLowerCase() == 'pending') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CouponScreen(
-                partnerData: partnerData,
-                token: token,
-              ),
-            ),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardScreen(partnerData: partnerData),
-            ),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardScreen(partnerData: partnerData),
+          ),
+        );
       } else {
         CustomAlerts.showError(context, response['message'] ?? 'Incorrect credentials.');
       }

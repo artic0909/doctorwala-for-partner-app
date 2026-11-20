@@ -5,7 +5,6 @@ import '../core/app_colors.dart';
 import '../core/app_assets.dart';
 import '../core/session_manager.dart';
 import 'welcome_screen.dart';
-import 'coupon_screen.dart';
 import 'dashboard/dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -122,26 +121,12 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) return;
 
       if (token != null && partnerData != null) {
-        final String status = partnerData['status']?.toString() ?? 'Pending';
-
-        if (status.toLowerCase() == 'pending') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CouponScreen(
-                partnerData: partnerData,
-                token: token,
-              ),
-            ),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardScreen(partnerData: partnerData),
-            ),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardScreen(partnerData: partnerData),
+          ),
+        );
         return;
       }
     }
