@@ -619,6 +619,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
     ];
 
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final dynamicOverviewToCertGap = (screenHeight * 0.024).clamp(16.0, 26.0);
+    final dynamicLabelToCardGap = (screenHeight * 0.012).clamp(8.0, 12.0);
+
     return RefreshIndicator(
       onRefresh: _fetchStats,
       color: AppColors.teal,
@@ -627,7 +631,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 100),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 12,
+          bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -679,7 +688,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   : (MediaQuery.sizeOf(context).width < 400 ? 1.45 : 1.55),
               children: cards,
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: dynamicOverviewToCertGap),
 
             // Certificate Section Label
             FadeInUp(
@@ -707,7 +716,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: dynamicLabelToCardGap),
 
             // Header / Welcome Certificate banner
             FadeInDown(
@@ -929,7 +938,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
           ],
         ),
       ),

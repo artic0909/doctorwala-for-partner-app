@@ -477,7 +477,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       children: [
         SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 120),
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+          ),
           child: FadeInUp(
             duration: const Duration(milliseconds: 400),
             child: Form(

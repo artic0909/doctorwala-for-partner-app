@@ -395,7 +395,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                               _filteredDoctors.isEmpty
                                   ? _buildEmptyState()
                                   : ListView.builder(
-                                    padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 110),
+                                    padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 135),
                                     itemCount: _filteredDoctors.length,
                                     itemBuilder: (context, idx) {
                                       final doc =

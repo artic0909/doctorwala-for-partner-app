@@ -137,7 +137,7 @@ class _HelpScreenState extends State<HelpScreen> {
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 135),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

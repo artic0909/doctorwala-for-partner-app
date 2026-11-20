@@ -199,7 +199,7 @@ class _MedicalCardAccessTabState extends State<MedicalCardAccessTab> {
                   left: 20,
                   right: 20,
                   top: 16,
-                  bottom: 120,
+                  bottom: 135,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -311,7 +311,7 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
                             isFilterEmpty: isFiltered,
                           )
                         : ListView.builder(
-                            padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
+                            padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 135),
                             itemCount: filteredHistories.length,
                             itemBuilder: (context, index) {
                               final record = filteredHistories[index] as Map<String, dynamic>;
@@ -336,7 +336,7 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
                             isFilterEmpty: isFiltered,
                           )
                         : ListView.builder(
-                            padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 120),
+                            padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 135),
                             itemCount: filteredSystemPrescriptions.length,
                             itemBuilder: (context, index) {
                               final pres = filteredSystemPrescriptions[index] as Map<String, dynamic>;

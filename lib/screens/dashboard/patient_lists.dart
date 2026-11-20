@@ -220,7 +220,7 @@ class _PatientListsTabState extends State<PatientListsTab> {
                     child: _filteredRequests.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
-                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 110),
+                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 135),
                             itemCount: _filteredRequests.length,
                             physics: const AlwaysScrollableScrollPhysics(),
                             itemBuilder: (context, index) {
