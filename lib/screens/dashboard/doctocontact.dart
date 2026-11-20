@@ -9,6 +9,7 @@ import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
+import '../../core/state_picker_modal.dart';
 
 class DoctorContactScreen extends StatefulWidget {
   const DoctorContactScreen({super.key});
@@ -1330,63 +1331,60 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
           ],
         ),
         const SizedBox(height: 4),
-        SizedBox(
-          height: 42,
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedState,
-            isExpanded: true,
-            hint: Text(
-              'Select State',
-              style: GoogleFonts.manrope(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF94A3B8),
+        InkWell(
+          onTap: () async {
+            final chosen = await showSearchableStatePicker(
+              context: context,
+              currentState: _selectedState,
+              states: _states,
+            );
+            if (chosen != null) {
+              setState(() {
+                _selectedState = chosen;
+              });
+            }
+          },
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _selectedState != null
+                    ? AppColors.teal.withAlpha(140)
+                    : const Color(0xFFE2E8F0),
+                width: 1.0,
               ),
             ),
-            icon: const Icon(
-              Icons.arrow_drop_down_rounded,
-              color: Color(0xFF64748B),
-              size: 20,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              filled: true,
-              fillColor: const Color(0xFFF8FAFC),
-              prefixIcon: const Icon(
-                Icons.map_outlined,
-                color: Color(0xFF64748B),
-                size: 16.5,
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: AppColors.teal, width: 1.4),
-              ),
-            ),
-            items: _states.map((state) {
-              return DropdownMenuItem<String>(
-                value: state,
-                child: Text(
-                  state,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.navy,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.map_outlined,
+                  color: Color(0xFF64748B),
+                  size: 16.5,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedState ?? 'Select State',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12.5,
+                      fontWeight: _selectedState != null ? FontWeight.w600 : FontWeight.w500,
+                      color: _selectedState != null ? AppColors.navy : const Color(0xFF94A3B8),
+                    ),
                   ),
                 ),
-              );
-            }).toList(),
-            onChanged: (val) {
-              setState(() {
-                _selectedState = val;
-              });
-            },
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Color(0xFF64748B),
+                  size: 20,
+                ),
+              ],
+            ),
           ),
         ),
       ],

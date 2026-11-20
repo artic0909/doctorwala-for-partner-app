@@ -8,6 +8,7 @@ import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
+import '../../core/state_picker_modal.dart';
 
 class OpdContactScreen extends StatefulWidget {
   const OpdContactScreen({super.key});
@@ -593,56 +594,58 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
   }
 
   Widget _buildStateDropdown() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.01),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return InkWell(
+      onTap: () async {
+        final chosen = await showSearchableStatePicker(
+          context: context,
+          currentState: _selectedState,
+          states: _states,
+        );
+        if (chosen != null) {
+          setState(() {
+            _selectedState = chosen;
+          });
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.navy.withValues(alpha: 0.01),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: _selectedState != null
+                ? AppColors.teal.withValues(alpha: 0.6)
+                : Colors.grey[200]!,
+            width: 1.5,
           ),
-        ],
-        border: Border.all(color: Colors.grey[200]!, width: 1.5),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedState,
-          isExpanded: true,
-          hint: Row(
-            children: [
-              const Icon(Icons.map_rounded, color: AppColors.teal, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Select State *',
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.map_rounded, color: AppColors.teal, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _selectedState ?? 'Select State *',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.manrope(
-                  color: Colors.grey[400],
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
+                  color: _selectedState != null ? AppColors.navy : Colors.grey[400],
+                  fontSize: 13.5,
+                  fontWeight: _selectedState != null ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
-            ],
-          ),
-          icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.teal, size: 28),
-          style: GoogleFonts.manrope(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.navy,
-          ),
-          items: _states.map((String state) {
-            return DropdownMenuItem<String>(
-              value: state,
-              child: Text(state),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedState = value;
-            });
-          },
+            ),
+            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.teal, size: 22),
+          ],
         ),
       ),
     );
