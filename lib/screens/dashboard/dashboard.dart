@@ -23,18 +23,6 @@ import 'medical_card_access.dart';
 import 'patient_lists.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class _MilestoneItem {
-  final String label;
-  final bool isDone;
-  final int targetIndex;
-
-  const _MilestoneItem({
-    required this.label,
-    required this.isDone,
-    required this.targetIndex,
-  });
-}
-
 class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
 
@@ -54,7 +42,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _todayCount = 0;
   bool _isFetchingStats = false;
   bool _hasUnreadNotifications = false;
-  bool _isTutorialBannerDismissed = false;
   int _profileCompletionPercent = 0;
   bool _step1Done = false;
   bool _step2Done = false;
@@ -71,106 +58,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndShowTutorial();
     });
-  }
-
-  List<_MilestoneItem> _getMilestones() {
-    final types = _parseRegistrationTypes(_partnerData['registration_type']);
-    final hasOPD = types.contains('OPD');
-    final hasPathology = types.contains('Pathology');
-
-    if (hasOPD && hasPathology) {
-      return [
-        _MilestoneItem(
-          label: 'OPD Chamber',
-          isDone: _step1Done,
-          targetIndex: 3,
-        ),
-        _MilestoneItem(
-          label: 'Pathology Lab',
-          isDone: _step2Done,
-          targetIndex: 4,
-        ),
-        _MilestoneItem(
-          label: 'Add Doctors',
-          isDone: _step3Done,
-          targetIndex: 5,
-        ),
-        _MilestoneItem(
-          label: 'Add Tests',
-          isDone: _step4Done,
-          targetIndex: 6,
-        ),
-      ];
-    } else if (hasOPD) {
-      return [
-        _MilestoneItem(
-          label: 'Clinic Info',
-          isDone: _step1Done,
-          targetIndex: 3,
-        ),
-        _MilestoneItem(
-          label: 'Contact Details',
-          isDone: _step2Done,
-          targetIndex: 3,
-        ),
-        _MilestoneItem(
-          label: 'Chamber Address',
-          isDone: _step3Done,
-          targetIndex: 3,
-        ),
-        _MilestoneItem(
-          label: 'Add Doctors',
-          isDone: _step4Done,
-          targetIndex: 5,
-        ),
-      ];
-    } else if (hasPathology) {
-      return [
-        _MilestoneItem(
-          label: 'Lab Info',
-          isDone: _step1Done,
-          targetIndex: 4,
-        ),
-        _MilestoneItem(
-          label: 'Contact Details',
-          isDone: _step2Done,
-          targetIndex: 4,
-        ),
-        _MilestoneItem(
-          label: 'Lab Address',
-          isDone: _step3Done,
-          targetIndex: 4,
-        ),
-        _MilestoneItem(
-          label: 'Add Tests',
-          isDone: _step4Done,
-          targetIndex: 6,
-        ),
-      ];
-    } else {
-      return [
-        _MilestoneItem(
-          label: 'Doctor Info',
-          isDone: _step1Done,
-          targetIndex: 11,
-        ),
-        _MilestoneItem(
-          label: 'Fees (INR)',
-          isDone: _step2Done,
-          targetIndex: 11,
-        ),
-        _MilestoneItem(
-          label: 'Chamber Address',
-          isDone: _step3Done,
-          targetIndex: 11,
-        ),
-        _MilestoneItem(
-          label: 'Visiting Schedule',
-          isDone: _step4Done,
-          targetIndex: 11,
-        ),
-      ];
-    }
   }
 
   int _getSetupTargetIndex() {
@@ -197,32 +84,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  String _getProfileSetupTitle() {
-    final types = _parseRegistrationTypes(_partnerData['registration_type']);
-    if (types.contains('OPD') && types.contains('Pathology')) {
-      return 'Clinic & Lab Profile Setup';
-    } else if (types.contains('OPD')) {
-      return 'OPD Chamber Profile Setup';
-    } else if (types.contains('Pathology')) {
-      return 'Pathology Lab Profile Setup';
-    } else {
-      return 'Doctor Profile Setup';
-    }
-  }
-
-  String _getProfileSetupSubtitle() {
-    final types = _parseRegistrationTypes(_partnerData['registration_type']);
-    if (types.contains('OPD') && types.contains('Pathology')) {
-      return 'Complete OPD & Lab contact details and add services to unlock bookings';
-    } else if (types.contains('OPD')) {
-      return 'Complete chamber details & add doctors to unlock patient bookings';
-    } else if (types.contains('Pathology')) {
-      return 'Complete laboratory details & add tests to unlock diagnostic bookings';
-    } else {
-      return 'Complete all 4 steps to unlock Appointments and Patient Records';
-    }
-  }
-
   Future<void> _loadCachedProfileState() async {
     final prefs = await SharedPreferences.getInstance();
     final partnerId = _partnerData['id']?.toString() ?? 'default';
@@ -235,25 +96,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bool s1 = false, s2 = false, s3 = false, s4 = false;
 
       if (hasOPD && hasPathology) {
-        s1 = prefs.getBool('opd_contact_saved_$partnerId') ?? false;
-        s2 = prefs.getBool('pathology_contact_saved_$partnerId') ?? false;
+        s1 = (prefs.getBool('has_opd_info_$partnerId') ?? false) &&
+            (prefs.getBool('has_opd_addr_$partnerId') ?? false) &&
+            (prefs.getBool('has_opd_map_$partnerId') ?? false) &&
+            (prefs.getBool('has_opd_banner_$partnerId') ?? false);
+        s2 = (prefs.getBool('has_path_info_$partnerId') ?? false) &&
+            (prefs.getBool('has_path_addr_$partnerId') ?? false) &&
+            (prefs.getBool('has_path_map_$partnerId') ?? false) &&
+            (prefs.getBool('has_path_banner_$partnerId') ?? false);
         s3 = prefs.getBool('has_doc_added_$partnerId') ?? false;
         s4 = prefs.getBool('has_test_added_$partnerId') ?? false;
       } else if (hasOPD) {
-        s1 = prefs.getBool('has_opd_info_$partnerId') ?? (prefs.getBool('opd_contact_saved_$partnerId') ?? false);
-        s2 = prefs.getBool('has_opd_contact_$partnerId') ?? (prefs.getBool('opd_contact_saved_$partnerId') ?? false);
-        s3 = prefs.getBool('has_opd_addr_$partnerId') ?? (prefs.getBool('opd_contact_saved_$partnerId') ?? false);
+        s1 = prefs.getBool('has_opd_info_$partnerId') ?? false;
+        s2 = (prefs.getBool('has_opd_addr_$partnerId') ?? false) && (prefs.getBool('has_opd_map_$partnerId') ?? false);
+        s3 = prefs.getBool('has_opd_banner_$partnerId') ?? false;
         s4 = prefs.getBool('has_doc_added_$partnerId') ?? false;
       } else if (hasPathology) {
-        s1 = prefs.getBool('has_path_info_$partnerId') ?? (prefs.getBool('pathology_contact_saved_$partnerId') ?? false);
-        s2 = prefs.getBool('has_path_contact_$partnerId') ?? (prefs.getBool('pathology_contact_saved_$partnerId') ?? false);
-        s3 = prefs.getBool('has_path_addr_$partnerId') ?? (prefs.getBool('pathology_contact_saved_$partnerId') ?? false);
+        s1 = prefs.getBool('has_path_info_$partnerId') ?? false;
+        s2 = (prefs.getBool('has_path_addr_$partnerId') ?? false) && (prefs.getBool('has_path_map_$partnerId') ?? false);
+        s3 = prefs.getBool('has_path_banner_$partnerId') ?? false;
         s4 = prefs.getBool('has_test_added_$partnerId') ?? false;
       } else {
         s1 = prefs.getBool('has_doc_info_$partnerId') ?? false;
-        s2 = prefs.getBool('has_fee_$partnerId') ?? false;
-        s3 = prefs.getBool('has_addr_$partnerId') ?? false;
-        s4 = prefs.getBool('has_sched_$partnerId') ?? false;
+        s2 = (prefs.getBool('has_fee_$partnerId') ?? false) && (prefs.getBool('has_sched_$partnerId') ?? false);
+        s3 = (prefs.getBool('has_addr_$partnerId') ?? false) && (prefs.getBool('has_map_$partnerId') ?? false);
+        s4 = prefs.getBool('has_banner_$partnerId') ?? false;
       }
 
       setState(() {
@@ -377,22 +244,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
       int percent = 0;
 
       if (hasOPD && hasPathology) {
-        bool opdDone = prefs.getBool('opd_contact_saved_$partnerId') ?? false;
+        bool opdInfo = prefs.getBool('has_opd_info_$partnerId') ?? false;
+        bool opdAddr = prefs.getBool('has_opd_addr_$partnerId') ?? false;
+        bool opdMap = prefs.getBool('has_opd_map_$partnerId') ?? false;
+        bool opdBanner = prefs.getBool('has_opd_banner_$partnerId') ?? false;
+
         if (opdProfile != null && opdProfile['success'] == true && opdProfile['contact_details'] != null) {
           final cd = opdProfile['contact_details'] as Map<String, dynamic>;
-          final name = (cd['clinic_name'] ?? '').toString().trim();
-          final addr = (cd['clinic_address'] ?? '').toString().trim();
-          if (name.isNotEmpty && addr.isNotEmpty) opdDone = true;
+          final name = (cd['clinic_name'] ?? _partnerData['partner_clinic_name'] ?? '').toString().trim();
+          final regType = (cd['clinic_registration_type'] ?? '').toString().trim();
+          final person = (cd['clinic_contact_person_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
+          final phone = (cd['clinic_mobile_number'] ?? _partnerData['partner_mobile_number'] ?? '').toString().trim();
+          opdInfo = name.isNotEmpty && regType.isNotEmpty && person.isNotEmpty && phone.isNotEmpty;
+
+          final addr = (cd['clinic_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
+          final city = (cd['clinic_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
+          final pin = (cd['clinic_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
+          opdAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+
+          final mapLink = (cd['clinic_google_map_link'] ?? '').toString().trim();
+          opdMap = mapLink.isNotEmpty;
+
+          final bannerUrl = opdProfile['opd_banner'] ?? cd['opd_banner'];
+          opdBanner = bannerUrl != null && bannerUrl.toString().trim().isNotEmpty;
         }
 
-        bool pathDone = prefs.getBool('pathology_contact_saved_$partnerId') ?? false;
+        bool pathInfo = prefs.getBool('has_path_info_$partnerId') ?? false;
+        bool pathAddr = prefs.getBool('has_path_addr_$partnerId') ?? false;
+        bool pathMap = prefs.getBool('has_path_map_$partnerId') ?? false;
+        bool pathBanner = prefs.getBool('has_path_banner_$partnerId') ?? false;
+
         if (pathProfile != null && pathProfile['success'] == true && pathProfile['contact_details'] != null) {
           final cd = pathProfile['contact_details'] as Map<String, dynamic>;
-          final name = (cd['clinic_name'] ?? '').toString().trim();
-          final addr = (cd['clinic_address'] ?? '').toString().trim();
-          if (name.isNotEmpty && addr.isNotEmpty) pathDone = true;
+          final name = (cd['clinic_name'] ?? _partnerData['partner_clinic_name'] ?? '').toString().trim();
+          final regType = (cd['clinic_registration_type'] ?? '').toString().trim();
+          final person = (cd['clinic_contact_person_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
+          final phone = (cd['clinic_mobile_number'] ?? _partnerData['partner_mobile_number'] ?? '').toString().trim();
+          pathInfo = name.isNotEmpty && regType.isNotEmpty && person.isNotEmpty && phone.isNotEmpty;
+
+          final addr = (cd['clinic_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
+          final city = (cd['clinic_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
+          final pin = (cd['clinic_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
+          pathAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+
+          final mapLink = (cd['clinic_google_map_link'] ?? '').toString().trim();
+          pathMap = mapLink.isNotEmpty;
+
+          final bannerUrl = pathProfile['pathology_banner'] ?? cd['pathology_banner'];
+          pathBanner = bannerUrl != null && bannerUrl.toString().trim().isNotEmpty;
         }
 
+        final bool opdDone = opdInfo && opdAddr && opdMap && opdBanner;
+        final bool pathDone = pathInfo && pathAddr && pathMap && pathBanner;
         final bool docAdded = docCount > 0;
         final bool testAdded = testCount > 0;
 
@@ -409,36 +312,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
         percent = steps * 25;
 
         await prefs.setInt('profile_completion_percent_$partnerId', percent);
-        await prefs.setBool('opd_contact_saved_$partnerId', s1);
-        await prefs.setBool('pathology_contact_saved_$partnerId', s2);
+        await prefs.setBool('has_opd_info_$partnerId', opdInfo);
+        await prefs.setBool('has_opd_addr_$partnerId', opdAddr);
+        await prefs.setBool('has_opd_map_$partnerId', opdMap);
+        await prefs.setBool('has_opd_banner_$partnerId', opdBanner);
+        await prefs.setBool('opd_contact_saved_$partnerId', opdDone);
+
+        await prefs.setBool('has_path_info_$partnerId', pathInfo);
+        await prefs.setBool('has_path_addr_$partnerId', pathAddr);
+        await prefs.setBool('has_path_map_$partnerId', pathMap);
+        await prefs.setBool('has_path_banner_$partnerId', pathBanner);
+        await prefs.setBool('pathology_contact_saved_$partnerId', pathDone);
+
         await prefs.setBool('has_doc_added_$partnerId', s3);
         await prefs.setBool('has_test_added_$partnerId', s4);
       } else if (hasOPD) {
         bool opdInfo = prefs.getBool('has_opd_info_$partnerId') ?? false;
-        bool opdContact = prefs.getBool('has_opd_contact_$partnerId') ?? false;
-        bool opdAddr = prefs.getBool('has_opd_addr_$partnerId') ?? false;
+        bool opdAddrMap = (prefs.getBool('has_opd_addr_$partnerId') ?? false) && (prefs.getBool('has_opd_map_$partnerId') ?? false);
+        bool opdBanner = prefs.getBool('has_opd_banner_$partnerId') ?? false;
 
         if (opdProfile != null && opdProfile['success'] == true && opdProfile['contact_details'] != null) {
           final cd = opdProfile['contact_details'] as Map<String, dynamic>;
           final name = (cd['clinic_name'] ?? _partnerData['partner_clinic_name'] ?? '').toString().trim();
           final regType = (cd['clinic_registration_type'] ?? '').toString().trim();
-          opdInfo = name.isNotEmpty && regType.isNotEmpty;
-
           final person = (cd['clinic_contact_person_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
           final phone = (cd['clinic_mobile_number'] ?? _partnerData['partner_mobile_number'] ?? '').toString().trim();
-          opdContact = person.isNotEmpty && phone.isNotEmpty;
+          opdInfo = name.isNotEmpty && regType.isNotEmpty && person.isNotEmpty && phone.isNotEmpty;
 
           final addr = (cd['clinic_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
           final city = (cd['clinic_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
           final pin = (cd['clinic_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
-          opdAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+          final mapLink = (cd['clinic_google_map_link'] ?? '').toString().trim();
+          opdAddrMap = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty && mapLink.isNotEmpty;
+
+          final bannerUrl = opdProfile['opd_banner'] ?? cd['opd_banner'];
+          opdBanner = bannerUrl != null && bannerUrl.toString().trim().isNotEmpty;
         }
 
         final bool docAdded = docCount > 0;
 
         s1 = opdInfo;
-        s2 = opdContact;
-        s3 = opdAddr;
+        s2 = opdAddrMap;
+        s3 = opdBanner;
         s4 = docAdded;
 
         int steps = 0;
@@ -450,36 +365,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         await prefs.setInt('profile_completion_percent_$partnerId', percent);
         await prefs.setBool('has_opd_info_$partnerId', s1);
-        await prefs.setBool('has_opd_contact_$partnerId', s2);
-        await prefs.setBool('has_opd_addr_$partnerId', s3);
+        await prefs.setBool('has_opd_addr_$partnerId', s2);
+        await prefs.setBool('has_opd_map_$partnerId', s2);
+        await prefs.setBool('has_opd_banner_$partnerId', s3);
         await prefs.setBool('has_doc_added_$partnerId', s4);
         await prefs.setBool('opd_contact_saved_$partnerId', s1 && s2 && s3);
       } else if (hasPathology) {
         bool pathInfo = prefs.getBool('has_path_info_$partnerId') ?? false;
-        bool pathContact = prefs.getBool('has_path_contact_$partnerId') ?? false;
-        bool pathAddr = prefs.getBool('has_path_addr_$partnerId') ?? false;
+        bool pathAddrMap = (prefs.getBool('has_path_addr_$partnerId') ?? false) && (prefs.getBool('has_path_map_$partnerId') ?? false);
+        bool pathBanner = prefs.getBool('has_path_banner_$partnerId') ?? false;
 
         if (pathProfile != null && pathProfile['success'] == true && pathProfile['contact_details'] != null) {
           final cd = pathProfile['contact_details'] as Map<String, dynamic>;
           final name = (cd['clinic_name'] ?? _partnerData['partner_clinic_name'] ?? '').toString().trim();
           final regType = (cd['clinic_registration_type'] ?? '').toString().trim();
-          pathInfo = name.isNotEmpty && regType.isNotEmpty;
-
           final person = (cd['clinic_contact_person_name'] ?? _partnerData['partner_contact_person_name'] ?? '').toString().trim();
           final phone = (cd['clinic_mobile_number'] ?? _partnerData['partner_mobile_number'] ?? '').toString().trim();
-          pathContact = person.isNotEmpty && phone.isNotEmpty;
+          pathInfo = name.isNotEmpty && regType.isNotEmpty && person.isNotEmpty && phone.isNotEmpty;
 
           final addr = (cd['clinic_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
           final city = (cd['clinic_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
           final pin = (cd['clinic_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
-          pathAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+          final mapLink = (cd['clinic_google_map_link'] ?? '').toString().trim();
+          pathAddrMap = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty && mapLink.isNotEmpty;
+
+          final bannerUrl = pathProfile['pathology_banner'] ?? cd['pathology_banner'];
+          pathBanner = bannerUrl != null && bannerUrl.toString().trim().isNotEmpty;
         }
 
         final bool testAdded = testCount > 0;
 
         s1 = pathInfo;
-        s2 = pathContact;
-        s3 = pathAddr;
+        s2 = pathAddrMap;
+        s3 = pathBanner;
         s4 = testAdded;
 
         int steps = 0;
@@ -491,15 +409,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         await prefs.setInt('profile_completion_percent_$partnerId', percent);
         await prefs.setBool('has_path_info_$partnerId', s1);
-        await prefs.setBool('has_path_contact_$partnerId', s2);
-        await prefs.setBool('has_path_addr_$partnerId', s3);
+        await prefs.setBool('has_path_addr_$partnerId', s2);
+        await prefs.setBool('has_path_map_$partnerId', s2);
+        await prefs.setBool('has_path_banner_$partnerId', s3);
         await prefs.setBool('has_test_added_$partnerId', s4);
         await prefs.setBool('pathology_contact_saved_$partnerId', s1 && s2 && s3);
       } else {
         bool hasDoc = prefs.getBool('has_doc_info_$partnerId') ?? false;
-        bool hasFee = prefs.getBool('has_fee_$partnerId') ?? false;
-        bool hasAddr = prefs.getBool('has_addr_$partnerId') ?? false;
-        bool hasSched = prefs.getBool('has_sched_$partnerId') ?? false;
+        bool hasFeeSched = (prefs.getBool('has_fee_$partnerId') ?? false) && (prefs.getBool('has_sched_$partnerId') ?? false);
+        bool hasAddrMap = (prefs.getBool('has_addr_$partnerId') ?? false) && (prefs.getBool('has_map_$partnerId') ?? false);
+        bool hasBanner = prefs.getBool('has_banner_$partnerId') ?? false;
 
         if (docProfile != null && docProfile['success'] == true && docProfile['contact_details'] != null) {
           final cd = docProfile['contact_details'] as Map<String, dynamic>;
@@ -510,26 +429,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
           hasDoc = name.isNotEmpty && spec.isNotEmpty && desig.isNotEmpty;
 
           final fees = double.tryParse((cd['partner_doctor_fees'] ?? '').toString().trim()) ?? 0;
-          hasFee = fees > 0;
+          final bool schedOk = cd['visit_day_time'] != null && cd['visit_day_time'] is List && (cd['visit_day_time'] as List).isNotEmpty;
+          hasFeeSched = fees > 0 && schedOk;
 
           final addr = (cd['partner_doctor_address'] ?? _partnerData['partner_address'] ?? '').toString().trim();
           final city = (cd['partner_doctor_city'] ?? _partnerData['partner_city'] ?? '').toString().trim();
           final pin = (cd['partner_doctor_pincode'] ?? _partnerData['partner_pincode'] ?? '').toString().trim();
-          hasAddr = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+          final mapLink = (cd['partner_doctor_google_map_link'] ?? '').toString().trim();
+          hasAddrMap = addr.isNotEmpty && city.isNotEmpty && pin.isNotEmpty && mapLink.isNotEmpty;
 
-          hasSched = false;
-          if (cd['visit_day_time'] != null && cd['visit_day_time'] is List) {
-            final list = cd['visit_day_time'] as List;
-            if (list.isNotEmpty) {
-              hasSched = true;
-            }
-          }
+          final bannerUrl = docProfile['doctor_banner'] ?? cd['partner_doctor_banner'];
+          hasBanner = bannerUrl != null && bannerUrl.toString().trim().isNotEmpty;
         }
 
         s1 = hasDoc;
-        s2 = hasFee;
-        s3 = hasAddr;
-        s4 = hasSched;
+        s2 = hasFeeSched;
+        s3 = hasAddrMap;
+        s4 = hasBanner;
 
         int steps = 0;
         if (s1) steps++;
@@ -541,8 +457,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         await prefs.setInt('profile_completion_percent_$partnerId', percent);
         await prefs.setBool('has_doc_info_$partnerId', s1);
         await prefs.setBool('has_fee_$partnerId', s2);
+        await prefs.setBool('has_sched_$partnerId', s2);
         await prefs.setBool('has_addr_$partnerId', s3);
-        await prefs.setBool('has_sched_$partnerId', s4);
+        await prefs.setBool('has_map_$partnerId', s3);
+        await prefs.setBool('has_banner_$partnerId', s4);
         await prefs.setBool('doctor_contact_saved_$partnerId', percent == 100);
       }
 
@@ -1300,229 +1218,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ACCURATE PROFILE COMPLETION PROGRESS CARD (Hides when 100% complete)
-        if (_profileCompletionPercent < 100 && !_isTutorialBannerDismissed)
-          FadeInDown(
-            duration: const Duration(milliseconds: 350),
-            child: Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: _profileCompletionPercent == 100
-                      ? [const Color(0xFFF0FDF4), const Color(0xFFF8FAFC)]
-                      : [const Color(0xFFEEF2FF), const Color(0xFFF0FDF9)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: _profileCompletionPercent == 100
-                      ? const Color(0xFF86EFAC)
-                      : const Color(0xFF6366F1).withValues(alpha: 0.25),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: (_profileCompletionPercent == 100
-                            ? const Color(0xFF22C55E)
-                            : const Color(0xFF6366F1))
-                        .withValues(alpha: 0.08),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top Row: Percentage Badge, Status & Close (✖)
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _profileCompletionPercent == 100
-                              ? const Color(0xFF16A34A)
-                              : (_profileCompletionPercent >= 50
-                                  ? const Color(0xFF4F46E5)
-                                  : Colors.orange.shade800),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '$_profileCompletionPercent%',
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _profileCompletionPercent == 100
-                                  ? 'Profile 100% Completed 🎉'
-                                  : _getProfileSetupTitle(),
-                              style: GoogleFonts.manrope(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.navy,
-                              ),
-                            ),
-                            Text(
-                              _profileCompletionPercent == 100
-                                  ? 'All services unlocked & ready to use'
-                                  : _getProfileSetupSubtitle(),
-                              style: GoogleFonts.manrope(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Dismiss / Close
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() => _isTutorialBannerDismissed = true);
-                          },
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFFCBD5E1),
-                                width: 1,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.close_rounded,
-                              size: 15,
-                              color: Color(0xFF64748B),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Linear Progress Bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: (_profileCompletionPercent / 100.0).clamp(0.04, 1.0),
-                      minHeight: 7,
-                      backgroundColor: const Color(0xFFE2E8F0),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _profileCompletionPercent == 100
-                            ? const Color(0xFF16A34A)
-                            : (_profileCompletionPercent >= 50
-                                ? AppColors.teal
-                                : Colors.orange),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 4 Redirectable Checklist Chips
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: _getMilestones().map((m) {
-                      return _buildRedirectableChip(
-                        label: m.label,
-                        isDone: m.isDone,
-                        onTap: () => setState(() => _currentIndex = m.targetIndex),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          OnboardingTutorialDialog.show(
-                            context,
-                            partnerData: _partnerData,
-                            onStartSetup: () {
-                              setState(() => _currentIndex = _getSetupTargetIndex());
-                            },
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF4F46E5),
-                          side: const BorderSide(
-                            color: Color(0xFF6366F1),
-                            width: 1,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        ),
-                        icon: const Icon(Icons.school_rounded, size: 14),
-                        label: Text(
-                          'Quick Guide',
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() => _currentIndex = _getSetupTargetIndex());
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _profileCompletionPercent == 100
-                                ? const Color(0xFF16A34A)
-                                : const Color(0xFF4F46E5),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 9),
-                          ),
-                          icon: Icon(
-                            _profileCompletionPercent == 100
-                                ? Icons.edit_note_rounded
-                                : Icons.arrow_forward_rounded,
-                            size: 15,
-                          ),
-                          label: Text(
-                            _profileCompletionPercent == 100
-                                ? 'Update Details'
-                                : 'Complete Setup Now',
-                            style: GoogleFonts.manrope(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
         // SECTION HEADER
         FadeInUp(
           duration: const Duration(milliseconds: 350),
@@ -1627,7 +1322,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final hasOPD = types.contains('OPD');
                 final hasPathology = types.contains('Pathology');
                 final hasDoctor = types.contains('Doctor');
-                final isLocked = _profileCompletionPercent < 100;
 
                 final List<Widget> shortcutWidgets = [];
 
@@ -1655,7 +1349,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   shortcutWidgets.add(
                     _buildRoundShortcutItem(
                       icon: Icons.local_hospital_rounded,
-                      title: 'Doctor\nChamber',
+                      title: 'OPD \nProfile',
                       color: const Color(0xFF0D9488),
                       isLocked: false,
                       badge: opdContactDone ? '100%' : null,
@@ -1672,7 +1366,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   shortcutWidgets.add(
                     _buildRoundShortcutItem(
                       icon: Icons.medical_services_rounded,
-                      title: 'Pathology\nClinic',
+                      title: 'Lab\n Profile',
                       color: const Color(0xFF9333EA),
                       isLocked: false,
                       badge: pathContactDone ? '100%' : null,
@@ -1699,7 +1393,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   shortcutWidgets.add(
                     _buildRoundShortcutItem(
                       icon: Icons.science_rounded,
-                      title: 'Add\nTests',
+                      title: 'Add\n Lab Tests',
                       color: const Color(0xFF7C3AED),
                       isLocked: false,
                       onTap: () => setState(() => _currentIndex = 6),
@@ -1713,14 +1407,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.credit_card_rounded,
                     title: 'Medical\nCard',
                     color: const Color(0xFFE11D48),
-                    isLocked: isLocked,
-                    onTap: () {
-                      if (isLocked) {
-                        _showProfileRequiredDialog('Medical Card Access');
-                        return;
-                      }
-                      setState(() => _currentIndex = 7);
-                    },
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 7),
                   ),
                 );
 
@@ -1730,14 +1418,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.people_alt_rounded,
                     title: 'Patient\nLists',
                     color: const Color(0xFF0284C7),
-                    isLocked: isLocked,
-                    onTap: () {
-                      if (isLocked) {
-                        _showProfileRequiredDialog('Patient Lists');
-                        return;
-                      }
-                      setState(() => _currentIndex = 8);
-                    },
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 8),
                   ),
                 );
 
@@ -1747,14 +1429,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.pending_actions_rounded,
                     title: 'Upcoming\nAppts',
                     color: const Color(0xFFD97706),
-                    isLocked: isLocked,
-                    onTap: () {
-                      if (isLocked) {
-                        _showProfileRequiredDialog('Upcoming Appointments');
-                        return;
-                      }
-                      setState(() => _currentIndex = 1);
-                    },
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 1),
                   ),
                 );
 
@@ -1764,14 +1440,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.calendar_month_rounded,
                     title: "Today's\nBookings",
                     color: const Color(0xFF059669),
-                    isLocked: isLocked,
-                    onTap: () {
-                      if (isLocked) {
-                        _showProfileRequiredDialog("Today's Bookings");
-                        return;
-                      }
-                      setState(() => _currentIndex = 15);
-                    },
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 15),
                   ),
                 );
 
@@ -1781,14 +1451,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.task_alt_rounded,
                     title: 'Completed\nAppts',
                     color: const Color(0xFF10B981),
-                    isLocked: isLocked,
-                    onTap: () {
-                      if (isLocked) {
-                        _showProfileRequiredDialog('Completed Appointments');
-                        return;
-                      }
-                      setState(() => _currentIndex = 9);
-                    },
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 9),
                   ),
                 );
 
@@ -1798,14 +1462,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.cancel_rounded,
                     title: 'Cancelled\nAppts',
                     color: const Color(0xFFDC2626),
-                    isLocked: isLocked,
-                    onTap: () {
-                      if (isLocked) {
-                        _showProfileRequiredDialog('Cancelled Appointments');
-                        return;
-                      }
-                      setState(() => _currentIndex = 14);
-                    },
+                    isLocked: false,
+                    onTap: () => setState(() => _currentIndex = 14),
                   ),
                 );
 
@@ -1861,53 +1519,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildRedirectableChip({
-    required String label,
-    required bool isDone,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: isDone ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isDone ? const Color(0xFF86EFAC) : const Color(0xFFFCD34D),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isDone ? Icons.check_circle_rounded : Icons.pending_rounded,
-              size: 12,
-              color: isDone ? const Color(0xFF16A34A) : Colors.orange.shade800,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.manrope(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: isDone ? const Color(0xFF15803D) : Colors.orange.shade900,
-              ),
-            ),
-            const SizedBox(width: 2),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 12,
-              color: isDone ? const Color(0xFF15803D) : Colors.orange.shade900,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -2054,107 +1665,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showProfileRequiredDialog(String featureName) {
-    final targetIndex = _getSetupTargetIndex();
-    final types = _parseRegistrationTypes(_partnerData['registration_type']);
-    final String sectionName = types.contains('Doctor')
-        ? 'List Myself'
-        : (types.contains('OPD') ? 'Doctor Chamber' : 'Pathology Clinic');
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.lock_rounded, color: Colors.amber, size: 22),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'Feature Locked',
-              style: GoogleFonts.manrope(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                color: AppColors.navy,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Your profile is currently $_profileCompletionPercent% complete.\n\nPlease complete your setup under "$sectionName" to unlock $featureName and access all partner features.',
-          style: GoogleFonts.manrope(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Close',
-              style: GoogleFonts.manrope(
-                fontWeight: FontWeight.w700,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          OutlinedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              OnboardingTutorialDialog.show(
-                context,
-                partnerData: _partnerData,
-                onStartSetup: () {
-                  setState(() => _currentIndex = targetIndex);
-                },
-              );
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF4F46E5),
-              side: const BorderSide(color: Color(0xFF6366F1)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Text(
-              'View Guide 📖',
-              style: GoogleFonts.manrope(
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _currentIndex = targetIndex);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4F46E5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              'Complete Setup Now',
-              style: GoogleFonts.manrope(
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

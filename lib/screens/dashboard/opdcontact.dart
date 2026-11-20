@@ -144,6 +144,30 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
           if (fetchedRegType != null && _regTypes.contains(fetchedRegType)) {
             _selectedRegType = fetchedRegType;
           }
+
+          final banner = response['opd_banner'] ?? data['opd_banner'];
+          final mapLink = (data['clinic_google_map_link'] ?? '').toString().trim();
+          final name = (data['clinic_name'] ?? '').toString().trim();
+          final person = (data['clinic_contact_person_name'] ?? '').toString().trim();
+          final mobile = (data['clinic_mobile_number'] ?? '').toString().trim();
+          final addr = (data['clinic_address'] ?? '').toString().trim();
+          final state = (data['clinic_state'] ?? '').toString().trim();
+          final city = (data['clinic_city'] ?? '').toString().trim();
+          final pin = (data['clinic_pincode'] ?? '').toString().trim();
+
+          final bool hasBanner = banner != null && banner.toString().trim().isNotEmpty;
+          final bool hasMap = mapLink.isNotEmpty;
+          final bool hasInfo = name.isNotEmpty && person.isNotEmpty;
+          final bool hasAddr = addr.isNotEmpty && state.isNotEmpty && city.isNotEmpty && pin.isNotEmpty;
+
+          SharedPreferences.getInstance().then((prefs) {
+            final pid = partnerData?['id']?.toString() ?? 'default';
+            prefs.setBool('has_opd_info_$pid', hasInfo && mobile.isNotEmpty);
+            prefs.setBool('has_opd_addr_$pid', hasAddr);
+            prefs.setBool('has_opd_map_$pid', hasMap);
+            prefs.setBool('has_opd_banner_$pid', hasBanner);
+            prefs.setBool('opd_contact_saved_$pid', hasInfo && mobile.isNotEmpty && hasAddr && hasMap && hasBanner);
+          });
         });
       } else {
         if (partnerData != null) {
@@ -249,10 +273,28 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
         final prefs = await SharedPreferences.getInstance();
         final pData = await SessionManager.getPartnerData();
         final pid = pData?['id']?.toString() ?? 'default';
-        await prefs.setBool('opd_contact_saved_$pid', true);
-        await prefs.setBool('has_opd_info_$pid', true);
-        await prefs.setBool('has_opd_contact_$pid', true);
-        await prefs.setBool('has_opd_addr_$pid', true);
+
+        final bool hasBanner = _localBannerPath != null ||
+            (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty) ||
+            (response['opd_banner'] != null && response['opd_banner'].toString().isNotEmpty);
+        final bool hasMap = _googleMapController.text.trim().isNotEmpty;
+        final bool hasInfo = _clinicNameController.text.trim().isNotEmpty &&
+            _contactPersonController.text.trim().isNotEmpty &&
+            _selectedRegType != null;
+        final bool hasContact = _mobileController.text.trim().isNotEmpty;
+        final bool hasAddr = _addressController.text.trim().isNotEmpty &&
+            _cityController.text.trim().isNotEmpty &&
+            _pinCodeController.text.trim().isNotEmpty &&
+            _selectedState != null;
+
+        final bool isFullyDone = hasInfo && hasContact && hasAddr && hasMap && hasBanner;
+
+        await prefs.setBool('has_opd_info_$pid', hasInfo && hasContact);
+        await prefs.setBool('has_opd_contact_$pid', hasContact);
+        await prefs.setBool('has_opd_addr_$pid', hasAddr);
+        await prefs.setBool('has_opd_map_$pid', hasMap);
+        await prefs.setBool('has_opd_banner_$pid', hasBanner);
+        await prefs.setBool('opd_contact_saved_$pid', isFullyDone);
 
         if (!mounted) return;
         CustomAlerts.showSuccessLoader(context, response['message'] ?? 'OPD details saved successfully!');
@@ -324,7 +366,42 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 12),
+
+              // Stepper Roadmap Badge
+              FadeInDown(
+                duration: const Duration(milliseconds: 380),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF86EFAC), width: 0.9),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_outline_rounded,
+                        color: Color(0xFF16A34A),
+                        size: 15,
+                      ),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Text(
+                          '1. Clinic Info  ➔  2. Address & Map Link  ➔  3. Banner Image  ➔  4. Add Doctors',
+                          style: GoogleFonts.manrope(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF15803D),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
 
               // Banner Image Upload Card
               FadeInUp(
@@ -416,7 +493,7 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
                     const SizedBox(height: 14),
                     _buildFormInput(
                       controller: _googleMapController,
-                      hint: 'Google Map Link (Optional)',
+                      hint: 'Google Map Link * (Required for 100%)',
                       icon: Icons.map_rounded,
                     ),
                     const SizedBox(height: 14),

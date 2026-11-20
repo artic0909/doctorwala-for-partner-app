@@ -229,20 +229,25 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
           }
         }
 
+        final bool hasBanner = (response['doctor_banner'] != null && response['doctor_banner'].toString().isNotEmpty) ||
+            (data['partner_doctor_banner'] != null && data['partner_doctor_banner'].toString().isNotEmpty);
+        final bool hasMap = (data['partner_doctor_google_map_link'] ?? '').toString().trim().isNotEmpty;
+
         int stepsCount = 0;
         if (hasDoc) stepsCount++;
-        if (hasFee) stepsCount++;
-        if (hasAddr) stepsCount++;
-        if (hasSched) stepsCount++;
+        if (hasFee && hasSched) stepsCount++;
+        if (hasAddr && hasMap) stepsCount++;
+        if (hasBanner) stepsCount++;
         final calcPct = stepsCount * 25;
 
         final prefs = await SharedPreferences.getInstance();
         final pid = partnerData?['id']?.toString() ?? 'default';
         await prefs.setInt('profile_completion_percent_$pid', calcPct);
         await prefs.setBool('has_doc_info_$pid', hasDoc);
-        await prefs.setBool('has_fee_$pid', hasFee);
-        await prefs.setBool('has_addr_$pid', hasAddr);
-        await prefs.setBool('has_sched_$pid', hasSched);
+        await prefs.setBool('has_fee_$pid', hasFee && hasSched);
+        await prefs.setBool('has_addr_$pid', hasAddr && hasMap);
+        await prefs.setBool('has_map_$pid', hasMap);
+        await prefs.setBool('has_banner_$pid', hasBanner);
         await prefs.setBool('doctor_contact_saved_$pid', calcPct == 100);
 
         setState(() {
@@ -492,12 +497,36 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
         final prefs = await SharedPreferences.getInstance();
         final pData = await SessionManager.getPartnerData();
         final pid = pData?['id']?.toString() ?? 'default';
-        await prefs.setInt('profile_completion_percent_$pid', 100);
-        await prefs.setBool('has_doc_info_$pid', true);
-        await prefs.setBool('has_fee_$pid', true);
-        await prefs.setBool('has_addr_$pid', true);
-        await prefs.setBool('has_sched_$pid', true);
-        await prefs.setBool('doctor_contact_saved_$pid', true);
+
+        final bool hasBanner = _localBannerPath != null ||
+            (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty) ||
+            (response['doctor_banner'] != null && response['doctor_banner'].toString().isNotEmpty);
+        final bool hasMap = _googleMapController.text.trim().isNotEmpty;
+        final bool hasDoc = _doctorNameController.text.trim().isNotEmpty &&
+            _specialistController.text.trim().isNotEmpty &&
+            _designationController.text.trim().isNotEmpty;
+        final double feeVal = double.tryParse(_feesController.text.trim()) ?? 0;
+        final bool hasFee = feeVal > 0;
+        final bool hasSched = activeDaysList.isNotEmpty;
+        final bool hasAddr = _addressController.text.trim().isNotEmpty &&
+            _cityController.text.trim().isNotEmpty &&
+            _pinCodeController.text.trim().isNotEmpty &&
+            _selectedState != null;
+
+        int stepsCount = 0;
+        if (hasDoc) stepsCount++;
+        if (hasFee && hasSched) stepsCount++;
+        if (hasAddr && hasMap) stepsCount++;
+        if (hasBanner) stepsCount++;
+        final calcPct = stepsCount * 25;
+
+        await prefs.setInt('profile_completion_percent_$pid', calcPct);
+        await prefs.setBool('has_doc_info_$pid', hasDoc);
+        await prefs.setBool('has_fee_$pid', hasFee && hasSched);
+        await prefs.setBool('has_addr_$pid', hasAddr && hasMap);
+        await prefs.setBool('has_map_$pid', hasMap);
+        await prefs.setBool('has_banner_$pid', hasBanner);
+        await prefs.setBool('doctor_contact_saved_$pid', calcPct == 100);
 
         if (!mounted) return;
 
@@ -722,7 +751,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                       const SizedBox(width: 7),
                       Expanded(
                         child: Text(
-                          '1. Info  ➔  2. Fees  ➔  3. Visiting Schedule  ➔  4. Chamber',
+                          '1. Info  ➔  2. Fees & Schedule  ➔  3. Address & Map Link  ➔  4. Banner Image',
                           style: GoogleFonts.manrope(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -884,9 +913,9 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                     _buildCompactField(
                       label: 'Google Map Link',
                       controller: _googleMapController,
-                      hint: 'https://maps.google.com/?q=... (Optional)',
+                      hint: 'https://maps.google.com/?q=... (Required for 100%)',
                       icon: Icons.map_rounded,
-                      isRequired: false,
+                      isRequired: true,
                     ),
                   ],
                 ),
