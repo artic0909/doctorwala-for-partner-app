@@ -40,6 +40,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
   final _addressController = TextEditingController();
 
   String? _selectedState;
+  String? _clinicRegistrationType;
 
   // States List
   final List<String> _states = [
@@ -187,6 +188,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
 
       if (response['success'] == true && response['contact_details'] != null) {
         final data = response['contact_details'] as Map<String, dynamic>;
+        _clinicRegistrationType = (data['clinic_registration_type'] ?? 'Doctor').toString();
         final dName = (data['partner_doctor_name'] ??
                 partnerData?['partner_contact_person_name'] ??
                 '')
@@ -455,7 +457,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       }
 
       final Map<String, String> body = {
-        'clinic_registration_type': 'Doctor',
+        'clinic_registration_type': _clinicRegistrationType ?? 'Doctor',
         'partner_doctor_name': _doctorNameController.text.trim(),
         'partner_doctor_specialist': _specialistController.text.trim(),
         'partner_doctor_designation': _designationController.text.trim(),

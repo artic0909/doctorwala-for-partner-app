@@ -112,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final types = _parseRegistrationTypes(_partnerData['registration_type']);
       final hasOPD = types.contains('OPD');
       final hasPathology = types.contains('Pathology');
-      final hasDoctor = types.contains('Doctor');
+      final hasDoctor = types.contains('Doctor') || types.contains('Others');
 
       final apiCalls = <Future<dynamic>>[
         ApiService.getDoctors(token: token).catchError((_) => {'success': false}),
@@ -1259,7 +1259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final types = _parseRegistrationTypes(rawRegType);
                 final hasOPD = types.contains('OPD');
                 final hasPathology = types.contains('Pathology');
-                final hasDoctor = types.contains('Doctor');
+                final hasDoctor = types.contains('Doctor') || types.contains('Others');
 
                 final List<Widget> shortcutWidgets = [];
 

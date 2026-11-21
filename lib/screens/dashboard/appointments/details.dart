@@ -109,12 +109,17 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
   
   bool _isVideoCall(Map<String, dynamic> appt) {
+    final clinicType = (appt['clinic_type'] ?? '').toString().toLowerCase().trim();
+    // Video consultation is strictly disabled for OPD and Pathology
+    if (clinicType == 'opd' || clinicType == 'pathology') {
+      return false;
+    }
     final visitMode = (appt['visit_mode'] ?? '').toString().toLowerCase().trim();
     if (visitMode == 'offline' || visitMode == 'physical' || visitMode == 'in_person') {
       return false;
     }
     final isVideo = appt['is_video'] == true || appt['is_video'] == 1 || appt['is_video'] == '1' || appt['is_video'] == 'true';
-    return visitMode == 'online' || visitMode == 'video' || visitMode == 'video call' || isVideo;
+    return (clinicType == 'doctor' || clinicType == 'others') && (visitMode == 'online' || visitMode == 'video' || visitMode == 'video call' || isVideo);
   }
 
   bool _isWindowOpen(Map<String, dynamic> appt) {

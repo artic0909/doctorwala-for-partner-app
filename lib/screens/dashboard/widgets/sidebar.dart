@@ -53,7 +53,7 @@ class CustomSidebar extends StatelessWidget {
     final types = _parseRegistrationTypes(rawRegType);
     final hasOPD = types.contains('OPD');
     final hasPathology = types.contains('Pathology');
-    final hasDoctor = types.contains('Doctor');
+    final hasDoctor = types.contains('Doctor') || types.contains('Others');
 
     return Drawer(
       backgroundColor: AppColors.background,

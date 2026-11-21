@@ -153,7 +153,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
     final types = _parseRegistrationTypes(rawRegType);
     final hasOPD = types.contains('OPD');
     final hasPathology = types.contains('Pathology');
-    final hasDoctor = types.contains('Doctor');
+    final hasDoctor = types.contains('Doctor') || types.contains('Others');
 
     final items = <_BottomNavItem>[
       _BottomNavItem(
