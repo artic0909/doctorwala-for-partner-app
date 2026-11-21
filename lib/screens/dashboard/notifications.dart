@@ -7,6 +7,7 @@ import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'appointments/details.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 class NotificationsScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -321,11 +322,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
-              ),
-            )
+          ? const PartnerNotificationsSkeleton()
           : RefreshIndicator(
               onRefresh: _fetchNotifications,
               color: AppColors.teal,

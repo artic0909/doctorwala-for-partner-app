@@ -7,6 +7,7 @@ import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'create_prescription_form.dart';
 import 'create_handwritten_prescription_form.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 
 class _Theme {
@@ -157,11 +158,7 @@ class _PatientMedicalHistoryScreenState extends State<PatientMedicalHistoryScree
       return Scaffold(
         backgroundColor: _Theme.bgTint,
         appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
-        body: const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(_Theme.accent),
-          ),
-        ),
+        body: const PartnerMedicalHistorySkeleton(),
       );
     }
 

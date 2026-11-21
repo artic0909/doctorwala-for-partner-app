@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 class _Theme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
@@ -186,14 +187,9 @@ class _MedicalCardAccessTabState extends State<MedicalCardAccessTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _Theme.bgTint,
-      body:
-          _isLoadingMeta
-              ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(_Theme.accent),
-                ),
-              )
-              : SingleChildScrollView(
+      body: _isLoadingMeta
+          ? const PartnerMedicalCardSkeleton()
+          : SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.only(
                   left: 20,

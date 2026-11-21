@@ -6,6 +6,7 @@ import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'adddoctor.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 class _DoctorTheme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
@@ -379,16 +380,9 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
 
               // Listings List
               Expanded(
-                child:
-                    _isFetching
-                        ? const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              _DoctorTheme.accent,
-                            ),
-                          ),
-                        )
-                        : RefreshIndicator(
+                child: _isFetching
+                    ? const PartnerDoctorsSkeleton()
+                    : RefreshIndicator(
                           onRefresh: _fetchDoctors,
                           color: _DoctorTheme.accent,
                           child:

@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_colors.dart';
 import '../../core/api_service.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 class HelpScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -569,30 +570,7 @@ class _HelpScreenState extends State<HelpScreen> {
   }
 
   Widget _buildLoader() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            height: 36,
-            width: 36,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Loading Support Details...',
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const PartnerHelpSkeleton();
   }
 
   Widget _buildErrorState() {

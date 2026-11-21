@@ -5,6 +5,7 @@ import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'patient_profile_view.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 class _Theme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
@@ -209,11 +210,7 @@ class _PatientListsTabState extends State<PatientListsTab> {
           // Main List
           Expanded(
             child: _isFetching
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(_Theme.accent),
-                    ),
-                  )
+                ? const PartnerPatientInquiriesSkeleton()
                 : RefreshIndicator(
                     onRefresh: _fetchRequests,
                     color: _Theme.accent,

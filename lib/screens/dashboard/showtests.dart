@@ -6,6 +6,7 @@ import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import 'addtests.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 class _TestTheme {
   static const Color primary = Color(0xFF4C1D95); // Deep Biotech Purple/Violet
@@ -364,13 +365,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
               ),
               Expanded(
                 child: _isFetching
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _TestTheme.accent,
-                          ),
-                        ),
-                      )
+                    ? const PartnerTestsSkeleton()
                     : RefreshIndicator(
                         onRefresh: _fetchTests,
                         color: _TestTheme.accent,

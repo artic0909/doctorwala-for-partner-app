@@ -10,6 +10,7 @@ import '../../core/api_service.dart';
 import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import '../../core/state_picker_modal.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 
 class OpdContactScreen extends StatefulWidget {
   const OpdContactScreen({super.key});
@@ -323,12 +324,8 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
   Widget build(BuildContext context) {
     if (_isFetching) {
       return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.teal),
-          ),
-        ),
+        backgroundColor: AppColors.background,
+        body: PartnerFormProfileSkeleton(),
       );
     }
 

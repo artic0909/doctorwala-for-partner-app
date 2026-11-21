@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/app_colors.dart';
 import '../../core/session_manager.dart';
 import '../../core/api_service.dart';
+import '../../widgets/partner_skeleton_loader.dart';
 import 'widgets/bottom_nav.dart';
 import 'opdcontact.dart';
 import 'pathologycontact.dart';
@@ -34,6 +36,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
+  Timer? _skeletonTimer;
+  int? _skeletonTabIndex;
   int _totalDoctors = 0;
   int _totalTests = 0;
   int _upcomingCount = 0;
@@ -46,6 +50,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _step2Done = false;
   bool _step3Done = false;
   late Map<String, dynamic> _partnerData;
+
+  void _switchTab(int index) {
+    if (_currentIndex == index && _skeletonTabIndex == null) return;
+    _skeletonTimer?.cancel();
+    setState(() {
+      _currentIndex = index;
+      _skeletonTabIndex = index;
+    });
+    _skeletonTimer = Timer(const Duration(milliseconds: 320), () {
+      if (mounted && _skeletonTabIndex == index) {
+        setState(() => _skeletonTabIndex = null);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _skeletonTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -594,15 +618,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        body: _buildBody(),
+        body: _skeletonTabIndex != null
+            ? PartnerTabSkeletonView(tabIndex: _skeletonTabIndex!)
+            : _buildBody(),
         bottomNavigationBar: CustomBottomNav(
           currentIndex: _currentIndex,
           partnerData: _partnerData,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
+          onTap: _switchTab,
         ),
       ),
     );
@@ -1679,14 +1701,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.teal,
-                              ),
+                        ? const ShimmerLoading(
+                            child: SkeletonBox(
+                              width: 44,
+                              height: 22,
+                              borderRadius: 6,
                             ),
                           )
                         : Text(

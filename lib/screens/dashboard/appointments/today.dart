@@ -9,6 +9,7 @@ import '../../../core/session_manager.dart';
 import '../../../core/custom_alerts.dart';
 import 'details.dart';
 import '../video_call/video_call_screen.dart';
+import '../../../widgets/partner_skeleton_loader.dart';
 
 class TodayAppointmentsScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -492,11 +493,7 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
           // Main List
           Expanded(
             child: _isFetching
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                    ),
-                  )
+                ? const PartnerAppointmentsSkeleton()
                 : RefreshIndicator(
                     onRefresh: _fetchAppointments,
                     color: themeColor,
