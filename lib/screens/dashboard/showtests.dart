@@ -15,12 +15,6 @@ class _TestTheme {
   static const Color bgTint = Color(0xFFFAF5FF); // Tint background
   static const Color textPrimary = Color(0xFF1E1B4B); // Deep indigo text
   static const Color textSecondary = Color(0xFF475569); // Slate secondary text
-  static const Color border = Color(0xFFE9D5FF); // Soft purple border
-  static const LinearGradient buttonGradient = LinearGradient(
-    colors: [Color(0xFF4C1D95), Color(0xFFD946EF)],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
 }
 
 class ShowTestsScreen extends StatefulWidget {
@@ -245,16 +239,23 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
         children: [
           Column(
             children: [
+              // Custom Header Bar with Search & Add button
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.blueGrey.withAlpha(20),
+                      width: 1.0,
+                    ),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: _TestTheme.primary.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withAlpha(4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -269,94 +270,108 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                             Text(
                               'Pathology Tests',
                               style: GoogleFonts.manrope(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 color: _TestTheme.primary,
-                                letterSpacing: -0.5,
+                                letterSpacing: -0.3,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Total tests configured: ${_tests.length}',
                               style: GoogleFonts.manrope(
-                                fontSize: 12,
+                                fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
                                 color: _TestTheme.textSecondary,
                               ),
                             ),
                           ],
                         ),
-                        Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: _TestTheme.buttonGradient,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _TestTheme.accent.withValues(alpha: 0.25),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
+                        // Add Test Button
+                        SizedBox(
+                          height: 38,
                           child: ElevatedButton.icon(
                             onPressed: () => _navigateToAddTest(),
                             icon: const Icon(
                               Icons.add_circle_outline_rounded,
-                              size: 16,
+                              size: 15,
                               color: Colors.white,
                             ),
                             label: Text(
                               'Add Test',
                               style: GoogleFonts.manrope(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
+                              backgroundColor: const Color(0xFF7C3AED),
+                              foregroundColor: Colors.white,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
+                                horizontal: 14,
+                                vertical: 8,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: _TestTheme.bgTint,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _TestTheme.border),
-                      ),
+                    const SizedBox(height: 12),
+                    // Search Bar
+                    SizedBox(
+                      height: 42,
                       child: TextField(
                         controller: _searchController,
                         style: GoogleFonts.manrope(
-                          fontSize: 14,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: _TestTheme.textPrimary,
                         ),
                         decoration: InputDecoration(
+                          isDense: true,
                           prefixIcon: const Icon(
                             Icons.search_rounded,
-                            color: _TestTheme.accent,
-                            size: 20,
+                            color: Color(0xFF64748B),
+                            size: 18,
                           ),
                           hintText: 'Search by test name or type...',
                           hintStyle: GoogleFonts.manrope(
-                            fontSize: 13,
-                            color: _TestTheme.textSecondary.withValues(alpha: 0.6),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF94A3B8),
                           ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF7C3AED),
+                              width: 1.4,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -372,7 +387,12 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                         child: _filteredTests.isEmpty
                             ? _buildEmptyState()
                             : ListView.builder(
-                                padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 135),
+                                padding: EdgeInsets.only(
+                                  left: 16,
+                                  right: 16,
+                                  top: 14,
+                                  bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+                                ),
                                 itemCount: _filteredTests.length,
                                 itemBuilder: (context, idx) {
                                   final test = _filteredTests[idx] as Map<String, dynamic>;
@@ -455,29 +475,60 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
     final type = test['test_type'] ?? 'N/A';
     final price = test['test_price']?.toString() ?? '0';
 
-    List<dynamic> daysList = [];
+    List<dynamic> rawDaysList = [];
     final scheduleData = test['test_day_time'];
     if (scheduleData != null) {
       if (scheduleData is List) {
-        daysList = scheduleData;
+        rawDaysList = scheduleData;
       } else if (scheduleData is String) {
         try {
-          daysList = jsonDecode(scheduleData);
+          rawDaysList = jsonDecode(scheduleData);
         } catch (_) {}
       }
     }
 
+    // Filter active schedules (ignore days without timings)
+    final List<Map<String, String>> activeSchedules = [];
+    for (var sched in rawDaysList) {
+      if (sched is! Map) continue;
+      final dayName = sched['day']?.toString() ?? '';
+      final start = sched['start_time']?.toString() ?? '';
+      final end = sched['end_time']?.toString() ?? '';
+
+      final startDisplay = _formatDBTime(start);
+      final endDisplay = _formatDBTime(end);
+
+      String displayTime = '';
+      if (startDisplay.isEmpty && endDisplay.isEmpty) {
+        displayTime = '';
+      } else if (endDisplay.isEmpty) {
+        displayTime = '$startDisplay onwards';
+      } else if (startDisplay.isEmpty) {
+        displayTime = 'Till $endDisplay';
+      } else {
+        displayTime = '$startDisplay - $endDisplay';
+      }
+
+      if (displayTime.isNotEmpty) {
+        String shortDay = dayName;
+        if (dayName.length > 3 && dayName.toLowerCase() != 'all day') {
+          shortDay = dayName.substring(0, 3);
+        }
+        activeSchedules.add({'day': shortDay, 'time': displayTime});
+      }
+    }
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _TestTheme.border, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: _TestTheme.primary.withValues(alpha: 0.02),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -485,27 +536,29 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Test Flask Icon
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: _TestTheme.accentLight,
-                    borderRadius: BorderRadius.circular(16),
+                    color: const Color(0xFF7C3AED).withAlpha(15),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: _TestTheme.accent.withValues(alpha: 0.2),
-                      width: 1.5,
+                      color: const Color(0xFF7C3AED).withAlpha(30),
+                      width: 1.0,
                     ),
                   ),
                   child: const Icon(
                     Icons.science_rounded,
-                    color: _TestTheme.primary,
-                    size: 28,
+                    color: Color(0xFF7C3AED),
+                    size: 22,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -513,31 +566,31 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                       Text(
                         name,
                         style: GoogleFonts.manrope(
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w800,
                           color: _TestTheme.primary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                          horizontal: 7,
+                          vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: _TestTheme.accentLight,
-                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFF7C3AED).withAlpha(12),
+                          borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: _TestTheme.accent.withValues(alpha: 0.3),
-                            width: 1.0,
+                            color: const Color(0xFF7C3AED).withAlpha(40),
+                            width: 0.9,
                           ),
                         ),
                         child: Text(
                           type,
                           style: GoogleFonts.manrope(
-                            fontSize: 11,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w800,
-                            color: _TestTheme.accent,
+                            color: const Color(0xFF7C3AED),
                           ),
                         ),
                       ),
@@ -549,7 +602,7 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
           ),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -561,84 +614,70 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: _TestTheme.textSecondary.withValues(alpha: 0.6),
+                        color: const Color(0xFF64748B),
                         letterSpacing: 0.5,
                       ),
                     ),
                     Text(
                       '₹$price',
                       style: GoogleFonts.manrope(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
-                        color: _TestTheme.accent,
+                        color: const Color(0xFF7C3AED),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
                   'AVAILABILITY HOURS',
                   style: GoogleFonts.manrope(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: _TestTheme.textSecondary.withValues(alpha: 0.6),
+                    color: const Color(0xFF64748B),
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
-                if (daysList.isEmpty)
-                  Text(
-                    'No schedule configured',
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.redAccent,
+                const SizedBox(height: 6),
+                if (activeSchedules.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Text(
+                      'Flexible / Contact Lab',
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF64748B),
+                      ),
                     ),
                   )
                 else
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children: daysList.map<Widget>((sched) {
-                      final dayName = sched['day']?.toString() ?? '';
-                      final start = sched['start_time']?.toString() ?? '';
-                      final end = sched['end_time']?.toString() ?? '';
-
-                      String shortDay = dayName;
-                      if (dayName.length > 3 && dayName.toLowerCase() != 'all day') {
-                        shortDay = dayName.substring(0, 3);
-                      }
-
-                      final startDisplay = _formatDBTime(start);
-                      final endDisplay = _formatDBTime(end);
-                      final String displayTime;
-                      if (startDisplay.isEmpty && endDisplay.isEmpty) {
-                        displayTime = 'No Timings';
-                      } else if (endDisplay.isEmpty) {
-                        displayTime = '$startDisplay onwards';
-                      } else if (startDisplay.isEmpty) {
-                        displayTime = 'Till $endDisplay';
-                      } else {
-                        displayTime = '$startDisplay - $endDisplay';
-                      }
-
+                    children: activeSchedules.map<Widget>((sched) {
                       return Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
+                          horizontal: 8,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: _TestTheme.accentLight,
-                          borderRadius: BorderRadius.circular(10),
+                          color: const Color(0xFF7C3AED).withAlpha(12),
+                          borderRadius: BorderRadius.circular(7),
                           border: Border.all(
-                            color: _TestTheme.accent.withValues(alpha: 0.15),
-                            width: 1.0,
+                            color: const Color(0xFF7C3AED).withAlpha(35),
+                            width: 0.9,
                           ),
                         ),
                         child: Text(
-                          '$shortDay: $displayTime',
+                          '${sched['day']}: ${sched['time']}',
                           style: GoogleFonts.manrope(
-                            fontSize: 11,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w700,
                             color: _TestTheme.primary,
                           ),
@@ -648,55 +687,63 @@ class _ShowTestsScreenState extends State<ShowTestsScreen> {
                   ),
                 const SizedBox(height: 8),
                 const Divider(
-                  height: 24,
+                  height: 16,
                   thickness: 1,
                   color: Color(0xFFF1F5F9),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton.icon(
-                      onPressed: () => _navigateToAddTest(testToEdit: test),
-                      icon: const Icon(
-                        Icons.edit_rounded,
-                        size: 16,
-                        color: _TestTheme.accent,
-                      ),
-                      label: Text(
-                        'Edit Details',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: _TestTheme.accent,
-                        ),
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                    InkWell(
+                      onTap: () => _navigateToAddTest(testToEdit: test),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.edit_rounded,
+                              size: 14,
+                              color: Color(0xFF7C3AED),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Edit Details',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF7C3AED),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    TextButton.icon(
-                      onPressed: () => _deleteTest(id),
-                      icon: const Icon(
-                        Icons.delete_outline_rounded,
-                        size: 16,
-                        color: Colors.redAccent,
-                      ),
-                      label: Text(
-                        'Remove',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.redAccent,
-                        ),
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                    const SizedBox(width: 12),
+                    InkWell(
+                      onTap: () => _deleteTest(id),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 14,
+                              color: Colors.redAccent,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Remove',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

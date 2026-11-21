@@ -10,16 +10,9 @@ import '../../core/custom_alerts.dart';
 class _DoctorTheme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
   static const Color accent = Color(0xFF0D9488); // Turquoise/Teal
-  static const Color accentLight = Color(0xFFF0FDFA); // Soft Mint/Turquoise Light
   static const Color bgTint = Color(0xFFF8FAFC); // Slate background
   static const Color textPrimary = Color(0xFF0F172A); // Dark slate
   static const Color textSecondary = Color(0xFF64748B); // Medium slate
-  static const Color border = Color(0xFFE2E8F0); // Border color
-  static const LinearGradient buttonGradient = LinearGradient(
-    colors: [Color(0xFF1E3A8A), Color(0xFF0D9488)],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
 }
 
 class AddDoctorScreen extends StatefulWidget {
@@ -338,37 +331,42 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
       ),
       body: SingleChildScrollView(
         controller: _scrollController,
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 14,
+          bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FadeInDown(
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 300),
               child: Text(
                 _isEditing ? 'Modify Practitioner Details' : 'List New Doctor',
                 style: GoogleFonts.manrope(
-                  fontSize: 22,
+                  fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: _DoctorTheme.primary,
-                  letterSpacing: -0.5,
+                  letterSpacing: -0.3,
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 3),
             FadeInDown(
-              duration: const Duration(milliseconds: 450),
+              duration: const Duration(milliseconds: 350),
               child: Text(
                 'Configure seating schedule, designation, and consultation fees.',
                 style: GoogleFonts.manrope(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: _DoctorTheme.textSecondary,
                 ),
               ),
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 14),
             FadeInUp(
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 380),
               child: _buildFormCard(),
             ),
           ],
@@ -379,16 +377,16 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
 
   Widget _buildFormCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: _DoctorTheme.border, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -397,34 +395,42 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
         child: Column(
           children: [
             _buildDesignationSelector(),
-            const SizedBox(height: 20),
-            _AnimatedFormInput(
+            const SizedBox(height: 12),
+            _buildCompactField(
+              label: 'Doctor Name',
               controller: _doctorNameController,
-              hint: 'Enter Doctor Name *',
-              icon: Icons.person_outline_rounded,
+              hint: 'Enter doctor name',
+              icon: Icons.person_rounded,
+              isRequired: true,
             ),
-            const SizedBox(height: 14),
-            _AnimatedFormInput(
+            const SizedBox(height: 10),
+            _buildCompactField(
+              label: 'Specialist / Qualification',
               controller: _specialistController,
-              hint: 'Enter Specialist *',
-              icon: Icons.stars_outlined,
+              hint: 'e.g. Cardiologist, MBBS, MD',
+              icon: Icons.stars_rounded,
+              isRequired: true,
             ),
-            const SizedBox(height: 14),
-            _AnimatedFormInput(
+            const SizedBox(height: 10),
+            _buildCompactField(
+              label: 'Consultation Fees',
               controller: _feesController,
-              hint: 'Enter Doctor Fees *',
+              hint: 'Enter fees in ₹',
               icon: Icons.currency_rupee_rounded,
+              isRequired: true,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
-            const SizedBox(height: 14),
-            _AnimatedFormInput(
+            const SizedBox(height: 10),
+            _buildCompactField(
+              label: 'More Information',
               controller: _moreController,
-              hint: 'Enter More Details About Doctor',
+              hint: 'Enter additional details / experience (Optional)',
               icon: Icons.info_outline_rounded,
+              isRequired: false,
               maxLines: 2,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
 
             // Schedule section
             Row(
@@ -432,116 +438,93 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                 const Icon(
                   Icons.schedule_rounded,
                   color: _DoctorTheme.accent,
-                  size: 18,
+                  size: 16,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'SEATING SCHEDULE *',
+                  'SEATING SCHEDULE',
                   style: GoogleFonts.manrope(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     color: _DoctorTheme.primary,
-                    letterSpacing: 1.0,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const Text(
+                  ' *',
+                  style: TextStyle(
+                    color: Color(0xFFDC2626),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
 
             Column(
               children: _weekdays.map((day) => _buildScheduleRow(day)).toList(),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: _DoctorTheme.border),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                  child: SizedBox(
+                    height: 44,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: GoogleFonts.manrope(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: _DoctorTheme.textSecondary,
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: _DoctorTheme.textSecondary,
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: _DoctorTheme.buttonGradient,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _DoctorTheme.accent.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                  child: SizedBox(
+                    height: 44,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _submitForm,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: EdgeInsets.zero,
+                        backgroundColor: _DoctorTheme.accent,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child:
-                          _isLoading
-                              ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                              : FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        _isEditing
-                                            ? 'Update Details'
-                                            : 'Upload Details',
-                                        style: GoogleFonts.manrope(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      const Icon(
-                                        Icons.arrow_forward_rounded,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                    ],
-                                  ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
                                 ),
                               ),
+                            )
+                          : Text(
+                              _isEditing ? 'Update Details' : 'Upload Details',
+                              style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -553,22 +536,109 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
     );
   }
 
+  Widget _buildCompactField({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isRequired = false,
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
+              ),
+            ),
+            if (isRequired)
+              const Text(
+                ' *',
+                style: TextStyle(
+                  color: Color(0xFFDC2626),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4.5),
+        SizedBox(
+          height: maxLines == 1 ? 42 : null,
+          child: TextField(
+            controller: controller,
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _DoctorTheme.textPrimary,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: hint,
+              hintStyle: GoogleFonts.manrope(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF94A3B8),
+              ),
+              prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 17),
+              filled: true,
+              fillColor: const Color(0xFFF8FAFC),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: _DoctorTheme.accent, width: 1.4),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildDesignationSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            'DESIGNATION *',
-            style: GoogleFonts.manrope(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: _DoctorTheme.textSecondary,
-              letterSpacing: 0.5,
+        Row(
+          children: [
+            Text(
+              'DESIGNATION',
+              style: GoogleFonts.manrope(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
+              ),
             ),
-          ),
+            const Text(
+              ' *',
+              style: TextStyle(
+                color: Color(0xFFDC2626),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 6),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: ['MD', 'Dr', 'Prof', 'BDS'].map((option) {
@@ -581,33 +651,24 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
                   });
                 },
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  duration: const Duration(milliseconds: 180),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  height: 38,
                   decoration: BoxDecoration(
-                    color: isSelected ? _DoctorTheme.accentLight : Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    color: isSelected ? _DoctorTheme.accent.withAlpha(20) : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isSelected ? _DoctorTheme.accent : _DoctorTheme.border,
-                      width: 1.5,
+                      color: isSelected ? _DoctorTheme.accent : const Color(0xFFE2E8F0),
+                      width: isSelected ? 1.4 : 1.0,
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: _DoctorTheme.accent.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            )
-                          ]
-                        : [],
                   ),
                   child: Center(
                     child: Text(
                       option,
                       style: GoogleFonts.manrope(
-                        fontSize: 13,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w800,
-                        color: isSelected ? _DoctorTheme.accent : _DoctorTheme.textSecondary,
+                        color: isSelected ? _DoctorTheme.accent : const Color(0xFF475569),
                       ),
                     ),
                   ),
@@ -766,104 +827,6 @@ class _AddDoctorScreenState extends State<AddDoctorScreen> {
               ),
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _AnimatedFormInput extends StatefulWidget {
-  final TextEditingController controller;
-  final String hint;
-  final IconData icon;
-  final TextInputType keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final int maxLines;
-
-  const _AnimatedFormInput({
-    required this.controller,
-    required this.hint,
-    required this.icon,
-    this.keyboardType = TextInputType.text,
-    this.inputFormatters,
-    this.maxLines = 1,
-  });
-
-  @override
-  State<_AnimatedFormInput> createState() => _AnimatedFormInputState();
-}
-
-class _AnimatedFormInputState extends State<_AnimatedFormInput> {
-  final FocusNode _focusNode = FocusNode();
-  bool _isFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      setState(() {
-        _isFocused = _focusNode.hasFocus;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: _isFocused ? Colors.white : _DoctorTheme.bgTint,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _isFocused ? _DoctorTheme.primary : Colors.transparent,
-          width: 1.5,
-        ),
-        boxShadow: _isFocused
-            ? [
-                BoxShadow(
-                  color: _DoctorTheme.primary.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [],
-      ),
-      child: TextField(
-        controller: widget.controller,
-        focusNode: _focusNode,
-        keyboardType: widget.keyboardType,
-        inputFormatters: widget.inputFormatters,
-        maxLines: widget.maxLines,
-        style: GoogleFonts.manrope(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: _DoctorTheme.textPrimary,
-        ),
-        decoration: InputDecoration(
-          prefixIcon: Icon(
-            widget.icon,
-            color: _isFocused 
-                ? _DoctorTheme.primary 
-                : _DoctorTheme.textSecondary.withValues(alpha: 0.7),
-            size: 18,
-          ),
-          hintText: widget.hint,
-          hintStyle: GoogleFonts.manrope(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: _DoctorTheme.textSecondary.withValues(alpha: 0.5),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
       ),
     );
   }

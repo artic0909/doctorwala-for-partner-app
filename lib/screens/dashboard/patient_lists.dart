@@ -13,7 +13,6 @@ class _Theme {
   static const Color bgTint = Color(0xFFF8FAFC); // Slate background
   static const Color textPrimary = Color(0xFF0F172A); // Dark slate
   static const Color textSecondary = Color(0xFF64748B); // Medium slate
-  static const Color border = Color(0xFFE2E8F0); // Border color
 }
 
 class PatientListsTab extends StatefulWidget {
@@ -126,14 +125,20 @@ class _PatientListsTabState extends State<PatientListsTab> {
           // Search Header Card
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             decoration: BoxDecoration(
               color: Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.blueGrey.withAlpha(20),
+                  width: 1.0,
+                ),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: _Theme.primary.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withAlpha(4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -151,55 +156,89 @@ class _PatientListsTabState extends State<PatientListsTab> {
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: _Theme.primary,
-                            letterSpacing: -0.5,
+                            letterSpacing: -0.3,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Total Requests: ${_requests.length}',
                           style: GoogleFonts.manrope(
-                            fontSize: 12,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w600,
                             color: _Theme.textSecondary,
                           ),
                         ),
                       ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.refresh_rounded, color: _Theme.accent),
-                      onPressed: _fetchRequests,
-                      tooltip: 'Refresh',
+                    InkWell(
+                      onTap: _fetchRequests,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _Theme.accent.withAlpha(15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.refresh_rounded,
+                          color: _Theme.accent,
+                          size: 18,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 // Search Bar
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
+                SizedBox(
+                  height: 42,
                   child: TextField(
                     controller: _searchController,
                     style: GoogleFonts.manrope(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: _Theme.textPrimary,
                     ),
                     decoration: InputDecoration(
+                      isDense: true,
                       prefixIcon: const Icon(
                         Icons.search_rounded,
-                        color: _Theme.accent,
-                        size: 20,
+                        color: Color(0xFF64748B),
+                        size: 18,
                       ),
                       hintText: 'Search patient, card no. or doctor...',
                       hintStyle: GoogleFonts.manrope(
-                        fontSize: 13,
-                        color: _Theme.textSecondary.withValues(alpha: 0.6),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF94A3B8),
                       ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE2E8F0),
+                          width: 1.0,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE2E8F0),
+                          width: 1.0,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: _Theme.accent,
+                          width: 1.4,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -217,7 +256,12 @@ class _PatientListsTabState extends State<PatientListsTab> {
                     child: _filteredRequests.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
-                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 135),
+                            padding: EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              top: 14,
+                              bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+                            ),
                             itemCount: _filteredRequests.length,
                             physics: const AlwaysScrollableScrollPhysics(),
                             itemBuilder: (context, index) {
@@ -310,16 +354,16 @@ class _PatientListsTabState extends State<PatientListsTab> {
     final hasActiveAccess = reqStatus == 'accepted' && accessStatus == 'on' && encryptedId.isNotEmpty;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _Theme.border, width: 1.2),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: _Theme.primary.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -330,7 +374,7 @@ class _PatientListsTabState extends State<PatientListsTab> {
           onTap: hasActiveAccess ? () => _navigateToProfile(encryptedId) : null,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -339,10 +383,11 @@ class _PatientListsTabState extends State<PatientListsTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
+                        color: statusColor.withAlpha(15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: statusColor.withAlpha(40), width: 0.9),
                       ),
                       child: Text(
                         statusLabel,
@@ -355,45 +400,95 @@ class _PatientListsTabState extends State<PatientListsTab> {
                     ),
                     if (reqStatus == 'accepted')
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: (accessStatus == 'on' ? _Theme.accent : Colors.grey).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
+                          color: (accessStatus == 'on' ? _Theme.accent : const Color(0xFF64748B)).withAlpha(15),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: (accessStatus == 'on' ? _Theme.accent : const Color(0xFF64748B)).withAlpha(40),
+                            width: 0.9,
+                          ),
                         ),
                         child: Text(
                           accessStatus == 'on' ? 'ACCESS: ACTIVE' : 'ACCESS: REVOKED',
                           style: GoogleFonts.manrope(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
-                            color: accessStatus == 'on' ? _Theme.accent : Colors.grey.shade600,
+                            color: accessStatus == 'on' ? _Theme.accent : const Color(0xFF64748B),
                           ),
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
 
-                // Patient details
-                Text(
-                  patientName,
-                  style: GoogleFonts.manrope(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: _Theme.primary,
-                  ),
+                // Patient details with avatar
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: _Theme.accent.withAlpha(15),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: _Theme.accent.withAlpha(30), width: 1.0),
+                      ),
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: _Theme.accent,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            patientName,
+                            style: GoogleFonts.manrope(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: _Theme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Text(
+                                'Card: ',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: _Theme.textSecondary,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  cardNo,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF334155),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Card Number: $cardNo',
-                  style: GoogleFonts.manrope(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: _Theme.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 12),
+
+                const SizedBox(height: 10),
                 const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
 
                 // Seating doctor requested for
                 Row(
@@ -405,9 +500,9 @@ class _PatientListsTabState extends State<PatientListsTab> {
                           Text(
                             'REQUESTED FOR DOCTOR',
                             style: GoogleFonts.manrope(
-                              fontSize: 9,
+                              fontSize: 9.5,
                               fontWeight: FontWeight.w800,
-                              color: _Theme.textSecondary.withValues(alpha: 0.6),
+                              color: const Color(0xFF64748B),
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -415,7 +510,7 @@ class _PatientListsTabState extends State<PatientListsTab> {
                           Text(
                             doctorName,
                             style: GoogleFonts.manrope(
-                              fontSize: 13,
+                              fontSize: 12.5,
                               fontWeight: FontWeight.w700,
                               color: _Theme.primary,
                             ),
@@ -423,20 +518,34 @@ class _PatientListsTabState extends State<PatientListsTab> {
                         ],
                       ),
                     ),
-                    if (hasActiveAccess) ...[
+                    if (hasActiveAccess)
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: _Theme.accent.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10),
+                          color: _Theme.accent.withAlpha(15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: _Theme.accent.withAlpha(30)),
                         ),
-                        child: const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14,
-                          color: _Theme.accent,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'View Profile',
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: _Theme.accent,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 11,
+                              color: _Theme.accent,
+                            ),
+                          ],
                         ),
                       ),
-                    ],
                   ],
                 ),
               ],

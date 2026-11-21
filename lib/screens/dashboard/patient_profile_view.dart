@@ -398,20 +398,25 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
         color: _Theme.accent,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 14,
+            bottom: (MediaQuery.paddingOf(context).bottom + 30).clamp(36.0, 60.0),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Patient Profile Header Card
               FadeInDown(
-                duration: const Duration(milliseconds: 350),
+                duration: const Duration(milliseconds: 300),
                 child: _buildPatientHeaderCard(patient),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
               // Summary Stats (Prescriptions & Reports)
               FadeInUp(
-                duration: const Duration(milliseconds: 350),
+                duration: const Duration(milliseconds: 320),
                 child: Row(
                   children: [
                     Expanded(
@@ -419,86 +424,123 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
                         title: 'Prescriptions',
                         count: noPrescriptions.toString(),
                         icon: Icons.description_rounded,
-                        color: Colors.blueAccent,
+                        color: const Color(0xFF0284C7),
                         onTap: _navigateToHistory,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: _buildStatCard(
                         title: 'Medical Reports',
                         count: noReports.toString(),
                         icon: Icons.science_rounded,
-                        color: Colors.purpleAccent,
+                        color: const Color(0xFF7C3AED),
                         onTap: _navigateToHistory,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
               // Highlighted "Create Prescription" Button
               FadeInUp(
-                duration: const Duration(milliseconds: 380),
-                child: ElevatedButton.icon(
-                  onPressed: _navigateToCreatePrescription,
-                  icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                  label: Text(
-                    'CREATE PRESCRIPTION',
-                    style: GoogleFonts.manrope(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14,
-                      letterSpacing: 0.5,
+                duration: const Duration(milliseconds: 350),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: ElevatedButton.icon(
+                    onPressed: _navigateToCreatePrescription,
+                    icon: const Icon(Icons.add_circle_outline_rounded, color: Colors.white, size: 18),
+                    label: Text(
+                      'CREATE PRESCRIPTION',
+                      style: GoogleFonts.manrope(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                        letterSpacing: 0.5,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _Theme.accent,
-                    foregroundColor: Colors.white,
-                    elevation: 1,
-                    shadowColor: _Theme.accent.withValues(alpha: 0.2),
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _Theme.accent,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
               // Vitals Section
+              FadeInUp(
+                duration: const Duration(milliseconds: 380),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle('Latest Vitals', Icons.favorite_rounded, Colors.redAccent),
+                    const SizedBox(height: 10),
+                    _buildVitalsGrid(vitals),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Bookings History Section - Scrollable Appointments Carousel
               FadeInUp(
                 duration: const Duration(milliseconds: 400),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Latest Vitals', Icons.favorite_rounded, Colors.redAccent),
-                    const SizedBox(height: 12),
-                    _buildVitalsGrid(vitals),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Bookings History Section
-              FadeInUp(
-                duration: const Duration(milliseconds: 450),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle('Appointment History', Icons.history_rounded, _Theme.primary),
-                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildSectionTitle('Appointment History', Icons.calendar_month_rounded, _Theme.primary),
+                        if (bookings.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: _Theme.accent.withAlpha(15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${bookings.length} ${bookings.length == 1 ? 'Appointment' : 'Appointments'}',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: _Theme.accent,
+                                  ),
+                                ),
+                                if (bookings.length > 1) ...[
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.swipe_rounded, size: 12, color: _Theme.accent),
+                                ],
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
                     if (bookings.isEmpty)
                       _buildEmptyBookingsState()
                     else
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: bookings.length,
-                        itemBuilder: (context, index) {
-                          final booking = bookings[index] as Map<String, dynamic>;
-                          return _buildBookingCard(booking);
-                        },
+                      SizedBox(
+                        height: 154,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: bookings.length,
+                          separatorBuilder: (context, index) => const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final booking = bookings[index] as Map<String, dynamic>;
+                            return _buildBookingCard(booking, isHorizontal: true);
+                          },
+                        ),
                       ),
                   ],
                 ),
@@ -519,16 +561,16 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: _Theme.border, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: _Theme.primary.withValues(alpha: 0.02),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -538,15 +580,16 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: _Theme.accentLight,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: _Theme.accent.withValues(alpha: 0.15), width: 1.5),
+                  color: _Theme.accent.withAlpha(15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _Theme.accent.withAlpha(30), width: 1.0),
                 ),
-                child: const Icon(Icons.person_rounded, color: _Theme.accent, size: 30),
+                child: const Icon(Icons.person_rounded, color: _Theme.accent, size: 24),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -557,17 +600,17 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
                           child: Text(
                             name,
                             style: GoogleFonts.manrope(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
                               color: _Theme.primary,
                             ),
                           ),
                         ),
                         if (isVerified)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
-                              color: _Theme.accent.withValues(alpha: 0.08),
+                              color: _Theme.accent.withAlpha(15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Row(
@@ -578,7 +621,7 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
                                 Text(
                                   'VERIFIED',
                                   style: GoogleFonts.manrope(
-                                    fontSize: 8,
+                                    fontSize: 8.5,
                                     fontWeight: FontWeight.w800,
                                     color: _Theme.accent,
                                   ),
@@ -588,11 +631,11 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       'Medical ID: $cardNo',
                       style: GoogleFonts.manrope(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: _Theme.textSecondary,
                       ),
@@ -602,12 +645,12 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-          const SizedBox(height: 14),
-          _buildContactInfoRow(Icons.email_outlined, 'Email Address', email),
           const SizedBox(height: 10),
-          _buildContactInfoRow(Icons.phone_iphone_rounded, 'Mobile Number', phone),
+          _buildContactInfoRow(Icons.email_outlined, 'Email', email),
+          const SizedBox(height: 6),
+          _buildContactInfoRow(Icons.phone_iphone_rounded, 'Mobile', phone),
         ],
       ),
     );
@@ -760,11 +803,11 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: vitalItems.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: MediaQuery.sizeOf(context).width < 360 ? 0.82 : 0.9,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1.25,
       ),
       itemBuilder: (context, index) => vitalItems[index],
     );
@@ -782,21 +825,21 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
     final displayValue = cleanValue == 'N/A' ? 'N/A' : '$cleanValue$suffix';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
-        color: bgAccent ? color.withValues(alpha: 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: bgAccent ? color.withAlpha(12) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: bgAccent ? color.withValues(alpha: 0.2) : _Theme.border,
-          width: 1.2,
+          color: bgAccent ? color.withAlpha(45) : _Theme.border,
+          width: 1.0,
         ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 6),
+          Icon(icon, color: color, size: 18),
+          const SizedBox(height: 4),
           Text(
             displayValue,
             textAlign: TextAlign.center,
@@ -804,19 +847,19 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
               fontSize: 12,
-              fontWeight: FontWeight.w900,
-              color: _Theme.primary,
+              fontWeight: FontWeight.w800,
+              color: cleanValue == 'N/A' ? _Theme.textSecondary : _Theme.primary,
             ),
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 2),
           Text(
             title.toUpperCase(),
             textAlign: TextAlign.center,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
               fontSize: 8,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: _Theme.textSecondary,
               letterSpacing: 0.2,
             ),
@@ -835,48 +878,129 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _Theme.border),
       ),
-      child: Text(
-        'No appointment history found for this patient.',
-        textAlign: TextAlign.center,
-        style: GoogleFonts.manrope(
-          fontSize: 12.5,
-          fontWeight: FontWeight.w600,
-          color: _Theme.textSecondary,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.event_busy_rounded, size: 32, color: _Theme.textSecondary.withAlpha(100)),
+          const SizedBox(height: 8),
+          Text(
+            'No appointment history found for this patient.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.manrope(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: _Theme.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildBookingCard(Map<String, dynamic> booking) {
-    final date = booking['booking_date'] ?? 'N/A';
-    final time = booking['booking_time'] ?? 'N/A';
-    final clinicType = booking['clinic_type'] ?? 'N/A';
-    final status = booking['status'] ?? 'Upcoming';
+  String _formatBookingDate(dynamic raw) {
+    if (raw == null) return 'N/A';
+    final str = raw.toString().trim();
+    if (str.isEmpty || str == 'N/A' || str == 'null') return 'N/A';
+    try {
+      final parsed = DateTime.parse(str);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return '${parsed.day} ${months[parsed.month - 1]}, ${parsed.year}';
+    } catch (_) {
+      return str;
+    }
+  }
 
-    final isPathology = clinicType.toLowerCase() == 'pathology';
-    final serviceName = isPathology
-        ? (booking['test']?['test_name'] ?? 'N/A')
-        : (booking['doctor']?['doctor_name'] ?? 'N/A');
+  String _formatBookingTime(dynamic raw) {
+    if (raw == null) return 'N/A';
+    final str = raw.toString().trim();
+    if (str.isEmpty || str == 'N/A' || str == 'null') return 'N/A';
+    try {
+      final parts = str.split(':');
+      if (parts.length >= 2) {
+        int hour = int.parse(parts[0]);
+        final minute = parts[1];
+        final period = hour >= 12 ? 'PM' : 'AM';
+        if (hour > 12) hour -= 12;
+        if (hour == 0) hour = 12;
+        return '${hour.toString().padLeft(2, '0')}:$minute $period';
+      }
+    } catch (_) {}
+    return str;
+  }
 
-    Color statusColor;
-    if (status == 'Completed') {
-      statusColor = _Theme.accent;
-    } else if (status == 'Cancelled') {
-      statusColor = Colors.redAccent;
+  Widget _buildBookingCard(Map<String, dynamic> booking, {bool isHorizontal = false}) {
+    final rawDate = booking['booking_date'] ?? booking['appointment_date'] ?? booking['date'];
+    final rawTime = booking['booking_time'] ?? booking['appointment_time'] ?? booking['time'];
+    final formattedDate = _formatBookingDate(rawDate);
+    final formattedTime = _formatBookingTime(rawTime);
+
+    final clinicType = (booking['clinic_type'] ?? booking['type'] ?? 'OPD').toString();
+    final isPathology = clinicType.toLowerCase().contains('pathology') || clinicType.toLowerCase().contains('lab');
+
+    // Extract doctor / test name with extensive fallback
+    String serviceName = 'N/A';
+    if (isPathology) {
+      if (booking['test'] is Map) {
+        serviceName = booking['test']['test_name']?.toString() ??
+            booking['test']['name']?.toString() ?? 'N/A';
+      }
+      if (serviceName == 'N/A') {
+        serviceName = booking['test_name']?.toString() ??
+            booking['clinic_test']?['test_name']?.toString() ??
+            booking['service_name']?.toString() ?? 'Diagnostic Test';
+      }
     } else {
-      statusColor = Colors.orangeAccent;
+      if (booking['doctor'] is Map) {
+        serviceName = booking['doctor']['doctor_name']?.toString() ??
+            booking['doctor']['name']?.toString() ?? 'N/A';
+      }
+      if (serviceName == 'N/A') {
+        serviceName = booking['doctor_name']?.toString() ??
+            booking['clinic_doctor']?['doctor_name']?.toString() ??
+            booking['clinic_doctor']?['name']?.toString() ??
+            booking['doctor_user']?['user_name']?.toString() ??
+            booking['partner']?['clinic_name']?.toString() ??
+            booking['clinic_name']?.toString() ?? 'Doctor Consultation';
+      }
     }
 
+    final status = (booking['status'] ?? 'Upcoming').toString();
+    Color statusColor;
+    Color statusBg;
+    if (status.toLowerCase() == 'completed') {
+      statusColor = _Theme.accent;
+      statusBg = _Theme.accent.withAlpha(20);
+    } else if (status.toLowerCase() == 'cancelled' || status.toLowerCase() == 'rejected') {
+      statusColor = Colors.redAccent;
+      statusBg = Colors.redAccent.withAlpha(20);
+    } else if (status.toLowerCase() == 'confirmed' || status.toLowerCase() == 'accepted') {
+      statusColor = Colors.teal;
+      statusBg = Colors.teal.withAlpha(20);
+    } else {
+      statusColor = Colors.orange.shade700;
+      statusBg = Colors.orange.shade50;
+    }
+
+    final cardWidth = isHorizontal ? 295.0 : double.infinity;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      width: cardWidth,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _Theme.border, width: 1.2),
+        border: Border.all(color: _Theme.border, width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(5),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -884,28 +1008,39 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: (isPathology ? Colors.purpleAccent : _Theme.accent).withValues(alpha: 0.08),
+                  color: (isPathology ? Colors.purple : _Theme.accent).withAlpha(15),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(
-                  clinicType.toUpperCase(),
-                  style: GoogleFonts.manrope(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    color: isPathology ? Colors.purple : _Theme.accent,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isPathology ? Icons.biotech_rounded : Icons.local_hospital_rounded,
+                      size: 11,
+                      color: isPathology ? Colors.purple : _Theme.accent,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      isPathology ? 'PATHOLOGY' : 'OPD DOCTOR',
+                      style: GoogleFonts.manrope(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        color: isPathology ? Colors.purple : _Theme.accent,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.08),
+                  color: statusBg,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   status.toUpperCase(),
                   style: GoogleFonts.manrope(
-                    fontSize: 9,
+                    fontSize: 9.5,
                     fontWeight: FontWeight.w800,
                     color: statusColor,
                   ),
@@ -913,32 +1048,94 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            isPathology ? 'Test Name: $serviceName' : 'Doctor: $serviceName',
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: _Theme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.calendar_month_rounded, size: 12, color: _Theme.textSecondary),
-              const SizedBox(width: 4),
-              Text(
-                date,
-                style: GoogleFonts.manrope(fontSize: 11.5, fontWeight: FontWeight.w600, color: _Theme.textSecondary),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: (isPathology ? Colors.purple : _Theme.primary).withAlpha(12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isPathology ? Icons.science_outlined : Icons.person_outline_rounded,
+                  size: 18,
+                  color: isPathology ? Colors.purple : _Theme.primary,
+                ),
               ),
-              const SizedBox(width: 14),
-              const Icon(Icons.access_time_rounded, size: 12, color: _Theme.textSecondary),
-              const SizedBox(width: 4),
-              Text(
-                time,
-                style: GoogleFonts.manrope(fontSize: 11.5, fontWeight: FontWeight.w600, color: _Theme.textSecondary),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      serviceName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.manrope(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: _Theme.primary,
+                      ),
+                    ),
+                    if (booking['serial_no'] != null || booking['booking_id'] != null)
+                      Text(
+                        booking['serial_no'] != null ? 'Token: #${booking['serial_no']}' : 'ID: #${booking['booking_id']}',
+                        style: GoogleFonts.manrope(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: _Theme.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ],
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: _Theme.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.calendar_today_rounded, size: 11, color: _Theme.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      formattedDate,
+                      style: GoogleFonts.manrope(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: _Theme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.schedule_rounded, size: 11, color: _Theme.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      formattedTime,
+                      style: GoogleFonts.manrope(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: _Theme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -10,8 +10,6 @@ class _Theme {
   static const Color primary = Color(0xFF1E3A8A); // Deep Indigo Navy
   static const Color accent = Color(0xFF0D9488); // Teal
   static const Color bgTint = Color(0xFFF8FAFC);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color border = Color(0xFFE2E8F0);
 }
 
 class CreateHandwrittenPrescriptionScreen extends StatefulWidget {
@@ -216,26 +214,29 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(20),
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 30),
                 children: [
                   _buildSectionCard(
                     title: 'Prescription Info',
                     icon: Icons.edit_note_rounded,
                     children: [
                       _buildDatePickerField(
-                        label: 'Date of Report *',
+                        label: 'Date of Report',
                         value: _formatDocDate(_reportDate),
                         onTap: _selectReportDate,
+                        isRequired: true,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       _buildReadOnlyField(
-                        label: 'Clinic Name (Readonly)',
+                        label: 'Clinic Name',
                         value: clinicName,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       _buildDropdownField<int>(
-                        label: 'OPD Doctor *',
+                        label: 'OPD Doctor',
                         value: _selectedDoctorId,
+                        isRequired: true,
                         items: widget.doctors.map<DropdownMenuItem<int>>((doc) {
                           return DropdownMenuItem<int>(
                             value: doc['id'],
@@ -258,11 +259,12 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
                         },
                         validator: (value) => value == null ? 'Doctor is required' : null,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       _buildTextField(
-                        label: 'Heading / Title *',
+                        label: 'Heading / Title',
                         controller: _headingController,
                         placeholder: 'e.g. Prescription - Dr. Sharma',
+                        isRequired: true,
                         validator: (value) =>
                             value == null || value.trim().isEmpty ? 'Heading is required' : null,
                       ),
@@ -272,73 +274,102 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
                     title: 'Attachments',
                     icon: Icons.image_outlined,
                     children: [
-                      Text(
-                        'Upload Scanned Images *',
-                        style: GoogleFonts.manrope(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: _Theme.textSecondary,
-                          letterSpacing: 0.5,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            'Upload Scanned Images',
+                            style: GoogleFonts.manrope(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF334155),
+                            ),
+                          ),
+                          const Text(
+                            ' *',
+                            style: TextStyle(
+                              color: Color(0xFFDC2626),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => _pickImage(ImageSource.camera),
-                              icon: const Icon(Icons.camera_alt_rounded, size: 16),
-                              label: const Text('Camera'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _Theme.bgTint,
-                                foregroundColor: _Theme.accent,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: const BorderSide(color: _Theme.border),
+                            child: SizedBox(
+                              height: 40,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _pickImage(ImageSource.camera),
+                                icon: const Icon(Icons.camera_alt_rounded, size: 16, color: _Theme.accent),
+                                label: Text(
+                                  'Camera',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: _Theme.accent,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: _Theme.accent.withAlpha(10),
+                                  side: BorderSide(color: _Theme.accent.withAlpha(60)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => _pickImage(ImageSource.gallery),
-                              icon: const Icon(Icons.photo_library_rounded, size: 16),
-                              label: const Text('Gallery'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _Theme.bgTint,
-                                foregroundColor: _Theme.accent,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: const BorderSide(color: _Theme.border),
+                            child: SizedBox(
+                              height: 40,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _pickImage(ImageSource.gallery),
+                                icon: const Icon(Icons.photo_library_rounded, size: 16, color: _Theme.accent),
+                                label: Text(
+                                  'Gallery',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: _Theme.accent,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: _Theme.accent.withAlpha(10),
+                                  side: BorderSide(color: _Theme.accent.withAlpha(60)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       if (_selectedImagePaths.isNotEmpty) ...[
-                        Text(
-                          'Selected Images (${_selectedImagePaths.length}):',
-                          style: GoogleFonts.manrope(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: _Theme.primary,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              'Selected Images (${_selectedImagePaths.length}):',
+                              style: GoogleFonts.manrope(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: _Theme.primary,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
                           ),
                           itemCount: _selectedImagePaths.length,
                           itemBuilder: (context, index) {
@@ -360,7 +391,7 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
                                     onTap: () => _removeImage(index),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.6),
+                                        color: Colors.black.withAlpha(160),
                                         shape: BoxShape.circle,
                                       ),
                                       padding: const EdgeInsets.all(4),
@@ -378,60 +409,83 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
                         ),
                       ] else
                         Container(
-                          height: 100,
+                          height: 85,
                           decoration: BoxDecoration(
-                            color: _Theme.bgTint,
+                            color: const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: _Theme.border, style: BorderStyle.solid),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
                           child: Center(
-                            child: Text(
-                              'No images selected',
-                              style: GoogleFonts.manrope(
-                                fontSize: 13,
-                                color: _Theme.textSecondary.withValues(alpha: 0.6),
-                                fontWeight: FontWeight.w600,
-                              ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate_outlined, color: Colors.grey.shade400, size: 24),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'No images selected',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12,
+                                    color: const Color(0xFF94A3B8),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       Text(
                         'Accepted: JPG, PNG, WEBP — max 5MB each',
                         style: GoogleFonts.manrope(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: _Theme.textSecondary.withValues(alpha: 0.5),
+                          color: const Color(0xFF94A3B8),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _submitForm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _Theme.accent,
-                        foregroundColor: Colors.white,
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Text(
-                        'Save Record',
-                        style: GoogleFonts.manrope(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Colors.blueGrey.withAlpha(20))),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(5),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: 46,
+            child: ElevatedButton.icon(
+              onPressed: _isSubmitting ? null : _submitForm,
+              icon: const Icon(Icons.check_circle_rounded, size: 18),
+              label: Text(
+                _isSubmitting ? 'Saving...' : 'Save Record',
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _Theme.accent,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -441,34 +495,47 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
     required List<Widget> children,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _Theme.border, width: 1.2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: _Theme.accent, size: 18),
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _Theme.accent.withAlpha(15),
+                  border: Border.all(color: _Theme.accent.withAlpha(30), width: 1.0),
+                ),
+                child: Icon(icon, color: _Theme.accent, size: 16),
+              ),
               const SizedBox(width: 8),
               Text(
-                title.toUpperCase(),
+                title,
                 style: GoogleFonts.manrope(
-                  fontSize: 10.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w800,
-                  color: _Theme.accent,
-                  letterSpacing: 0.5,
+                  color: _Theme.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           ...children,
         ],
       ),
@@ -485,28 +552,40 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
         Text(
           label,
           style: GoogleFonts.manrope(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: _Theme.textSecondary,
-            letterSpacing: 0.5,
+            fontSize: 11.5,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF334155),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4.5),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+          height: 42,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9), // Light grey fill for read only
+            color: const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: _Theme.border, width: 1.0),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
           ),
-          child: Text(
-            value,
-            style: GoogleFonts.manrope(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: _Theme.textSecondary,
-            ),
+          child: Row(
+            children: [
+              const Icon(Icons.apartment_rounded, color: Color(0xFF64748B), size: 17),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: _Theme.primary,
+                  ),
+                ),
+              ),
+              const Icon(Icons.lock_outline_rounded, color: Color(0xFF94A3B8), size: 15),
+            ],
           ),
         ),
       ],
@@ -517,6 +596,7 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
     required String label,
     required TextEditingController controller,
     required String placeholder,
+    bool isRequired = false,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
     String? Function(String?)? validator,
@@ -524,23 +604,42 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: _Theme.textSecondary,
-            letterSpacing: 0.5,
-          ),
+        Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
+              ),
+            ),
+            if (isRequired)
+              const Text(
+                ' *',
+                style: TextStyle(
+                  color: Color(0xFFDC2626),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          decoration: _inputDecoration(placeholder),
-          style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700, color: _Theme.primary),
-          validator: validator,
+        const SizedBox(height: 4.5),
+        SizedBox(
+          height: maxLines == 1 ? 42 : null,
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            decoration: _inputDecoration(placeholder, prefixIcon: Icons.title_rounded),
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _Theme.primary,
+            ),
+            validator: validator,
+          ),
         ),
       ],
     );
@@ -551,29 +650,49 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
     required T? value,
     required List<DropdownMenuItem<T>> items,
     required void Function(T?)? onChanged,
+    bool isRequired = false,
     String? Function(T?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: _Theme.textSecondary,
-            letterSpacing: 0.5,
-          ),
+        Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
+              ),
+            ),
+            if (isRequired)
+              const Text(
+                ' *',
+                style: TextStyle(
+                  color: Color(0xFFDC2626),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 6),
-        DropdownButtonFormField<T>(
-          isExpanded: true,
-          initialValue: value,
-          items: items,
-          onChanged: onChanged,
-          decoration: _inputDecoration('Select Option'),
-          style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: _Theme.primary),
-          validator: validator,
+        const SizedBox(height: 4.5),
+        SizedBox(
+          height: 42,
+          child: DropdownButtonFormField<T>(
+            isExpanded: true,
+            initialValue: value,
+            items: items,
+            onChanged: onChanged,
+            decoration: _inputDecoration('Select Option', prefixIcon: Icons.medical_services_outlined),
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _Theme.primary,
+            ),
+            validator: validator,
+          ),
         ),
       ],
     );
@@ -583,33 +702,59 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
     required String label,
     required String value,
     required VoidCallback onTap,
+    bool isRequired = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: _Theme.textSecondary,
-            letterSpacing: 0.5,
-          ),
+        Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
+              ),
+            ),
+            if (isRequired)
+              const Text(
+                ' *',
+                style: TextStyle(
+                  color: Color(0xFFDC2626),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4.5),
         InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(10),
-          child: InputDecorator(
-            decoration: _inputDecoration('Select Date'),
+          child: Container(
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+            ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  value,
-                  style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700, color: _Theme.primary),
+                const Icon(Icons.calendar_month_rounded, color: Color(0xFF64748B), size: 17),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    value,
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _Theme.primary,
+                    ),
+                  ),
                 ),
-                const Icon(Icons.calendar_month_rounded, color: _Theme.accent, size: 16),
+                const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF64748B), size: 20),
               ],
             ),
           ),
@@ -618,28 +763,32 @@ class _CreateHandwrittenPrescriptionScreenState extends State<CreateHandwrittenP
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  InputDecoration _inputDecoration(String hint, {IconData? prefixIcon}) {
     return InputDecoration(
+      isDense: true,
       hintText: hint,
       hintStyle: GoogleFonts.manrope(
         fontSize: 12.5,
-        color: _Theme.textSecondary.withValues(alpha: 0.5),
-        fontWeight: FontWeight.w600,
+        color: const Color(0xFF94A3B8),
+        fontWeight: FontWeight.w500,
       ),
+      prefixIcon: prefixIcon != null
+          ? Icon(prefixIcon, color: const Color(0xFF64748B), size: 17)
+          : null,
       filled: true,
-      fillColor: _Theme.bgTint,
-      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+      fillColor: const Color(0xFFF8FAFC),
+      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: _Theme.border, width: 1.0),
+        borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: _Theme.border, width: 1.0),
+        borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: _Theme.accent, width: 1.2),
+        borderSide: const BorderSide(color: _Theme.accent, width: 1.4),
       ),
     );
   }

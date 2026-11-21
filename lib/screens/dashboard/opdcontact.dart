@@ -333,72 +333,42 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 135),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 14,
+          bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+        ),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FadeInDown(
-                duration: const Duration(milliseconds: 400),
+                duration: const Duration(milliseconds: 300),
                 child: Text(
                   'Doctor Chamber Setup',
                   style: GoogleFonts.manrope(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: AppColors.navy,
-                    letterSpacing: -0.5,
+                    letterSpacing: -0.3,
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 3),
               FadeInDown(
-                duration: const Duration(milliseconds: 450),
+                duration: const Duration(milliseconds: 350),
                 child: Text(
                   'Complete your doctor chamber clinic profile details below',
                   style: GoogleFonts.manrope(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
+                    color: const Color(0xFF64748B),
                   ),
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Stepper Roadmap Badge
-              FadeInDown(
-                duration: const Duration(milliseconds: 380),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF86EFAC), width: 0.9),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle_outline_rounded,
-                        color: Color(0xFF16A34A),
-                        size: 15,
-                      ),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        child: Text(
-                          '1. Clinic Info  ➔  2. Address & Map Link  ➔  3. Banner Image  ➔  4. Add Doctors',
-                          style: GoogleFonts.manrope(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF15803D),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
 
               // Banner Image Upload Card
               FadeInUp(
@@ -408,159 +378,182 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
 
               // Section 1: Clinic Profile Types
               FadeInUp(
-                duration: const Duration(milliseconds: 400),
+                duration: const Duration(milliseconds: 360),
                 child: _buildSectionCard(
                   title: 'Clinic Information',
-                  icon: Icons.business_rounded,
+                  icon: Icons.apartment_rounded,
+                  iconColor: const Color(0xFF0D9488),
                   children: [
-                    _buildFormInput(
+                    _buildCompactField(
+                      label: 'Clinic Name',
                       controller: _clinicNameController,
-                      hint: 'Clinic Name *',
+                      hint: 'Enter clinic name',
                       icon: Icons.apartment_rounded,
+                      isRequired: true,
                     ),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
+                    const SizedBox(height: 10),
+                    _buildCompactField(
+                      label: 'Contact Person Name',
                       controller: _contactPersonController,
-                      hint: 'Contact Person *',
+                      hint: 'Enter contact person name',
                       icon: Icons.person_rounded,
+                      isRequired: true,
                     ),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
+                    const SizedBox(height: 10),
+                    _buildCompactField(
+                      label: 'Clinic GSTIN',
                       controller: _gstinController,
-                      hint: 'Clinic GSTIN (Optional)',
+                      hint: 'Enter GSTIN (Optional)',
                       icon: Icons.receipt_long_rounded,
+                      isRequired: false,
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
 
               // Section 2: Contact Details
               FadeInUp(
-                duration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 400),
                 child: _buildSectionCard(
                   title: 'Contact Details',
                   icon: Icons.contact_phone_rounded,
+                  iconColor: const Color(0xFF0284C7),
                   children: [
-                    _buildFormInput(
+                    _buildCompactField(
+                      label: 'Mobile Number',
                       controller: _mobileController,
-                      hint: 'Mobile Number *',
+                      hint: '10-digit mobile number',
                       icon: Icons.phone_android_rounded,
+                      isRequired: true,
+                      prefixText: '+91 ',
                       keyboardType: TextInputType.phone,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                     ),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
+                    const SizedBox(height: 10),
+                    _buildCompactField(
+                      label: 'Email Address',
                       controller: _emailController,
-                      hint: 'Email ID *',
+                      hint: 'clinic@example.com',
                       icon: Icons.alternate_email_rounded,
+                      isRequired: true,
                       keyboardType: TextInputType.emailAddress,
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
 
               // Section 3: Location Details
               FadeInUp(
-                duration: const Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 440),
                 child: _buildSectionCard(
-                  title: 'Location Details',
+                  title: 'Location & Address',
                   icon: Icons.location_on_rounded,
+                  iconColor: const Color(0xFFE11D48),
                   children: [
                     _buildStateDropdown(),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
-                      controller: _cityController,
-                      hint: 'City *',
-                      icon: Icons.location_city_rounded,
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildCompactField(
+                            label: 'City',
+                            controller: _cityController,
+                            hint: 'Enter city',
+                            icon: Icons.location_city_rounded,
+                            isRequired: true,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _buildCompactField(
+                            label: 'Pin Code',
+                            controller: _pinCodeController,
+                            hint: '6-digit pincode',
+                            icon: Icons.pin_drop_rounded,
+                            isRequired: true,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(6),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
-                      controller: _pinCodeController,
-                      hint: 'Pin Code *',
-                      icon: Icons.pin_drop_rounded,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
+                    const SizedBox(height: 10),
+                    _buildCompactField(
+                      label: 'Landmark',
                       controller: _landmarkController,
-                      hint: 'Landmark *',
+                      hint: 'Nearby landmark / road',
                       icon: Icons.assistant_navigation,
+                      isRequired: true,
                     ),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
+                    const SizedBox(height: 10),
+                    _buildCompactField(
+                      label: 'Google Map Link',
                       controller: _googleMapController,
-                      hint: 'Google Map Link * (Required for 100%)',
+                      hint: 'https://maps.google.com/?q=... (Required for 100%)',
                       icon: Icons.map_rounded,
+                      isRequired: true,
                     ),
-                    const SizedBox(height: 14),
-                    _buildFormInput(
+                    const SizedBox(height: 10),
+                    _buildCompactField(
+                      label: 'Full Address',
                       controller: _addressController,
-                      hint: 'Full Address *',
+                      hint: 'Premises, building, street address',
                       icon: Icons.home_work_outlined,
-                      maxLines: 3,
+                      isRequired: true,
+                      maxLines: 2,
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 15),
+              const SizedBox(height: 16),
 
               // SUBMIT BUTTON
               FadeInUp(
-                duration: const Duration(milliseconds: 700),
-                child: Container(
+                duration: const Duration(milliseconds: 480),
+                child: SizedBox(
                   width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.getStartedGradient,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.teal.withValues(alpha: 0.35),
-                        blurRadius: 15,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
+                  height: 46,
+                  child: ElevatedButton.icon(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
+                      backgroundColor: const Color(0xFF0D9488),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: _isLoading
+                    icon: _isLoading
                         ? const SizedBox(
-                            width: 22,
-                            height: 22,
+                            width: 18,
+                            height: 18,
                             child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
+                              strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Save Contact Details',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 20),
-                            ],
-                          ),
+                        : const Icon(Icons.check_circle_rounded, size: 18),
+                    label: Text(
+                      _isLoading ? 'Saving...' : 'Save Chamber Details',
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -571,167 +564,227 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
   Widget _buildSectionCard({
     required String title,
     required IconData icon,
+    Color iconColor = const Color(0xFF0D9488),
     required List<Widget> children,
   }) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey[100]!, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.02),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: AppColors.navy.withValues(alpha: 0.01),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
-              ),
-              border: Border(
-                bottom: BorderSide(color: Colors.grey[100]!, width: 1),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: AppColors.teal, size: 20),
-                const SizedBox(width: 10),
-                Text(
-                  title.toUpperCase(),
-                  style: GoogleFonts.manrope(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.navy,
-                    letterSpacing: 1.0,
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: iconColor.withAlpha(15),
+                  border: Border.all(
+                    color: iconColor.withAlpha(30),
+                    width: 1.0,
                   ),
                 ),
-              ],
-            ),
+                child: Icon(icon, color: iconColor, size: 17),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.manrope(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.navy,
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
+          const SizedBox(height: 12),
+          ...children,
         ],
       ),
     );
   }
 
-  Widget _buildFormInput({
+  Widget _buildCompactField({
+    required String label,
     required TextEditingController controller,
     required String hint,
     required IconData icon,
+    bool isRequired = false,
+    String? prefixText,
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.01),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey[200]!, width: 1.5),
-      ),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters,
-        style: GoogleFonts.manrope(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.navy,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
+              ),
+            ),
+            if (isRequired)
+              const Text(
+                ' *',
+                style: TextStyle(
+                  color: Color(0xFFDC2626),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+          ],
         ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: GoogleFonts.manrope(
-            color: Colors.grey[400],
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+        const SizedBox(height: 4.5),
+        SizedBox(
+          height: maxLines == 1 ? 42 : null,
+          child: TextField(
+            controller: controller,
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.navy,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: hint,
+              hintStyle: GoogleFonts.manrope(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF94A3B8),
+              ),
+              prefixText: prefixText,
+              prefixStyle: GoogleFonts.manrope(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
+              ),
+              prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 17),
+              filled: true,
+              fillColor: const Color(0xFFF8FAFC),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppColors.teal, width: 1.4),
+              ),
+            ),
           ),
-          prefixIcon: Icon(icon, color: AppColors.teal, size: 18),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildStateDropdown() {
-    return InkWell(
-      onTap: () async {
-        final chosen = await showSearchableStatePicker(
-          context: context,
-          currentState: _selectedState,
-          states: _states,
-        );
-        if (chosen != null) {
-          setState(() {
-            _selectedState = chosen;
-          });
-        }
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.navy.withValues(alpha: 0.01),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(
-            color: _selectedState != null
-                ? AppColors.teal.withValues(alpha: 0.6)
-                : Colors.grey[200]!,
-            width: 1.5,
-          ),
-        ),
-        child: Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            const Icon(Icons.map_rounded, color: AppColors.teal, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _selectedState ?? 'Select State *',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.manrope(
-                  color: _selectedState != null ? AppColors.navy : Colors.grey[400],
-                  fontSize: 13.5,
-                  fontWeight: _selectedState != null ? FontWeight.w600 : FontWeight.w500,
-                ),
+            Text(
+              'State / UT',
+              style: GoogleFonts.manrope(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF334155),
               ),
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.teal, size: 22),
+            const Text(
+              ' *',
+              style: TextStyle(
+                color: Color(0xFFDC2626),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
-      ),
+        const SizedBox(height: 4.5),
+        InkWell(
+          onTap: () async {
+            final chosen = await showSearchableStatePicker(
+              context: context,
+              currentState: _selectedState,
+              states: _states,
+            );
+            if (chosen != null) {
+              setState(() {
+                _selectedState = chosen;
+              });
+            }
+          },
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _selectedState != null
+                    ? AppColors.teal.withAlpha(140)
+                    : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.map_outlined,
+                  color: Color(0xFF64748B),
+                  size: 16.5,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedState ?? 'Select State / Union Territory',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12.5,
+                      fontWeight: _selectedState != null ? FontWeight.w600 : FontWeight.w500,
+                      color: _selectedState != null ? AppColors.navy : const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Color(0xFF64748B),
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -742,44 +795,44 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
         File(_localBannerPath!),
         fit: BoxFit.cover,
         width: double.infinity,
-        height: 180,
+        height: 140,
       );
     } else if (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty) {
       imageWidget = Image.network(
         _serverBannerUrl!,
         fit: BoxFit.cover,
         width: double.infinity,
-        height: 180,
+        height: 140,
         errorBuilder: (context, error, stackTrace) {
           return const Center(
-            child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 40),
+            child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 36),
           );
         },
       );
     } else {
       imageWidget = Container(
-        color: AppColors.background,
+        color: const Color(0xFFF8FAFC),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_photo_alternate_rounded, color: AppColors.teal.withValues(alpha: 0.8), size: 40),
-              const SizedBox(height: 8),
+              Icon(Icons.add_photo_alternate_rounded, color: AppColors.teal.withValues(alpha: 0.8), size: 34),
+              const SizedBox(height: 6),
               Text(
                 'Upload Chamber Banner Image',
                 style: GoogleFonts.manrope(
-                  fontSize: 13,
+                  fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                   color: AppColors.navy,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
-                'JPG, PNG, WebP (Max 2MB)',
+                'JPG, PNG, WebP (Required for 100%)',
                 style: GoogleFonts.manrope(
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary.withValues(alpha: 0.6),
+                  color: const Color(0xFF64748B),
                 ),
               ),
             ],
@@ -789,91 +842,93 @@ class _OpdContactScreenState extends State<OpdContactScreen> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 12),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.teal.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.image_rounded, color: AppColors.teal, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Chamber Banner Image',
-                  style: GoogleFonts.manrope(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.navy,
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF0D9488).withAlpha(15),
+                  border: Border.all(
+                    color: const Color(0xFF0D9488).withAlpha(30),
+                    width: 1.0,
                   ),
                 ),
-              ],
-            ),
+                child: const Icon(Icons.image_rounded, color: Color(0xFF0D9488), size: 17),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Chamber Banner Image',
+                style: GoogleFonts.manrope(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.navy,
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-            child: InkWell(
-              onTap: _showImageSourceBottomSheet,
-              borderRadius: BorderRadius.circular(16),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  height: 180,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade200, width: 1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: imageWidget),
-                      if (_localBannerPath != null || (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty))
-                        Positioned(
-                          bottom: 12,
-                          right: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.edit_rounded, color: Colors.white, size: 14),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Change',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+          const SizedBox(height: 10),
+          InkWell(
+            onTap: _showImageSourceBottomSheet,
+            borderRadius: BorderRadius.circular(14),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                height: 140,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: imageWidget),
+                    if (_localBannerPath != null || (_serverBannerUrl != null && _serverBannerUrl!.isNotEmpty))
+                      Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.edit_rounded, color: Colors.white, size: 12),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Change',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
             ),

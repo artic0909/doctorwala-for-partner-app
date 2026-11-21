@@ -15,12 +15,6 @@ class _DoctorTheme {
   static const Color bgTint = Color(0xFFF8FAFC); // Slate background
   static const Color textPrimary = Color(0xFF0F172A); // Dark slate
   static const Color textSecondary = Color(0xFF64748B); // Medium slate
-  static const Color border = Color(0xFFE2E8F0); // Border color
-  static const LinearGradient buttonGradient = LinearGradient(
-    colors: [Color(0xFF1E3A8A), Color(0xFF0D9488)],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
 }
 
 class ShowDoctorsScreen extends StatefulWidget {
@@ -255,14 +249,20 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
               // Custom Header Bar with Search & Add button
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.blueGrey.withAlpha(20),
+                      width: 1.0,
+                    ),
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: _DoctorTheme.primary.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withAlpha(4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -277,99 +277,107 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                             Text(
                               'Doctors List',
                               style: GoogleFonts.manrope(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 color: _DoctorTheme.primary,
-                                letterSpacing: -0.5,
+                                letterSpacing: -0.3,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Total Listed: ${_doctors.length}',
                               style: GoogleFonts.manrope(
-                                fontSize: 12,
+                                fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
                                 color: _DoctorTheme.textSecondary,
                               ),
                             ),
                           ],
                         ),
-                        // Add Doctors Button with gradient
-                        Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: _DoctorTheme.buttonGradient,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _DoctorTheme.accent.withValues(alpha: 0.25),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
+                        // Add Doctors Button
+                        SizedBox(
+                          height: 38,
                           child: ElevatedButton.icon(
                             onPressed: () => _navigateToAddDoctor(),
                             icon: const Icon(
                               Icons.person_add_rounded,
-                              size: 16,
+                              size: 15,
                               color: Colors.white,
                             ),
                             label: Text(
                               'Add Doctor',
                               style: GoogleFonts.manrope(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
+                              backgroundColor: _DoctorTheme.accent,
+                              foregroundColor: Colors.white,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
+                                horizontal: 14,
+                                vertical: 8,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     // Search Bar
-                    Container(
-                      decoration: BoxDecoration(
-                        color: _DoctorTheme.bgTint,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _DoctorTheme.border),
-                      ),
+                    SizedBox(
+                      height: 42,
                       child: TextField(
                         controller: _searchController,
                         style: GoogleFonts.manrope(
-                          fontSize: 14,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: _DoctorTheme.textPrimary,
                         ),
                         decoration: InputDecoration(
+                          isDense: true,
                           prefixIcon: const Icon(
                             Icons.search_rounded,
-                            color: _DoctorTheme.accent,
-                            size: 20,
+                            color: Color(0xFF64748B),
+                            size: 18,
                           ),
                           hintText: 'Search by doctor name or specialty...',
                           hintStyle: GoogleFonts.manrope(
-                            fontSize: 13,
-                            color: _DoctorTheme.textSecondary.withValues(
-                              alpha: 0.6,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF94A3B8),
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                              width: 1.0,
                             ),
                           ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: _DoctorTheme.accent,
+                              width: 1.4,
+                            ),
                           ),
                         ),
                       ),
@@ -389,7 +397,12 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                               _filteredDoctors.isEmpty
                                   ? _buildEmptyState()
                                   : ListView.builder(
-                                    padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 135),
+                                    padding: EdgeInsets.only(
+                                      left: 16,
+                                      right: 16,
+                                      top: 14,
+                                      bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+                                    ),
                                     itemCount: _filteredDoctors.length,
                                     itemBuilder: (context, idx) {
                                       final doc =
@@ -479,29 +492,60 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
     final more = doc['doctor_more']?.toString() ?? '';
 
     // Decode visit days
-    List<dynamic> daysList = [];
+    List<dynamic> rawDaysList = [];
     final visitData = doc['visit_day_time'];
     if (visitData != null) {
       if (visitData is List) {
-        daysList = visitData;
+        rawDaysList = visitData;
       } else if (visitData is String) {
         try {
-          daysList = jsonDecode(visitData);
+          rawDaysList = jsonDecode(visitData);
         } catch (_) {}
       }
     }
 
+    // Filter active schedules (ignore days without timings)
+    final List<Map<String, String>> activeSchedules = [];
+    for (var sched in rawDaysList) {
+      if (sched is! Map) continue;
+      final dayName = sched['day']?.toString() ?? '';
+      final start = sched['start_time']?.toString() ?? '';
+      final end = sched['end_time']?.toString() ?? '';
+
+      final startDisplay = _formatDBTime(start);
+      final endDisplay = _formatDBTime(end);
+
+      String displayTime = '';
+      if (startDisplay.isEmpty && endDisplay.isEmpty) {
+        displayTime = '';
+      } else if (endDisplay.isEmpty) {
+        displayTime = '$startDisplay onwards';
+      } else if (startDisplay.isEmpty) {
+        displayTime = 'Till $endDisplay';
+      } else {
+        displayTime = '$startDisplay - $endDisplay';
+      }
+
+      if (displayTime.isNotEmpty) {
+        String shortDay = dayName;
+        if (dayName.length > 3 && dayName.toLowerCase() != 'all day') {
+          shortDay = dayName.substring(0, 3);
+        }
+        activeSchedules.add({'day': shortDay, 'time': displayTime});
+      }
+    }
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _DoctorTheme.border, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blueGrey.withAlpha(22), width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: _DoctorTheme.primary.withValues(alpha: 0.02),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: Colors.black.withAlpha(5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -509,41 +553,42 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Doctor Icon Frame
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: _DoctorTheme.accentLight,
-                    borderRadius: BorderRadius.circular(16),
+                    color: _DoctorTheme.accent.withAlpha(15),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: _DoctorTheme.accent.withValues(alpha: 0.2),
-                      width: 1.5,
+                      color: _DoctorTheme.accent.withAlpha(30),
+                      width: 1.0,
                     ),
                   ),
                   child: const Icon(
                     Icons.person_rounded,
-                    color: _DoctorTheme.primary,
-                    size: 28,
+                    color: _DoctorTheme.accent,
+                    size: 22,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 10),
                 // Main Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
                             child: Text(
                               name,
                               style: GoogleFonts.manrope(
-                                fontSize: 16,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w800,
                                 color: _DoctorTheme.primary,
                               ),
@@ -551,21 +596,21 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                              horizontal: 7,
+                              vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: _DoctorTheme.accentLight,
-                              borderRadius: BorderRadius.circular(8),
+                              color: _DoctorTheme.accent.withAlpha(12),
+                              borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: _DoctorTheme.accent.withValues(alpha: 0.3),
-                                width: 1.0,
+                                color: _DoctorTheme.accent.withAlpha(40),
+                                width: 0.9,
                               ),
                             ),
                             child: Text(
                               desig,
                               style: GoogleFonts.manrope(
-                                fontSize: 11,
+                                fontSize: 10.5,
                                 fontWeight: FontWeight.w800,
                                 color: _DoctorTheme.accent,
                               ),
@@ -573,25 +618,25 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         spec,
                         style: GoogleFonts.manrope(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w600,
                           color: _DoctorTheme.textSecondary,
                         ),
                       ),
                       if (more.isNotEmpty) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         Text(
                           more,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.manrope(
-                            fontSize: 12,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w500,
-                            color: _DoctorTheme.textSecondary.withValues(
-                              alpha: 0.8,
-                            ),
+                            color: const Color(0xFF64748B),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -605,7 +650,7 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
           const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
           // Seating schedule & actions bar
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -617,144 +662,136 @@ class _ShowDoctorsScreenState extends State<ShowDoctorsScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: _DoctorTheme.textSecondary.withValues(alpha: 0.6),
+                        color: const Color(0xFF64748B),
                         letterSpacing: 0.5,
                       ),
                     ),
                     Text(
                       '₹$fees',
                       style: GoogleFonts.manrope(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                         color: _DoctorTheme.accent,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
                   'SEATING SCHEDULE',
                   style: GoogleFonts.manrope(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: _DoctorTheme.textSecondary.withValues(alpha: 0.6),
+                    color: const Color(0xFF64748B),
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
-                if (daysList.isEmpty)
-                  Text(
-                    'No schedule days configured',
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.redAccent,
+                const SizedBox(height: 6),
+                if (activeSchedules.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Text(
+                      'Flexible / Contact Chamber',
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF64748B),
+                      ),
                     ),
                   )
                 else
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
-                    children:
-                        daysList.map<Widget>((sched) {
-                          final dayName = sched['day']?.toString() ?? '';
-                          final start = sched['start_time']?.toString() ?? '';
-                          final end = sched['end_time']?.toString() ?? '';
-
-                          String shortDay = dayName;
-                          if (dayName.length > 3 &&
-                              dayName.toLowerCase() != 'all day') {
-                            shortDay = dayName.substring(0, 3);
-                          }
-
-                          final startDisplay = _formatDBTime(start);
-                          final endDisplay = _formatDBTime(end);
-                          final String displayTime;
-                          if (startDisplay.isEmpty && endDisplay.isEmpty) {
-                            displayTime = 'No Timings';
-                          } else if (endDisplay.isEmpty) {
-                            displayTime = '$startDisplay onwards';
-                          } else if (startDisplay.isEmpty) {
-                            displayTime = 'Till $endDisplay';
-                          } else {
-                            displayTime = '$startDisplay - $endDisplay';
-                          }
-
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _DoctorTheme.accentLight,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: _DoctorTheme.accent.withValues(alpha: 0.15),
-                                width: 1.0,
-                              ),
-                            ),
-                            child: Text(
-                              '$shortDay: $displayTime',
-                              style: GoogleFonts.manrope(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: _DoctorTheme.primary,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                    children: activeSchedules.map<Widget>((sched) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _DoctorTheme.accent.withAlpha(12),
+                          borderRadius: BorderRadius.circular(7),
+                          border: Border.all(
+                            color: _DoctorTheme.accent.withAlpha(35),
+                            width: 0.9,
+                          ),
+                        ),
+                        child: Text(
+                          '${sched['day']}: ${sched['time']}',
+                          style: GoogleFonts.manrope(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                            color: _DoctorTheme.primary,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 const SizedBox(height: 8),
                 const Divider(
-                  height: 24,
+                  height: 16,
                   thickness: 1,
                   color: Color(0xFFF1F5F9),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton.icon(
-                      onPressed: () => _navigateToAddDoctor(doctorToEdit: doc),
-                      icon: const Icon(
-                        Icons.edit_rounded,
-                        size: 16,
-                        color: _DoctorTheme.accent,
-                      ),
-                      label: Text(
-                        'Edit Details',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: _DoctorTheme.accent,
-                        ),
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                    InkWell(
+                      onTap: () => _navigateToAddDoctor(doctorToEdit: doc),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.edit_rounded,
+                              size: 14,
+                              color: _DoctorTheme.accent,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Edit Details',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: _DoctorTheme.accent,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    TextButton.icon(
-                      onPressed: () => _deleteDoctor(id),
-                      icon: const Icon(
-                        Icons.delete_outline_rounded,
-                        size: 16,
-                        color: Colors.redAccent,
-                      ),
-                      label: Text(
-                        'Remove',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.redAccent,
-                        ),
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                    const SizedBox(width: 12),
+                    InkWell(
+                      onTap: () => _deleteDoctor(id),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 14,
+                              color: Colors.redAccent,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Remove',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
