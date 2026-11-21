@@ -16,7 +16,6 @@ import 'showtests.dart';
 import 'appointments/upcoming.dart';
 import 'appointments/complete.dart';
 import 'appointments/cancel.dart';
-import 'appointments/today.dart';
 import 'account_settings.dart';
 import 'notifications.dart';
 import 'help.dart';
@@ -42,7 +41,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _totalTests = 0;
   int _upcomingCount = 0;
   int _completedCount = 0;
-  int _todayCount = 0;
   bool _isFetchingStats = false;
   bool _hasUnreadNotifications = false;
   int _profileCompletionPercent = 0;
@@ -166,7 +164,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       int testCount = 0;
       int upcoming = 0;
       int completed = 0;
-      int today = 0;
       bool hasUnread = false;
 
       if (doctorsRes['success'] == true && doctorsRes['doctors'] != null) {
@@ -179,7 +176,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final s = statsRes['stats'];
         upcoming = s['upcoming_count'] ?? 0;
         completed = s['completed_count'] ?? 0;
-        today = s['today_count'] ?? 0;
       }
       if (apptsRes['success'] == true && apptsRes['appointments'] != null) {
         final List<dynamic> appts = apptsRes['appointments'];
@@ -439,7 +435,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _totalTests = testCount;
           _upcomingCount = upcoming;
           _completedCount = completed;
-          _todayCount = today;
           _hasUnreadNotifications = hasUnread;
           _profileCompletionPercent = percent;
           _step1Done = s1;
@@ -541,8 +536,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 )
               : Text(
-                  _currentIndex == 1
-                      ? 'Upcoming Appointments'
+                  (_currentIndex == 1 || _currentIndex == 15)
+                      ? 'Upcoming Bookings'
                       : _currentIndex == 2
                       ? 'Account Settings'
                       : _currentIndex == 3
@@ -563,8 +558,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ? 'List Myself'
                       : _currentIndex == 14
                       ? 'Cancelled Appointments'
-                      : _currentIndex == 15
-                      ? "Today's Bookings"
                       : 'Help & Support',
                   style: GoogleFonts.manrope(
                     fontSize: 18,
@@ -635,6 +628,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 0:
         return _buildHomeTab();
       case 1:
+      case 15:
         return UpcomingAppointmentsScreen(partnerData: _partnerData);
       case 2:
         return AccountSettingsScreen(
@@ -672,8 +666,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return const DoctorContactScreen();
       case 14:
         return CancelledAppointmentsScreen(partnerData: _partnerData);
-      case 15:
-        return TodayAppointmentsScreen(partnerData: _partnerData, isTab: true);
       default:
         return _buildHomeTab();
     }
@@ -828,28 +820,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final cards = <Widget>[
       _buildCountCard(
-        title: "Today's Appointments",
-        count: '$_todayCount',
-        icon: Icons.today_rounded,
+        title: 'Upcoming Bookings',
+        count: '$_upcomingCount',
+        icon: Icons.calendar_month_rounded,
         color: AppColors.teal,
         delayMs: 100,
         isLoading: _isFetchingStats,
         onTap: () {
           setState(() {
-            _currentIndex = 15;
-          });
-        },
-      ),
-      _buildCountCard(
-        title: 'Pending Appts',
-        count: '$_upcomingCount',
-        icon: Icons.pending_actions_rounded,
-        color: Colors.orangeAccent,
-        delayMs: 150,
-        isLoading: _isFetchingStats,
-        onTap: () {
-          setState(() {
-            _currentIndex = 1; // Upcoming Appointments
+            _currentIndex = 1; // Upcoming Bookings
           });
         },
       ),
@@ -858,7 +837,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         count: '$_completedCount',
         icon: Icons.task_alt_rounded,
         color: Colors.blueAccent,
-        delayMs: 200,
+        delayMs: 150,
         isLoading: _isFetchingStats,
         onTap: () {
           setState(() {
@@ -1383,25 +1362,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 );
 
-                // 8. Upcoming Appointments
-                shortcutWidgets.add(
-                  _buildRoundShortcutItem(
-                    icon: Icons.pending_actions_rounded,
-                    title: 'Upcoming\nAppts',
-                    color: const Color(0xFFD97706),
-                    isLocked: false,
-                    onTap: () => setState(() => _currentIndex = 1),
-                  ),
-                );
-
-                // 9. Today's Bookings
+                // 8. Upcoming Bookings
                 shortcutWidgets.add(
                   _buildRoundShortcutItem(
                     icon: Icons.calendar_month_rounded,
-                    title: "Today's\nBookings",
-                    color: const Color(0xFF059669),
+                    title: 'Upcoming\nBookings',
+                    color: const Color(0xFF0D9488),
                     isLocked: false,
-                    onTap: () => setState(() => _currentIndex = 15),
+                    onTap: () => setState(() => _currentIndex = 1),
                   ),
                 );
 

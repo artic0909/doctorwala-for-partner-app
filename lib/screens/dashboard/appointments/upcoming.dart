@@ -345,7 +345,7 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Upcoming Appointments',
+                          'Upcoming Bookings',
                           style: GoogleFonts.manrope(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -355,7 +355,7 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Total Pending: ${_appointments.length}',
+                          'Total Upcoming: ${_appointments.length}',
                           style: GoogleFonts.manrope(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -416,7 +416,12 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
                     child: _filteredAppointments.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
-                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 135),
+                            padding: EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              top: 16,
+                              bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+                            ),
                             itemCount: _filteredAppointments.length,
                             physics: const AlwaysScrollableScrollPhysics(),
                             itemBuilder: (context, index) {
@@ -458,7 +463,7 @@ class _UpcomingAppointmentsScreenState extends State<UpcomingAppointmentsScreen>
             ),
             const SizedBox(height: 20),
             Text(
-              query.isEmpty ? 'No Upcoming Appointments' : 'No Results Found',
+              query.isEmpty ? 'No Upcoming Bookings' : 'No Results Found',
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,

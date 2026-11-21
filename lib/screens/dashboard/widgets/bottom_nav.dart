@@ -78,12 +78,12 @@ class _CustomBottomNavState extends State<CustomBottomNav>
     int mappedIndex = targetIndex;
 
     // Appointments/Bookings family:
-    // 1: Upcoming Appointments
+    // 1: Upcoming Appointments / Bookings
     // 9: Completed Appointments
     // 14: Cancelled Appointments
-    // 15: Today's Bookings
+    // 15: Today's Bookings (redirects to Upcoming)
     if (targetIndex == 1 || targetIndex == 9 || targetIndex == 14 || targetIndex == 15) {
-      mappedIndex = 15;
+      mappedIndex = 1;
     }
     // Patients / Medical Card family:
     // 7: Medical Card Access
@@ -196,7 +196,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
         activeIcon: Icons.event_available_rounded,
         inactiveIcon: Icons.event_available_outlined,
         label: 'Bookings',
-        index: 15,
+        index: 1,
         color: const Color(0xFF00897B), // Teal
       ),
       _BottomNavItem(
