@@ -266,7 +266,8 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
               data['partner_doctor_specialist']?.toString() ?? '';
           _designationController.text =
               data['partner_doctor_designation']?.toString() ?? '';
-          _feesController.text = data['partner_doctor_fees']?.toString() ?? '';
+          final String rawFee = data['partner_doctor_fees']?.toString() ?? '';
+          _feesController.text = (rawFee.isEmpty || rawFee == '500') ? '000' : rawFee;
 
           _mobileController.text =
               (data['partner_doctor_mobile'] != null &&
@@ -806,7 +807,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
                     _buildCompactField(
                       label: 'Consultation Fees (INR)',
                       controller: _feesController,
-                      hint: 'e.g. 500',
+                      hint: 'e.g. 000',
                       icon: Icons.payments_rounded,
                       isRequired: true,
                       prefixText: '₹ ',
