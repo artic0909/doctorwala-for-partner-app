@@ -264,7 +264,9 @@ class _WalletScreenState extends State<WalletScreen> {
 
     final balance = _summaryData?['balance'] ?? _walletData?['balance'] ?? 0.0;
     final totalEarned = _summaryData?['total_earned'] ?? 0.0;
-    final totalWithdrawn = _summaryData?['total_withdrawn'] ?? 0.0;
+    final totalSettled = _summaryData?['total_settled'] != null
+        ? (_summaryData!['total_settled'] as num).toDouble()
+        : ((_summaryData?['total_withdrawn'] as num?)?.toDouble() ?? 0.0);
     final currency = _walletData?['currency'] ?? 'INR';
 
     return Scaffold(
@@ -461,7 +463,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          _formatAmount(totalWithdrawn),
+                          _formatAmount(totalSettled),
                           style: GoogleFonts.manrope(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
