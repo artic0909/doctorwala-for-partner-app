@@ -162,24 +162,29 @@ class _WalletScreenState extends State<WalletScreen> {
         color: AppColors.teal,
         onRefresh: _fetchWalletData,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.only(
+            left: 14,
+            right: 14,
+            top: 12,
+            bottom: (MediaQuery.paddingOf(context).bottom + 125).clamp(140.0, 165.0),
+          ),
           children: [
             // Balance Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF0284C7), Color(0xFF0369A1)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    offset: const Offset(0, 8),
-                    blurRadius: 20,
-                    color: const Color(0xFF0284C7).withValues(alpha: 0.25),
+                    offset: const Offset(0, 4),
+                    blurRadius: 14,
+                    color: const Color(0xFF0284C7).withValues(alpha: 0.22),
                   ),
                 ],
               ),
@@ -192,63 +197,63 @@ class _WalletScreenState extends State<WalletScreen> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.18),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 22),
+                            child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 18),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Text(
                             'Wallet Balance',
                             style: GoogleFonts.manrope(
                               color: Colors.white70,
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
+                              letterSpacing: 0.2,
                             ),
                           ),
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
                           currency,
                           style: GoogleFonts.manrope(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
                   Text(
                     _formatAmount(balance),
                     style: GoogleFonts.manrope(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: 26,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
+                      letterSpacing: -0.4,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.security_rounded, color: Colors.white70, size: 14),
-                      const SizedBox(width: 6),
+                      const Icon(Icons.security_rounded, color: Colors.white70, size: 12),
+                      const SizedBox(width: 5),
                       Expanded(
                         child: Text(
                           'Secure payout wallet for consultation earnings',
                           style: GoogleFonts.manrope(
                             color: Colors.white70,
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -259,17 +264,17 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
             // Summary Metrics Row
             Row(
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
                     child: Column(
@@ -278,29 +283,29 @@ class _WalletScreenState extends State<WalletScreen> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(6),
+                              padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFECFDF5),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(7),
                               ),
-                              child: const Icon(Icons.arrow_downward_rounded, color: Color(0xFF10B981), size: 16),
+                              child: const Icon(Icons.arrow_downward_rounded, color: Color(0xFF10B981), size: 14),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 7),
                             Text(
                               'Earned',
                               style: GoogleFonts.manrope(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textSecondary,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 6),
                         Text(
                           _formatAmount(totalEarned),
                           style: GoogleFonts.manrope(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: const Color(0xFF10B981),
                           ),
@@ -309,13 +314,13 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
                     child: Column(
@@ -324,29 +329,29 @@ class _WalletScreenState extends State<WalletScreen> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(6),
+                              padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFEFF6FF),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(7),
                               ),
-                              child: const Icon(Icons.arrow_upward_rounded, color: Color(0xFF2563EB), size: 16),
+                              child: const Icon(Icons.arrow_upward_rounded, color: Color(0xFF2563EB), size: 14),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 7),
                             Text(
                               'Settled',
                               style: GoogleFonts.manrope(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textSecondary,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 6),
                         Text(
                           _formatAmount(totalWithdrawn),
                           style: GoogleFonts.manrope(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: const Color(0xFF2563EB),
                           ),
@@ -358,28 +363,28 @@ class _WalletScreenState extends State<WalletScreen> {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
             // Primary Bank Details Banner
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEF3C7),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.account_balance_rounded, color: Color(0xFFD97706), size: 24),
+                    child: const Icon(Icons.account_balance_rounded, color: Color(0xFFD97706), size: 20),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,7 +392,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         Text(
                           _primaryBank != null ? (_primaryBank!['bank_name'] ?? 'Bank Account') : 'No Primary Bank Account',
                           style: GoogleFonts.manrope(
-                            fontSize: 15,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
                           ),
@@ -400,7 +405,7 @@ class _WalletScreenState extends State<WalletScreen> {
                               ? 'A/C: ${_primaryBank!['masked_account_no'] ?? _primaryBank!['account_no']} • ${_primaryBank!['ifsc_code'] ?? ''}'
                               : 'Add your bank details for direct payouts',
                           style: GoogleFonts.manrope(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
                           ),
@@ -412,12 +417,14 @@ class _WalletScreenState extends State<WalletScreen> {
                     onPressed: widget.onNavigateToBankDetails,
                     style: TextButton.styleFrom(
                       foregroundColor: const Color(0xFF0284C7),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
                       _primaryBank != null ? 'Manage' : 'Add Bank',
                       style: GoogleFonts.manrope(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -426,7 +433,7 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 14),
 
             // Transactions Header & Filters
             Row(
@@ -435,7 +442,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 Text(
                   'Recent Transactions',
                   style: GoogleFonts.manrope(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
                   ),
@@ -443,44 +450,44 @@ class _WalletScreenState extends State<WalletScreen> {
                 Row(
                   children: [
                     _buildFilterChip('All', 'all'),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 5),
                     _buildFilterChip('Credits', 'credit'),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 5),
                     _buildFilterChip('Debits', 'debit'),
                   ],
                 ),
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             // Transactions List
             if (_filteredTransactions.isEmpty)
               Container(
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.receipt_long_rounded, color: Colors.black26, size: 48),
-                    const SizedBox(height: 10),
+                    const Icon(Icons.receipt_long_rounded, color: Colors.black26, size: 36),
+                    const SizedBox(height: 8),
                     Text(
                       'No Transactions Yet',
                       style: GoogleFonts.manrope(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
                       'Earnings from patient consultations and video calls will appear here automatically.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.manrope(
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
                       ),
@@ -495,29 +502,29 @@ class _WalletScreenState extends State<WalletScreen> {
                 final dateStr = _formatDateTime(tx['created_at']);
 
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 34,
+                        height: 34,
                         decoration: BoxDecoration(
                           color: isCredit ? const Color(0xFFECFDF5) : const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
                           isCredit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
                           color: isCredit ? const Color(0xFF10B981) : const Color(0xFF2563EB),
-                          size: 20,
+                          size: 17,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,18 +532,18 @@ class _WalletScreenState extends State<WalletScreen> {
                             Text(
                               tx['description'] ?? (isCredit ? 'Consultation Fee' : 'Payout Settlement'),
                               style: GoogleFonts.manrope(
-                                fontSize: 14,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: 2),
                             Text(
                               dateStr,
                               style: GoogleFonts.manrope(
-                                fontSize: 11,
+                                fontSize: 10.5,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textSecondary,
                               ),
@@ -550,7 +557,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           Text(
                             '${isCredit ? '+' : '-'}${_formatAmount(amount)}',
                             style: GoogleFonts.manrope(
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.w800,
                               color: isCredit ? const Color(0xFF10B981) : const Color(0xFFDC2626),
                             ),
@@ -559,7 +566,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           Text(
                             tx['status'] ?? 'completed',
                             style: GoogleFonts.manrope(
-                              fontSize: 10,
+                              fontSize: 9.5,
                               fontWeight: FontWeight.w700,
                               color: tx['status'] == 'completed'
                                   ? const Color(0xFF10B981)

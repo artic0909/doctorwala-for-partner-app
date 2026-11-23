@@ -1481,15 +1481,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF0F2042), Color(0xFF1E3A8A)],
+            colors: [Colors.white, Color(0xFFF8FAFC)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF1E3A8A).withValues(alpha: 0.25),
-              blurRadius: 12,
+              color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+              blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
@@ -1498,9 +1499,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => _switchTab(16),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1509,15 +1510,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF38BDF8).withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(14),
+                          color: const Color(0xFF0284C7).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(13),
                           border: Border.all(
-                            color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
+                            color: const Color(0xFF0284C7).withValues(alpha: 0.2),
                           ),
                         ),
                         child: const Icon(
                           Icons.account_balance_wallet_rounded,
-                          color: Color(0xFF38BDF8),
+                          color: Color(0xFF0284C7),
                           size: 22,
                         ),
                       ),
@@ -1533,7 +1534,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   style: GoogleFonts.manrope(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                                    color: const Color(0xFF0F172A),
                                     letterSpacing: -0.2,
                                   ),
                                 ),
@@ -1541,8 +1542,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981).withValues(alpha: 0.25),
+                                    color: const Color(0xFFECFDF5),
                                     borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: const Color(0xFFA7F3D0)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -1561,7 +1563,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         style: GoogleFonts.manrope(
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w800,
-                                          color: const Color(0xFF34D399),
+                                          color: const Color(0xFF059669),
                                           letterSpacing: 0.4,
                                         ),
                                       ),
@@ -1574,9 +1576,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Text(
                               'Consultation earnings & bank payout settlements',
                               style: GoogleFonts.manrope(
-                                fontSize: 12,
+                                fontSize: 11.5,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white70,
+                                color: const Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -1584,17 +1586,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const Icon(
                         Icons.arrow_forward_ios_rounded,
-                        color: Colors.white54,
-                        size: 14,
+                        color: Color(0xFF94A3B8),
+                        size: 13,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Container(
                     height: 1,
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: const Color(0xFFF1F5F9),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       // View Wallet Action Button
@@ -1603,29 +1605,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           onTap: () => _switchTab(16),
                           borderRadius: BorderRadius.circular(10),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.12),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.18),
+                                color: const Color(0xFFCBD5E1),
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const Icon(
                                   Icons.account_balance_wallet_outlined,
-                                  color: Colors.white,
+                                  color: Color(0xFF0284C7),
                                   size: 15,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   'View Wallet',
                                   style: GoogleFonts.manrope(
-                                    fontSize: 12.5,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                                    color: const Color(0xFF0F172A),
                                   ),
                                 ),
                               ],
@@ -1640,13 +1649,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           onTap: () => _switchTab(17),
                           borderRadius: BorderRadius.circular(10),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                             decoration: BoxDecoration(
                               color: const Color(0xFF0284C7),
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF0284C7).withValues(alpha: 0.3),
+                                  color: const Color(0xFF0284C7).withValues(alpha: 0.22),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -1664,7 +1673,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Text(
                                   '+ Bank Account',
                                   style: GoogleFonts.manrope(
-                                    fontSize: 12.5,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: Colors.white,
                                   ),
