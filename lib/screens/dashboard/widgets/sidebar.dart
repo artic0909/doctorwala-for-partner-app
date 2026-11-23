@@ -223,6 +223,23 @@ class CustomSidebar extends StatelessWidget {
                     context: context,
                   ),
 
+                // Finance & Wallet Group (Doctor & Others)
+                if (hasDoctor) ...[
+                  _buildSectionHeader('Finance & Wallet'),
+                  _buildDrawerItem(
+                    icon: Icons.account_balance_wallet_rounded,
+                    label: 'Wallet & Earnings',
+                    index: 16,
+                    context: context,
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.account_balance_rounded,
+                    label: 'Bank Details',
+                    index: 17,
+                    context: context,
+                  ),
+                ],
+
                 // Medical Card Access Group
                 _buildSectionHeader('Medical Card Access'),
                 _buildDrawerItem(

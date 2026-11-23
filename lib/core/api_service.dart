@@ -1189,4 +1189,230 @@ class ApiService {
       };
     }
   }
+
+  // ==========================================
+  // WALLET & BANK DETAILS API METHODS
+  // ==========================================
+
+  /// Get partner wallet details, balance, stats, and recent transactions
+  static Future<Map<String, dynamic>> getWallet({
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/wallet');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['success'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to fetch wallet info.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Get paginated wallet transactions
+  static Future<Map<String, dynamic>> getWalletTransactions({
+    required String token,
+    String? type,
+    int page = 1,
+  }) async {
+    final typeParam = type != null && type.isNotEmpty ? '&type=$type' : '';
+    final url = Uri.parse('$baseUrl/wallet/transactions?page=$page$typeParam');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['success'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to fetch transactions.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Get list of bank details for partner
+  static Future<Map<String, dynamic>> getBankDetails({
+    required String token,
+  }) async {
+    final url = Uri.parse('$baseUrl/bank-details');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['success'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to fetch bank accounts.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Add new bank details
+  static Future<Map<String, dynamic>> addBankDetail({
+    required String token,
+    required Map<String, dynamic> data,
+  }) async {
+    final url = Uri.parse('$baseUrl/bank-details');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': (response.statusCode == 200 || response.statusCode == 201) && responseData['success'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to save bank account.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Update bank details
+  static Future<Map<String, dynamic>> updateBankDetail({
+    required String token,
+    required int bankId,
+    required Map<String, dynamic> data,
+  }) async {
+    final url = Uri.parse('$baseUrl/bank-details/$bankId');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['success'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to update bank account.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Delete bank details
+  static Future<Map<String, dynamic>> deleteBankDetail({
+    required String token,
+    required int bankId,
+  }) async {
+    final url = Uri.parse('$baseUrl/bank-details/$bankId');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['success'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to delete bank account.',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// Set bank detail as primary
+  static Future<Map<String, dynamic>> setPrimaryBankDetail({
+    required String token,
+    required int bankId,
+  }) async {
+    final url = Uri.parse('$baseUrl/bank-details/$bankId/set-primary');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return {
+        'statusCode': response.statusCode,
+        'success': response.statusCode == 200 && responseData['success'] == true,
+        ...responseData,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to set primary bank account.',
+        'error': e.toString(),
+      };
+    }
+  }
 }

@@ -1019,6 +1019,125 @@ class PartnerHelpSkeleton extends StatelessWidget {
   }
 }
 
+/// Wallet Screen Skeleton Loader
+class PartnerWalletSkeleton extends StatelessWidget {
+  const PartnerWalletSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: ShimmerLoading(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Big Balance Card
+            const SkeletonBox(
+              width: double.infinity,
+              height: 140,
+              borderRadius: 20,
+              margin: EdgeInsets.only(bottom: 16),
+            ),
+            // Row metrics
+            const Row(
+              children: [
+                Expanded(child: SkeletonBox(height: 80, borderRadius: 16)),
+                SizedBox(width: 12),
+                Expanded(child: SkeletonBox(height: 80, borderRadius: 16)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Bank banner
+            const SkeletonBox(width: double.infinity, height: 70, borderRadius: 16),
+            const SizedBox(height: 24),
+            const SkeletonBox(width: 160, height: 20, margin: EdgeInsets.only(bottom: 12)),
+            ...List.generate(4, (index) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey.withAlpha(25)),
+              ),
+              child: const Row(
+                children: [
+                  SkeletonBox(width: 40, height: 40, borderRadius: 10),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SkeletonBox(width: 140, height: 14),
+                        SizedBox(height: 6),
+                        SkeletonBox(width: 90, height: 10),
+                      ],
+                    ),
+                  ),
+                  SkeletonBox(width: 60, height: 16),
+                ],
+              ),
+            )),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bank Details Screen Skeleton Loader
+class PartnerBankDetailsSkeleton extends StatelessWidget {
+  const PartnerBankDetailsSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: ShimmerLoading(
+        child: Column(
+          children: List.generate(2, (index) => Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.grey.withAlpha(25)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    SkeletonBox(width: 42, height: 42, borderRadius: 12),
+                    SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SkeletonBox(width: 140, height: 16),
+                        SizedBox(height: 6),
+                        SkeletonBox(width: 90, height: 12),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                SkeletonBox(width: double.infinity, height: 90, borderRadius: 12),
+                SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SkeletonBox(width: 100, height: 28, borderRadius: 8),
+                    SkeletonBox(width: 60, height: 28, borderRadius: 8),
+                  ],
+                ),
+              ],
+            ),
+          )),
+        ),
+      ),
+    );
+  }
+}
+
 /// Tab Skeleton View router: switches skeleton based on current active tab index
 class PartnerTabSkeletonView extends StatelessWidget {
   final int tabIndex;
@@ -1058,6 +1177,12 @@ class PartnerTabSkeletonView extends StatelessWidget {
         break;
       case 10: // Help & Support
         skeleton = const PartnerHelpSkeleton();
+        break;
+      case 16: // Wallet & Earnings
+        skeleton = const PartnerWalletSkeleton();
+        break;
+      case 17: // Bank Details
+        skeleton = const PartnerBankDetailsSkeleton();
         break;
       case 2: // Account Settings
       default:

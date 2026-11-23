@@ -21,6 +21,8 @@ import 'notifications.dart';
 import 'help.dart';
 import 'medical_card_access.dart';
 import 'patient_lists.dart';
+import 'wallet/wallet_screen.dart';
+import 'wallet/bank_details_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -558,6 +560,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ? 'List Myself'
                       : _currentIndex == 14
                       ? 'Cancelled Appointments'
+                      : _currentIndex == 16
+                      ? 'Wallet & Earnings'
+                      : _currentIndex == 17
+                      ? 'Bank Details'
                       : 'Help & Support',
                   style: GoogleFonts.manrope(
                     fontSize: 18,
@@ -666,6 +672,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return const DoctorContactScreen();
       case 14:
         return CancelledAppointmentsScreen(partnerData: _partnerData);
+      case 16:
+        return WalletScreen(
+          partnerData: _partnerData,
+          onNavigateToBankDetails: () => _switchTab(17),
+        );
+      case 17:
+        return BankDetailsScreen(partnerData: _partnerData);
       default:
         return _buildHomeTab();
     }
@@ -903,6 +916,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // ROUND SHORTCUTS & TUTORIAL ONBOARDING SECTION
             _buildRoundShortcutsSection(),
             const SizedBox(height: 14),
+
+            // WALLET & BANK DETAILS BANNER (DOCTOR & ALLIED CARE)
+            _buildWalletBanner(),
 
             // Overview Header
             FadeInUp(
@@ -1447,6 +1463,225 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Banner Card linking to Wallet & Bank Details
+  Widget _buildWalletBanner() {
+    final rawRegType = _partnerData['registration_type'];
+    final types = _parseRegistrationTypes(rawRegType);
+    final hasDoctor = types.contains('Doctor') || types.contains('Others');
+
+    if (!hasDoctor) return const SizedBox.shrink();
+
+    return FadeInUp(
+      duration: const Duration(milliseconds: 380),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0F2042), Color(0xFF1E3A8A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1E3A8A).withValues(alpha: 0.25),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _switchTab(16),
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF38BDF8).withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: Color(0xFF38BDF8),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'My Wallet',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981).withValues(alpha: 0.25),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 5,
+                                        height: 5,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF10B981),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'ACTIVE',
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: const Color(0xFF34D399),
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Consultation earnings & bank payout settlements',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Colors.white54,
+                        size: 14,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    height: 1,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      // View Wallet Action Button
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _switchTab(16),
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.18),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.account_balance_wallet_outlined,
+                                  color: Colors.white,
+                                  size: 15,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'View Wallet',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Add / Manage Bank Account Action Button
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _switchTab(17),
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0284C7),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF0284C7).withValues(alpha: 0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.account_balance_rounded,
+                                  color: Colors.white,
+                                  size: 15,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '+ Bank Account',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
