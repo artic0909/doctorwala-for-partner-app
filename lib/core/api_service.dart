@@ -1228,10 +1228,21 @@ class ApiService {
   static Future<Map<String, dynamic>> getWalletTransactions({
     required String token,
     String? type,
+    String? settlementStatus,
     int page = 1,
+    int perPage = 10,
   }) async {
-    final typeParam = type != null && type.isNotEmpty ? '&type=$type' : '';
-    final url = Uri.parse('$baseUrl/wallet/transactions?page=$page$typeParam');
+    final queryParams = <String>[
+      'page=$page',
+      'per_page=$perPage',
+    ];
+    if (type != null && type.isNotEmpty && type != 'all') {
+      queryParams.add('type=$type');
+    }
+    if (settlementStatus != null && settlementStatus.isNotEmpty && settlementStatus != 'all') {
+      queryParams.add('settlement_status=$settlementStatus');
+    }
+    final url = Uri.parse('$baseUrl/wallet/transactions?${queryParams.join('&')}');
 
     try {
       final response = await http.get(

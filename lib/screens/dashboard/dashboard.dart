@@ -136,7 +136,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final types = _parseRegistrationTypes(_partnerData['registration_type']);
       final hasOPD = types.contains('OPD');
       final hasPathology = types.contains('Pathology');
-      final hasDoctor = types.contains('Doctor') || types.contains('Others');
+      final hasDoctor = _isDoctorOrOthers();
 
       final apiCalls = <Future<dynamic>>[
         ApiService.getDoctors(token: token).catchError((_) => {'success': false}),
@@ -1274,9 +1274,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               builder: (context) {
                 final rawRegType = _partnerData['registration_type'];
                 final types = _parseRegistrationTypes(rawRegType);
-                final hasOPD = types.contains('OPD');
-                final hasPathology = types.contains('Pathology');
-                final hasDoctor = types.contains('Doctor') || types.contains('Others');
+                final hasOPD = types.any((t) => t.toLowerCase() == 'opd');
+                final hasPathology = types.any((t) => t.toLowerCase() == 'pathology');
+                final hasDoctor = _isDoctorOrOthers();
 
                 final List<Widget> shortcutWidgets = [];
 
@@ -1468,10 +1468,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Banner Card linking to Wallet & Bank Details
   Widget _buildWalletBanner() {
-    final rawRegType = _partnerData['registration_type'];
-    final types = _parseRegistrationTypes(rawRegType);
-    final hasDoctor = types.contains('Doctor') || types.contains('Others');
-
+    final hasDoctor = _isDoctorOrOthers();
     if (!hasDoctor) return const SizedBox.shrink();
 
     return FadeInUp(
@@ -1955,12 +1952,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
 
+  bool _isDoctorOrOthers() {
+    final rawRegType = _partnerData['registration_type'];
+    final types = _parseRegistrationTypes(rawRegType);
+    final hasDocType = types.any((t) {
+      final s = t.toLowerCase();
+      return s.contains('doctor') || s.contains('other');
+    });
+    final pType = (_partnerData['partner_type'] ?? '').toString().toLowerCase();
+    final clinicName = (_partnerData['partner_clinic_name'] ?? '').toString().toLowerCase();
+    return hasDocType ||
+        pType.contains('doctor') ||
+        pType.contains('other') ||
+        clinicName.contains('doctor');
+  }
+
   List<String> _parseRegistrationTypes(dynamic rawType) {
     if (rawType == null) return [];
     if (rawType is List) {
       return rawType.map((e) => e.toString().trim()).toList();
     }
-    final str = rawType.toString().trim();
+    String str = rawType.toString().trim();
+    // Repeatedly unwrap outer quotes/escaped characters if double or triple encoded
+    while ((str.startsWith('"') && str.endsWith('"')) ||
+        (str.startsWith("'") && str.endsWith("'"))) {
+      str = str.substring(1, str.length - 1).trim();
+    }
+    str = str.replaceAll(r'\"', '"').replaceAll(r"\'", "'");
     if (str.startsWith('[') && str.endsWith(']')) {
       try {
         final decoded = jsonDecode(str);
@@ -1981,6 +1999,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           .where((e) => e.isNotEmpty)
           .toList();
     }
-    return [str];
+    final clean = str
+        .replaceAll('[', '')
+        .replaceAll(']', '')
+        .replaceAll('"', '')
+        .replaceAll("'", '')
+        .replaceAll('\\', '')
+        .trim();
+    return clean.isNotEmpty ? [clean] : [];
   }
 }

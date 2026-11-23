@@ -159,7 +159,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
       builder: (ctx) => _BankFormBottomSheet(
         partnerData: widget.partnerData,
@@ -645,18 +645,27 @@ class _BankFormBottomSheetState extends State<_BankFormBottomSheet> {
     final isEdit = widget.initialData != null;
     final screenHeight = MediaQuery.of(context).size.height;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final navBarPadding = MediaQuery.of(context).viewPadding.bottom;
+    final safeBottom = navBarPadding > 0 ? navBarPadding : MediaQuery.of(context).padding.bottom;
 
-    return Material(
-      color: Colors.white,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: screenHeight * 0.90,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return AnimatedPadding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      child: SafeArea(
+        top: false,
+        bottom: true,
+        child: Material(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: screenHeight * 0.85,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Drag handle & Header
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 16, 8),
@@ -815,7 +824,7 @@ class _BankFormBottomSheetState extends State<_BankFormBottomSheet> {
 
             // Fixed bottom button above keyboard and safe area
             Container(
-              padding: EdgeInsets.fromLTRB(20, 10, 20, 16 + (bottomInset > 0 ? bottomInset : MediaQuery.of(context).padding.bottom)),
+              padding: EdgeInsets.fromLTRB(20, 10, 20, safeBottom > 0 ? 12 : 20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -828,7 +837,7 @@ class _BankFormBottomSheetState extends State<_BankFormBottomSheet> {
               ),
               child: SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
@@ -853,7 +862,9 @@ class _BankFormBottomSheetState extends State<_BankFormBottomSheet> {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   InputDecoration _inputDecoration(String label, String hint) {

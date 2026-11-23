@@ -19,7 +19,12 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
+  final ScrollController _scrollController = ScrollController();
   bool _isLoading = true;
+  bool _isFetchingTransactions = false;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
   String? _errorMessage;
 
   Map<String, dynamic>? _walletData;
@@ -27,12 +32,27 @@ class _WalletScreenState extends State<WalletScreen> {
   Map<String, dynamic>? _primaryBank;
   List<dynamic> _transactions = [];
 
-  String _selectedFilter = 'all'; // all, credit, debit
+  String _selectedFilter = 'all'; // all, pending, settled
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _fetchWalletData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 40) {
+      if (!_isLoadingMore && !_isFetchingTransactions && _hasMore) {
+        _loadMoreTransactions();
+      }
+    }
   }
 
   Future<void> _fetchWalletData() async {
@@ -61,9 +81,10 @@ class _WalletScreenState extends State<WalletScreen> {
           _walletData = response['wallet'] != null ? Map<String, dynamic>.from(response['wallet']) : null;
           _summaryData = response['summary'] != null ? Map<String, dynamic>.from(response['summary']) : null;
           _primaryBank = response['primary_bank'] != null ? Map<String, dynamic>.from(response['primary_bank']) : null;
-          _transactions = response['recent_transactions'] is List ? response['recent_transactions'] : [];
           _isLoading = false;
         });
+        // Initial fetch of transactions for selected filter (page 1, 10 items)
+        _fetchTransactions(reset: true);
       } else {
         setState(() {
           _errorMessage = response['message'] ?? 'Unable to load wallet data.';
@@ -79,9 +100,99 @@ class _WalletScreenState extends State<WalletScreen> {
     }
   }
 
-  List<dynamic> get _filteredTransactions {
-    if (_selectedFilter == 'all') return _transactions;
-    return _transactions.where((t) => t['transaction_type'] == _selectedFilter).toList();
+  Future<void> _fetchTransactions({bool reset = false}) async {
+    if (reset) {
+      setState(() {
+        _currentPage = 1;
+        _hasMore = true;
+        _isFetchingTransactions = true;
+      });
+    }
+
+    try {
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        if (mounted) setState(() => _isFetchingTransactions = false);
+        return;
+      }
+
+      final response = await ApiService.getWalletTransactions(
+        token: token,
+        page: 1,
+        settlementStatus: _selectedFilter == 'all' ? null : _selectedFilter,
+        perPage: 10,
+      );
+
+      if (!mounted) return;
+
+      if (response['success'] == true) {
+        final List<dynamic> list = response['transactions'] is List ? response['transactions'] : [];
+        setState(() {
+          _transactions = list;
+          _hasMore = list.length >= 10;
+          _isFetchingTransactions = false;
+        });
+      } else {
+        setState(() {
+          _isFetchingTransactions = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isFetchingTransactions = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMoreTransactions() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Short span of time showing skeleton of row design as requested
+    await Future.delayed(const Duration(milliseconds: 700));
+
+    try {
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        if (mounted) setState(() => _isLoadingMore = false);
+        return;
+      }
+
+      final nextPage = _currentPage + 1;
+      final response = await ApiService.getWalletTransactions(
+        token: token,
+        page: nextPage,
+        settlementStatus: _selectedFilter == 'all' ? null : _selectedFilter,
+        perPage: 10,
+      );
+
+      if (!mounted) return;
+
+      if (response['success'] == true) {
+        final List<dynamic> list = response['transactions'] is List ? response['transactions'] : [];
+        setState(() {
+          _currentPage = nextPage;
+          _transactions.addAll(list);
+          _hasMore = list.length >= 10;
+          _isLoadingMore = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    }
   }
 
   String _formatAmount(dynamic amount) {
@@ -162,6 +273,7 @@ class _WalletScreenState extends State<WalletScreen> {
         color: AppColors.teal,
         onRefresh: _fetchWalletData,
         child: ListView(
+          controller: _scrollController,
           padding: EdgeInsets.only(
             left: 14,
             right: 14,
@@ -435,7 +547,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
             const SizedBox(height: 14),
 
-            // Transactions Header & Filters
+            // Transactions Header & Dropdown Filter
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -447,24 +559,63 @@ class _WalletScreenState extends State<WalletScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                Row(
-                  children: [
-                    _buildFilterChip('All', 'all'),
-                    const SizedBox(width: 5),
-                    _buildFilterChip('Credits', 'credit'),
-                    const SizedBox(width: 5),
-                    _buildFilterChip('Debits', 'debit'),
-                  ],
+                Container(
+                  height: 34,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFCBD5E1)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedFilter,
+                      icon: const Icon(Icons.arrow_drop_down_rounded, size: 20, color: Color(0xFF0284C7)),
+                      style: GoogleFonts.manrope(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      dropdownColor: Colors.white,
+                      onChanged: (String? newVal) {
+                        if (newVal != null && newVal != _selectedFilter) {
+                          setState(() {
+                            _selectedFilter = newVal;
+                          });
+                          _fetchTransactions(reset: true);
+                        }
+                      },
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'all',
+                          child: Text('All Transactions'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'pending',
+                          child: Text('Pending Payouts'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'settled',
+                          child: Text('Settled Payouts'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
 
             const SizedBox(height: 8),
 
-            // Transactions List
-            if (_filteredTransactions.isEmpty)
+            // Transactions List / Skeleton Loading
+            if (_isFetchingTransactions) ...[
+              _buildSkeletonRow(),
+              _buildSkeletonRow(),
+              _buildSkeletonRow(),
+            ] else if (_transactions.isEmpty)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
@@ -475,7 +626,11 @@ class _WalletScreenState extends State<WalletScreen> {
                     const Icon(Icons.receipt_long_rounded, color: Colors.black26, size: 36),
                     const SizedBox(height: 8),
                     Text(
-                      'No Transactions Yet',
+                      _selectedFilter == 'pending'
+                          ? 'No Pending Payouts'
+                          : _selectedFilter == 'settled'
+                              ? 'No Settled Payouts'
+                              : 'No Transactions Yet',
                       style: GoogleFonts.manrope(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -495,8 +650,8 @@ class _WalletScreenState extends State<WalletScreen> {
                   ],
                 ),
               )
-            else
-              ..._filteredTransactions.map((tx) {
+            else ...[
+              ..._transactions.map((tx) {
                 final isCredit = tx['transaction_type'] == 'credit';
                 final amount = tx['amount'] ?? 0;
                 final dateStr = _formatDateTime(tx['created_at']);
@@ -563,54 +718,139 @@ class _WalletScreenState extends State<WalletScreen> {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            tx['status'] ?? 'completed',
-                            style: GoogleFonts.manrope(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w700,
-                              color: tx['status'] == 'completed'
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFD97706),
+                          if (isCredit)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: tx['settlement_status'] == 'settled'
+                                    ? const Color(0xFFECFDF5)
+                                    : const Color(0xFFFEF3C7),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                tx['settlement_status'] == 'settled' ? 'Settled' : 'Payout Pending',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: tx['settlement_status'] == 'settled'
+                                      ? const Color(0xFF10B981)
+                                      : const Color(0xFFB45309),
+                                ),
+                              ),
+                            )
+                          else
+                            Text(
+                              tx['status'] ?? 'completed',
+                              style: GoogleFonts.manrope(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                                color: tx['status'] == 'completed'
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFD97706),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ],
                   ),
                 );
               }),
+
+              // Skeleton Loader while scrolling down for next 10 items
+              if (_isLoadingMore) ...[
+                _buildSkeletonRow(),
+                _buildSkeletonRow(),
+              ],
+
+              // Reached end indicator
+              if (!_hasMore && _transactions.length >= 10)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: Text(
+                      'All transactions loaded',
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, String value) {
-    final isSelected = _selectedFilter == value;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedFilter = value;
-        });
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0284C7) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF0284C7) : const Color(0xFFCBD5E1),
+  Widget _buildSkeletonRow() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 140,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  width: 85,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                width: 55,
+                height: 13,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 5),
+              Container(
+                width: 48,
+                height: 11,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
