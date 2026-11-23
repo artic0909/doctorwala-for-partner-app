@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
@@ -29,24 +28,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   bool _isLoading = false;
   late Map<String, dynamic> _appointment;
 
-  bool _isDoctorPartner() {
-    final rawRegType = widget.partnerData['registration_type'];
-    if (rawRegType == null) return false;
-    if (rawRegType is List) {
-      return rawRegType.map((e) => e.toString().toLowerCase().trim()).contains('doctor');
-    }
-    final str = rawRegType.toString().toLowerCase().trim();
-    if (str.startsWith('[') && str.endsWith(']')) {
-      try {
-        final decoded = jsonDecode(str);
-        if (decoded is List) {
-          return decoded.map((e) => e.toString().toLowerCase().trim()).contains('doctor');
-        }
-      } catch (_) {}
-      return str.contains('doctor');
-    }
-    return str == 'doctor';
-  }
 
   @override
   void initState() {
@@ -367,9 +348,24 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
     // Doctor Details
     final doctor = _appointment['doctor'];
-    final doctorName = doctor?['doctor_name'] ?? 'N/A';
-    final doctorSpeciality = doctor?['doctor_specialist'] ?? 'N/A';
-    final doctorDesignation = doctor?['doctor_designation'] ?? 'N/A';
+    final docContact = _appointment['doctor_contact'];
+    final resDocName = _appointment['resolved_doctor_name'] ?? _appointment['resolved_service_name'];
+
+    final doctorName = (resDocName != null && resDocName.toString().trim().isNotEmpty && resDocName != 'N/A')
+        ? resDocName.toString().trim()
+        : (docContact?['partner_doctor_name'] ??
+            doctor?['doctor_name'] ??
+            _appointment['clinic_name'] ??
+            _appointment['doctor_name'] ??
+            'Specialist');
+
+    final doctorSpeciality = docContact?['partner_doctor_specialist'] ??
+        doctor?['doctor_specialist'] ??
+        (clinicType.toLowerCase() == 'others' ? 'Allied Care' : 'General Physician');
+
+    final doctorDesignation = docContact?['partner_doctor_designation'] ??
+        doctor?['doctor_designation'] ??
+        'Dr';
 
     // Test Details
     final test = _appointment['test'];
@@ -590,30 +586,19 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                               _buildInfoRow('Visit Mode', visitMode, themeColor),
                             ],
                           )
-                        : _isDoctorPartner()
-                            ? _buildSectionCard(
-                                title: 'Visit Details',
-                                icon: Icons.meeting_room_rounded,
-                                themeColor: themeColor,
-                                themeLight: themeLight,
-                                themeBorder: themeBorder,
-                                children: [
-                                  _buildInfoRow('Visit Mode', visitMode, themeColor),
-                                ],
-                              )
-                            : _buildSectionCard(
-                                title: 'Doctor Details',
-                                icon: Icons.medical_information_rounded,
-                                themeColor: themeColor,
-                                themeLight: themeLight,
-                                themeBorder: themeBorder,
-                                children: [
-                                  _buildInfoRow('Doctor Name', doctorName, themeColor),
-                                  _buildInfoRow('Specialty', doctorSpeciality, themeColor),
-                                  _buildInfoRow('Designation', doctorDesignation, themeColor),
-                                  _buildInfoRow('Visit Mode', visitMode, themeColor),
-                                ],
-                              ),
+                        : _buildSectionCard(
+                            title: clinicType.toLowerCase() == 'others' ? 'Specialist Details' : 'Doctor Details',
+                            icon: Icons.medical_information_rounded,
+                            themeColor: themeColor,
+                            themeLight: themeLight,
+                            themeBorder: themeBorder,
+                            children: [
+                              _buildInfoRow(clinicType.toLowerCase() == 'others' ? 'Specialist Name' : 'Doctor Name', doctorName, themeColor),
+                              _buildInfoRow('Specialty', doctorSpeciality, themeColor),
+                              _buildInfoRow('Designation', doctorDesignation, themeColor),
+                              _buildInfoRow('Visit Mode', visitMode, themeColor),
+                            ],
+                          ),
                   ),
                   const SizedBox(height: 40),
 

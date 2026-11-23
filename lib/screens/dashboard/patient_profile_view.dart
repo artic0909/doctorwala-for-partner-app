@@ -937,9 +937,16 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
     final clinicType = (booking['clinic_type'] ?? booking['type'] ?? 'OPD').toString();
     final isPathology = clinicType.toLowerCase().contains('pathology') || clinicType.toLowerCase().contains('lab');
 
-    // Extract doctor / test name with extensive fallback
+    // Extract doctor / test name with dynamic resolution
+    final resService = booking['resolved_service_name']?.toString().trim();
+    final resDoc = booking['resolved_doctor_name']?.toString().trim();
+
     String serviceName = 'N/A';
-    if (isPathology) {
+    if (resService != null && resService.isNotEmpty && resService != 'N/A') {
+      serviceName = resService;
+    } else if (resDoc != null && resDoc.isNotEmpty && resDoc != 'N/A') {
+      serviceName = resDoc;
+    } else if (isPathology) {
       if (booking['test'] is Map) {
         serviceName = booking['test']['test_name']?.toString() ??
             booking['test']['name']?.toString() ?? 'N/A';
@@ -950,7 +957,10 @@ class _PatientProfileViewScreenState extends State<PatientProfileViewScreen> {
             booking['service_name']?.toString() ?? 'Diagnostic Test';
       }
     } else {
-      if (booking['doctor'] is Map) {
+      if (booking['doctor_contact'] is Map) {
+        serviceName = booking['doctor_contact']['partner_doctor_name']?.toString() ?? 'N/A';
+      }
+      if (serviceName == 'N/A' && booking['doctor'] is Map) {
         serviceName = booking['doctor']['doctor_name']?.toString() ??
             booking['doctor']['name']?.toString() ?? 'N/A';
       }

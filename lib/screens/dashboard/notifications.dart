@@ -394,6 +394,72 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
+  String _resolveServiceName(Map<String, dynamic> appt) {
+    // 1. Check resolved names from backend
+    final resService = appt['resolved_service_name']?.toString().trim();
+    if (resService != null && resService.isNotEmpty && resService != 'N/A') {
+      return resService;
+    }
+    final resDoc = appt['resolved_doctor_name']?.toString().trim();
+    if (resDoc != null && resDoc.isNotEmpty && resDoc != 'N/A') {
+      return resDoc;
+    }
+
+    final clinicType = (appt['clinic_type'] ?? '').toString().toLowerCase();
+
+    // 2. Pathology test
+    if (clinicType == 'pathology') {
+      final testName = appt['test']?['test_name']?.toString().trim() ??
+          appt['test_name']?.toString().trim();
+      if (testName != null && testName.isNotEmpty && testName != 'N/A') {
+        return testName;
+      }
+      final clinic = appt['clinic_name']?.toString().trim();
+      if (clinic != null && clinic.isNotEmpty && clinic != 'N/A') {
+        return clinic;
+      }
+      return 'Diagnostic Test';
+    }
+
+    // 3. OPD Clinic
+    if (clinicType == 'opd') {
+      final docName = appt['doctor']?['doctor_name']?.toString().trim() ??
+          appt['doctor_name']?.toString().trim();
+      if (docName != null && docName.isNotEmpty && docName != 'N/A') {
+        return docName;
+      }
+      final clinic = appt['clinic_name']?.toString().trim();
+      if (clinic != null && clinic.isNotEmpty && clinic != 'N/A') {
+        return clinic;
+      }
+      return 'OPD Specialist';
+    }
+
+    // 4. Doctor or Others
+    final contactDocName = appt['doctor_contact']?['partner_doctor_name']?.toString().trim();
+    if (contactDocName != null && contactDocName.isNotEmpty && contactDocName != 'N/A') {
+      return contactDocName;
+    }
+
+    final clinicDocName = appt['clinic_name']?.toString().trim();
+    if (clinicDocName != null && clinicDocName.isNotEmpty && clinicDocName != 'N/A') {
+      return clinicDocName;
+    }
+
+    final docName = appt['doctor']?['doctor_name']?.toString().trim();
+    if (docName != null && docName.isNotEmpty && docName != 'N/A') {
+      return docName;
+    }
+
+    final partnerClinic = widget.partnerData['partner_clinic_name']?.toString().trim() ??
+        widget.partnerData['partner_contact_person_name']?.toString().trim();
+    if (partnerClinic != null && partnerClinic.isNotEmpty) {
+      return partnerClinic;
+    }
+
+    return clinicType == 'others' ? 'Allied Care Specialist' : 'Doctor Consultation';
+  }
+
   Widget _buildNotificationCard(Map<String, dynamic> appt, bool isUnread) {
     final patientName = appt['user_name'] ?? appt['user']?['user_name'] ?? 'N/A';
     final date = appt['booking_date'] ?? 'N/A';
@@ -402,10 +468,33 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final status = appt['status'] ?? 'Upcoming';
     final relativeTime = _getRelativeTime(appt);
 
-    final isPathology = clinicType.toLowerCase() == 'pathology';
-    final serviceName = isPathology
-        ? (appt['test']?['test_name'] ?? 'N/A')
-        : (appt['doctor']?['doctor_name'] ?? 'N/A');
+    final String cType = clinicType.toString().toLowerCase();
+    final bool isPathology = cType == 'pathology';
+    final bool isOthers = cType == 'others';
+    final bool isOpd = cType == 'opd';
+
+    final serviceName = _resolveServiceName(appt);
+
+    final String badgeText;
+    final IconData badgeIcon;
+    final Color badgeColor;
+    if (isPathology) {
+      badgeText = 'TEST BOOKING';
+      badgeIcon = Icons.science_rounded;
+      badgeColor = Colors.purple;
+    } else if (isOthers) {
+      badgeText = 'ALLIED CARE';
+      badgeIcon = Icons.health_and_safety_rounded;
+      badgeColor = const Color(0xFF0284C7);
+    } else if (isOpd) {
+      badgeText = 'OPD APPOINTMENT';
+      badgeIcon = Icons.local_hospital_rounded;
+      badgeColor = AppColors.teal;
+    } else {
+      badgeText = 'DOCTOR APPOINTMENT';
+      badgeIcon = Icons.medical_information_rounded;
+      badgeColor = AppColors.teal;
+    }
 
     // Color definitions based on status
     final Color statusColor;
@@ -472,24 +561,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: (isPathology ? Colors.purpleAccent : AppColors.teal).withValues(alpha: 0.08),
+                                color: badgeColor.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    isPathology ? Icons.science_rounded : Icons.medical_information_rounded,
+                                    badgeIcon,
                                     size: 11,
-                                    color: isPathology ? Colors.purple : AppColors.teal,
+                                    color: badgeColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    isPathology ? 'TEST BOOKING' : 'DOCTOR APPOINTMENT',
+                                    badgeText,
                                     style: GoogleFonts.manrope(
                                       fontSize: 9,
                                       fontWeight: FontWeight.w800,
-                                      color: isPathology ? Colors.purple : AppColors.teal,
+                                      color: badgeColor,
                                     ),
                                   ),
                                 ],

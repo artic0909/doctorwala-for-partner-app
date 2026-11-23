@@ -358,9 +358,19 @@ class _CancelledAppointmentsScreenState extends State<CancelledAppointmentsScree
     final clinicType = appt['clinic_type'] ?? 'N/A';
 
     final isPathology = clinicType.toLowerCase() == 'pathology';
-    final serviceName = isPathology
-        ? (appt['test']?['test_name'] ?? 'N/A')
-        : (appt['doctor']?['doctor_name'] ?? 'N/A');
+    final resService = appt['resolved_service_name']?.toString().trim();
+    final resDoc = appt['resolved_doctor_name']?.toString().trim();
+    final serviceName = (resService != null && resService.isNotEmpty && resService != 'N/A')
+        ? resService
+        : (resDoc != null && resDoc.isNotEmpty && resDoc != 'N/A')
+            ? resDoc
+            : isPathology
+                ? (appt['test']?['test_name'] ?? appt['test_name'] ?? appt['clinic_name'] ?? 'Diagnostic Test')
+                : (appt['doctor_contact']?['partner_doctor_name'] ??
+                    appt['clinic_name'] ??
+                    appt['doctor']?['doctor_name'] ??
+                    appt['doctor_name'] ??
+                    'Specialist Consultation');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
