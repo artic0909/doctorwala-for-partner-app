@@ -47,11 +47,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       }
     } catch (_) {
       if (mounted) {
-        final status = _appointment['status'] ?? 'Upcoming';
+        final status = (_appointment['status'] ?? 'Upcoming').toString().trim().toLowerCase();
         final Color themeColor;
-        if (status == 'Completed') {
+        if (status == 'completed') {
           themeColor = AppColors.teal;
-        } else if (status == 'Cancelled') {
+        } else if (status == 'cancelled') {
           themeColor = const Color(0xFFEF4444);
         } else {
           themeColor = const Color(0xFFD97706);
@@ -334,7 +334,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final status = _appointment['status'] ?? 'Pending';
+    final rawStatus = (_appointment['status'] ?? 'Upcoming').toString().trim();
+    final normStatus = rawStatus.toLowerCase();
+    final status = rawStatus.isEmpty ? 'Upcoming' : rawStatus;
     final date = _appointment['booking_date'] ?? 'N/A';
     final time = _appointment['booking_time'] ?? 'N/A';
     final visitMode = _appointment['visit_mode'] ?? 'N/A';
@@ -378,17 +380,17 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     final Color themeLight;
     final Color themeBorder;
     final IconData statusIcon;
-    if (status == 'Completed') {
+    if (normStatus == 'completed') {
       themeColor = AppColors.teal;
       themeLight = const Color(0xFFF0FAF7);
       themeBorder = const Color(0xFFBFECE1);
       statusIcon = Icons.check_circle_rounded;
-    } else if (status == 'Cancelled') {
+    } else if (normStatus == 'cancelled') {
       themeColor = const Color(0xFFEF4444);
       themeLight = const Color(0xFFFFF1F2);
       themeBorder = const Color(0xFFFECDD3);
       statusIcon = Icons.cancel_rounded;
-    } else if (status == 'Confirmed') {
+    } else if (normStatus == 'confirmed') {
       themeColor = const Color(0xFF0284C7);
       themeLight = const Color(0xFFF0F9FF);
       themeBorder = const Color(0xFFBAE6FD);
@@ -604,7 +606,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
                   // Actions Section
                   // Video Call Button in Details Screen
-                  if (_isVideoCall(_appointment) && (status == 'Upcoming' || status == 'Confirmed' || status == 'Pending')) ...[
+                  if (_isVideoCall(_appointment) && (normStatus == 'upcoming' || normStatus == 'confirmed' || normStatus == 'pending')) ...[
                     FadeInUp(
                       duration: const Duration(milliseconds: 300),
                       child: Padding(
@@ -662,7 +664,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     ),
                   ],
 
-                  if (status == 'Upcoming' || status == 'Pending')
+                  if (normStatus == 'upcoming' || normStatus == 'pending')
                     FadeInUp(
                       duration: const Duration(milliseconds: 450),
                       child: Column(
@@ -717,7 +719,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         ],
                       ),
                     )
-                  else if (status == 'Confirmed')
+                  else if (normStatus == 'confirmed')
                     FadeInUp(
                       duration: const Duration(milliseconds: 450),
                       child: Column(
@@ -737,9 +739,32 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.navy,
+                                backgroundColor: AppColors.teal,
                                 elevation: 2,
-                                shadowColor: AppColors.navy.withValues(alpha: 0.3),
+                                shadowColor: AppColors.teal.withValues(alpha: 0.3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _updateStatus('Cancelled'),
+                              icon: const Icon(Icons.cancel_outlined, color: Colors.redAccent),
+                              label: Text(
+                                'Cancel Appointment',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Colors.redAccent, width: 1.5),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
@@ -761,7 +786,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           border: Border.all(color: themeColor.withValues(alpha: 0.15)),
                         ),
                         child: Text(
-                          status == 'Completed'
+                          normStatus == 'completed'
                               ? 'This appointment has been completed successfully.'
                               : 'This appointment was cancelled.',
                           textAlign: TextAlign.center,

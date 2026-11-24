@@ -150,7 +150,7 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
         return;
       }
 
-      final response = await ApiService.getAppointments(token: token, status: 'Upcoming,Confirmed');
+      final response = await ApiService.getAppointments(token: token, status: 'Upcoming,Confirmed,Pending');
       if (!mounted) return;
 
       if (response['success'] == true) {
@@ -352,6 +352,71 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
       if (mounted) {
         Navigator.pop(context);
         CustomAlerts.showError(context, 'Failed to connect to video session.');
+      }
+    }
+  }
+
+  Future<void> _updateAppointmentStatus(Map<String, dynamic> appt, String newStatus) async {
+    final patientName = appt['user_name'] ?? appt['user']?['user_name'] ?? 'Patient';
+    final actionWord = newStatus == 'Confirmed' 
+        ? 'confirm' 
+        : newStatus == 'Completed' 
+            ? 'mark as completed' 
+            : 'cancel';
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          '$newStatus Appointment',
+          style: GoogleFonts.manrope(fontWeight: FontWeight.w800, color: AppColors.navy),
+        ),
+        content: Text(
+          'Are you sure you want to $actionWord the appointment for $patientName?',
+          style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'No, Keep',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: newStatus == 'Cancelled' ? Colors.redAccent : AppColors.teal,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(
+              newStatus == 'Cancelled' ? 'Yes, Cancel' : 'Yes, $newStatus',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        if (mounted) CustomAlerts.showError(context, 'Authentication token missing.');
+        return;
+      }
+      final id = appt['id']?.toString() ?? '';
+      final response = await ApiService.updateAppointmentStatus(
+        token: token,
+        id: id,
+        status: newStatus,
+      );
+      if (!mounted) return;
+      if (response['success'] == true) {
+        CustomAlerts.showSuccess(context, response['message'] ?? 'Status updated successfully.');
+        _fetchAppointments();
+      } else {
+        CustomAlerts.showError(context, response['message'] ?? 'Failed to update status.');
       }
     }
   }
@@ -590,6 +655,26 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
                     appt['doctor_name'] ??
                     'Specialist Consultation');
 
+    final rawStatus = (appt['status'] ?? 'Upcoming').toString().trim();
+    final normStatus = rawStatus.toLowerCase();
+    final statusText = rawStatus.isEmpty ? 'Upcoming' : rawStatus;
+
+    final Color statusBg;
+    final Color statusFg;
+    if (normStatus == 'confirmed') {
+      statusBg = const Color(0xFFE0F2FE);
+      statusFg = const Color(0xFF0369A1);
+    } else if (normStatus == 'completed') {
+      statusBg = const Color(0xFFDCFCE7);
+      statusFg = const Color(0xFF15803D);
+    } else if (normStatus == 'cancelled') {
+      statusBg = const Color(0xFFFEE2E2);
+      statusFg = const Color(0xFFB91C1C);
+    } else {
+      statusBg = const Color(0xFFFEF3C7);
+      statusFg = const Color(0xFFB45309);
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -646,6 +731,22 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
                     ),
                     Row(
                       children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusBg,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            statusText.toUpperCase(),
+                            style: GoogleFonts.manrope(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: statusFg,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
@@ -848,6 +949,117 @@ class _TodayAppointmentsScreenState extends State<TodayAppointmentsScreen> {
                             ],
                           ),
                         ),
+                ],
+
+                // Quick Action Buttons on Card
+                if (normStatus == 'upcoming' || normStatus == 'pending') ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 38,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _updateAppointmentStatus(appt, 'Confirmed'),
+                            icon: const Icon(Icons.check_circle_rounded, size: 16, color: Colors.white),
+                            label: Text(
+                              'Confirm',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.teal,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SizedBox(
+                          height: 38,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _updateAppointmentStatus(appt, 'Cancelled'),
+                            icon: const Icon(Icons.cancel_outlined, size: 16, color: Colors.redAccent),
+                            label: Text(
+                              'Cancel',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.redAccent, width: 1.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else if (normStatus == 'confirmed') ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 38,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _updateAppointmentStatus(appt, 'Completed'),
+                            icon: const Icon(Icons.task_alt_rounded, size: 16, color: Colors.white),
+                            label: Text(
+                              'Mark Complete',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.teal,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SizedBox(
+                          height: 38,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _updateAppointmentStatus(appt, 'Cancelled'),
+                            icon: const Icon(Icons.cancel_outlined, size: 16, color: Colors.redAccent),
+                            label: Text(
+                              'Cancel',
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.redAccent, width: 1.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ],
             ),
