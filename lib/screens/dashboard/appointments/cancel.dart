@@ -9,6 +9,7 @@ import '../../../core/session_manager.dart';
 import '../../../core/custom_alerts.dart';
 import 'details.dart';
 import '../../../widgets/partner_skeleton_loader.dart';
+import '../../../widgets/partner_appointment_card.dart';
 
 class CancelledAppointmentsScreen extends StatefulWidget {
   final Map<String, dynamic> partnerData;
@@ -21,8 +22,6 @@ class CancelledAppointmentsScreen extends StatefulWidget {
 
 class _CancelledAppointmentsScreenState extends State<CancelledAppointmentsScreen> {
   static const Color themeColor = Color(0xFFEF4444);
-  static const Color themeLight = Color(0xFFFFF1F2);
-  static const Color themeBorder = Color(0xFFFECDD3);
 
   bool _isFetching = true;
   List<dynamic> _appointments = [];
@@ -146,25 +145,6 @@ class _CancelledAppointmentsScreenState extends State<CancelledAppointmentsScree
           ),
         );
       }
-    }
-  }
-
-  String _formatTime12h(String time24h) {
-    if (time24h == 'N/A' || time24h.isEmpty) return 'N/A';
-    try {
-      final parts = time24h.split(':');
-      if (parts.length < 2) return time24h;
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      
-      final period = hour >= 12 ? 'PM' : 'AM';
-      hour = hour % 12;
-      if (hour == 0) hour = 12;
-      
-      final minuteStr = minute.toString().padLeft(2, '0');
-      return '$hour:$minuteStr $period';
-    } catch (_) {
-      return time24h;
     }
   }
 
@@ -350,230 +330,19 @@ class _CancelledAppointmentsScreenState extends State<CancelledAppointmentsScree
   }
 
   Widget _buildAppointmentCard(Map<String, dynamic> appt) {
-    final patientName = appt['user_name'] ?? appt['user']?['user_name'] ?? 'N/A';
-    final patientMobile = appt['user_mobile'] ?? appt['user']?['user_mobile'] ?? 'N/A';
-    final date = appt['booking_date'] ?? 'N/A';
-    final time = appt['booking_time'] ?? 'N/A';
-    final visitMode = appt['visit_mode'] ?? 'N/A';
-    final clinicType = appt['clinic_type'] ?? 'N/A';
+    final patientMobile = (appt['user_mobile'] ?? appt['user']?['user_mobile'] ?? 'N/A').toString();
+    final hasPhone = patientMobile != 'N/A' && patientMobile.isNotEmpty;
 
-    final isPathology = clinicType.toLowerCase() == 'pathology';
-    final resService = appt['resolved_service_name']?.toString().trim();
-    final resDoc = appt['resolved_doctor_name']?.toString().trim();
-    final serviceName = (resService != null && resService.isNotEmpty && resService != 'N/A')
-        ? resService
-        : (resDoc != null && resDoc.isNotEmpty && resDoc != 'N/A')
-            ? resDoc
-            : isPathology
-                ? (appt['test']?['test_name'] ?? appt['test_name'] ?? appt['clinic_name'] ?? 'Diagnostic Test')
-                : (appt['doctor_contact']?['partner_doctor_name'] ??
-                    appt['clinic_name'] ??
-                    appt['doctor']?['doctor_name'] ??
-                    appt['doctor_name'] ??
-                    'Specialist Consultation');
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: themeLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: themeBorder.withValues(alpha: 0.4), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: () => _navigateToDetails(appt),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top row with status tags & clinical type tag
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: (isPathology ? Colors.purpleAccent : themeColor).withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isPathology ? Icons.science_rounded : Icons.medical_information_rounded,
-                            size: 12,
-                            color: isPathology ? Colors.purple : themeColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            clinicType.toUpperCase(),
-                            style: GoogleFonts.manrope(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: isPathology ? Colors.purple : themeColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.teal.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            'SL: ${appt['enquiry_serial'] ?? 'N/A'}',
-                            style: GoogleFonts.manrope(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.teal,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.navy.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            visitMode.toUpperCase(),
-                            style: GoogleFonts.manrope(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.navy,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Patient details
-                Text(
-                  patientName,
-                  style: GoogleFonts.manrope(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.navy,
-                  ),
-                ),
-                const SizedBox(height: 4),
-
-                // Service Name
-                if (!(_isDoctorPartner() && !isPathology)) ...[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isPathology ? 'Test: ' : 'Doctor: ',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          serviceName,
-                          style: GoogleFonts.manrope(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.navy,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
-                const SizedBox(height: 12),
-
-                // Date, Time, Contact
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_month_rounded, size: 13, color: AppColors.textSecondary),
-                              const SizedBox(width: 6),
-                              Text(
-                                date,
-                                style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.navy,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time_rounded, size: 13, color: AppColors.textSecondary),
-                              const SizedBox(width: 6),
-                              Text(
-                                _formatTime12h(time),
-                                style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.navy,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    // Call number
-                    if (patientMobile != 'N/A' && patientMobile.isNotEmpty) ...[
-                      IconButton(
-                        onPressed: () => _makePhoneCall(patientMobile),
-                        icon: const Icon(Icons.phone_in_talk_rounded, color: themeColor, size: 18),
-                        tooltip: 'Call Patient',
-                        style: IconButton.styleFrom(
-                          backgroundColor: themeColor.withValues(alpha: 0.08),
-                          padding: const EdgeInsets.all(8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 12,
-                      color: themeColor,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+    return PartnerAppointmentCard(
+      appt: appt,
+      isDoctorPartner: _isDoctorPartner(),
+      onCall: hasPhone ? () => _makePhoneCall(patientMobile) : null,
+      onTap: () => PartnerAppointmentCard.showDetailsModal(
+        context: context,
+        appt: appt,
+        isDoctorPartner: _isDoctorPartner(),
+        onCall: hasPhone ? () => _makePhoneCall(patientMobile) : null,
+        onOpenFullDetails: () => _navigateToDetails(appt),
       ),
     );
   }
