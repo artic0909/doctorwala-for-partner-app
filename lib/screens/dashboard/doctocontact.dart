@@ -1,4 +1,5 @@
-import 'dart:io';
+  import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +12,62 @@ import '../../core/session_manager.dart';
 import '../../core/custom_alerts.dart';
 import '../../core/state_picker_modal.dart';
 import '../../widgets/partner_skeleton_loader.dart';
+
+class DoctorScheduleSlot {
+  String type; // 'day' or 'date'
+  String day;
+  String? date;
+
+  bool morningEnabled;
+  TimeOfDay morningStart;
+  TimeOfDay morningEnd;
+
+  bool afternoonEnabled;
+  TimeOfDay afternoonStart;
+  TimeOfDay afternoonEnd;
+
+  bool eveningEnabled;
+  TimeOfDay eveningStart;
+  TimeOfDay eveningEnd;
+
+  DoctorScheduleSlot({
+    this.type = 'day',
+    this.day = 'Monday',
+    this.date,
+    this.morningEnabled = true,
+    this.morningStart = const TimeOfDay(hour: 9, minute: 0),
+    this.morningEnd = const TimeOfDay(hour: 12, minute: 0),
+    this.afternoonEnabled = true,
+    this.afternoonStart = const TimeOfDay(hour: 13, minute: 0),
+    this.afternoonEnd = const TimeOfDay(hour: 16, minute: 0),
+    this.eveningEnabled = true,
+    this.eveningStart = const TimeOfDay(hour: 17, minute: 0),
+    this.eveningEnd = const TimeOfDay(hour: 20, minute: 0),
+  });
+
+  Map<String, dynamic> toJson(String Function(TimeOfDay) formatter) {
+    return {
+      'type': type,
+      'day': day,
+      'date': date,
+      'morning_enabled': morningEnabled,
+      'morning_start': formatter(morningStart),
+      'morning_end': formatter(morningEnd),
+      'afternoon_enabled': afternoonEnabled,
+      'afternoon_start': formatter(afternoonStart),
+      'afternoon_end': formatter(afternoonEnd),
+      'evening_enabled': eveningEnabled,
+      'evening_start': formatter(eveningStart),
+      'evening_end': formatter(eveningEnd),
+      'start_time': morningEnabled
+          ? formatter(morningStart)
+          : (afternoonEnabled ? formatter(afternoonStart) : formatter(eveningStart)),
+      'end_time': eveningEnabled
+          ? formatter(eveningEnd)
+          : (afternoonEnabled ? formatter(afternoonEnd) : formatter(morningEnd)),
+    };
+  }
+}
 
 class DoctorContactScreen extends StatefulWidget {
   const DoctorContactScreen({super.key});
@@ -84,6 +141,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
   ];
 
   // Weekdays Schedule State
+  // ignore: unused_field
   final List<String> _weekdays = [
     'Monday',
     'Tuesday',
@@ -92,20 +150,104 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
     'Friday',
     'Saturday',
     'Sunday',
+    'All Day',
   ];
 
-  final Map<String, bool> _activeDays = {};
-  final Map<String, TimeOfDay> _startTimes = {};
-  final Map<String, TimeOfDay> _endTimes = {};
+  final List<DoctorScheduleSlot> _scheduleSlots = [];
+
+  TimeOfDay _parseTime(String? timeStr, TimeOfDay fallback) {
+    if (timeStr == null || !timeStr.contains(':')) return fallback;
+    final parts = timeStr.split(':');
+    return TimeOfDay(
+      hour: int.tryParse(parts[0]) ?? fallback.hour,
+      minute: int.tryParse(parts[1]) ?? fallback.minute,
+    );
+  }
+
+  void _loadScheduleFromData(dynamic raw) {
+    _scheduleSlots.clear();
+    if (raw != null && raw is List && raw.isNotEmpty) {
+      for (var item in raw) {
+        if (item is Map) {
+          final type = item['type']?.toString() ?? (item['date'] != null ? 'date' : 'day');
+          final date = item['date']?.toString();
+          final day = item['day']?.toString() ?? 'Monday';
+
+          // Currently day-wise is hidden, only keep date-wise slots
+          if (type != 'date' && date == null) continue;
+
+          final bool mOn = item['morning_enabled'] == true;
+          final bool aOn = item['afternoon_enabled'] == true;
+          final bool eOn = item['evening_enabled'] == true;
+
+          final legacyStart = item['start_time']?.toString();
+          final legacyEnd = item['end_time']?.toString();
+
+          bool finalM = mOn;
+          bool finalA = aOn;
+          bool finalE = eOn;
+
+          TimeOfDay mStart = _parseTime(item['morning_start']?.toString(), const TimeOfDay(hour: 9, minute: 0));
+          TimeOfDay mEnd = _parseTime(item['morning_end']?.toString(), const TimeOfDay(hour: 12, minute: 0));
+          TimeOfDay aStart = _parseTime(item['afternoon_start']?.toString(), const TimeOfDay(hour: 13, minute: 0));
+          TimeOfDay aEnd = _parseTime(item['afternoon_end']?.toString(), const TimeOfDay(hour: 16, minute: 0));
+          TimeOfDay eStart = _parseTime(item['evening_start']?.toString(), const TimeOfDay(hour: 17, minute: 0));
+          TimeOfDay eEnd = _parseTime(item['evening_end']?.toString(), const TimeOfDay(hour: 20, minute: 0));
+
+          if (!mOn && !aOn && !eOn && legacyStart != null) {
+            final startHour = int.tryParse(legacyStart.split(':')[0]) ?? 10;
+            if (startHour < 12) {
+              finalM = true;
+              mStart = _parseTime(legacyStart, mStart);
+              mEnd = _parseTime(legacyEnd, mEnd);
+            } else if (startHour < 16) {
+              finalA = true;
+              aStart = _parseTime(legacyStart, aStart);
+              aEnd = _parseTime(legacyEnd, aEnd);
+            } else {
+              finalE = true;
+              eStart = _parseTime(legacyStart, eStart);
+              eEnd = _parseTime(legacyEnd, eEnd);
+            }
+          }
+
+          _scheduleSlots.add(DoctorScheduleSlot(
+            type: 'date',
+            day: day,
+            date: date,
+            morningEnabled: finalM,
+            morningStart: mStart,
+            morningEnd: mEnd,
+            afternoonEnabled: finalA,
+            afternoonStart: aStart,
+            afternoonEnd: aEnd,
+            eveningEnabled: finalE,
+            eveningStart: eStart,
+            eveningEnd: eEnd,
+          ));
+        }
+      }
+    }
+
+    if (_scheduleSlots.isEmpty) {
+      final now = DateTime.now();
+      final dateStr =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      _scheduleSlots.add(DoctorScheduleSlot(
+        type: 'date',
+        date: dateStr,
+        day: dayNames[now.weekday - 1],
+        morningEnabled: true,
+        afternoonEnabled: true,
+        eveningEnabled: true,
+      ));
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    for (var day in _weekdays) {
-      _activeDays[day] = false;
-      _startTimes[day] = const TimeOfDay(hour: 9, minute: 0);
-      _endTimes[day] = const TimeOfDay(hour: 17, minute: 0);
-    }
     _fetchExistingDetails();
   }
 
@@ -136,40 +278,6 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute $period';
-  }
-
-  Future<void> _selectTime(
-    BuildContext context,
-    String day,
-    bool isStart,
-  ) async {
-    final initialTime = isStart ? _startTimes[day]! : _endTimes[day]!;
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.teal,
-              onPrimary: Colors.white,
-              onSurface: AppColors.navy,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (pickedTime != null) {
-      setState(() {
-        if (isStart) {
-          _startTimes[day] = pickedTime;
-        } else {
-          _endTimes[day] = pickedTime;
-        }
-      });
-    }
   }
 
   Future<void> _fetchExistingDetails() async {
@@ -318,35 +426,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
             _selectedState = fetchedState;
           }
 
-          if (data['visit_day_time'] != null &&
-              data['visit_day_time'] is List) {
-            final list = data['visit_day_time'] as List;
-            for (var item in list) {
-              if (item is Map) {
-                final day = item['day']?.toString();
-                final startTimeStr = item['start_time']?.toString();
-                final endTimeStr = item['end_time']?.toString();
-
-                if (day != null && _weekdays.contains(day)) {
-                  _activeDays[day] = true;
-                  if (startTimeStr != null && startTimeStr.contains(':')) {
-                    final parts = startTimeStr.split(':');
-                    _startTimes[day] = TimeOfDay(
-                      hour: int.tryParse(parts[0]) ?? 9,
-                      minute: int.tryParse(parts[1]) ?? 0,
-                    );
-                  }
-                  if (endTimeStr != null && endTimeStr.contains(':')) {
-                    final parts = endTimeStr.split(':');
-                    _endTimes[day] = TimeOfDay(
-                      hour: int.tryParse(parts[0]) ?? 17,
-                      minute: int.tryParse(parts[1]) ?? 0,
-                    );
-                  }
-                }
-              }
-            }
-          }
+          _loadScheduleFromData(data['visit_day_time']);
         });
       } else {
         if (partnerData != null) {
@@ -420,28 +500,52 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
       return;
     }
 
-    final activeDaysList =
-        _weekdays.where((day) => _activeDays[day] == true).toList();
-    if (activeDaysList.isEmpty) {
-      CustomAlerts.showError(
-        context,
-        'Please enable at least one weekday schedule',
-      );
-      return;
+    bool hasActiveSlot = false;
+    for (var slot in _scheduleSlots) {
+      if (slot.morningEnabled) {
+        final startMinutes = slot.morningStart.hour * 60 + slot.morningStart.minute;
+        final endMinutes = slot.morningEnd.hour * 60 + slot.morningEnd.minute;
+        if (endMinutes <= startMinutes) {
+          CustomAlerts.showError(
+            context,
+            'Morning slot end time must be after start time for ${slot.type == "date" ? slot.date : slot.day}.',
+          );
+          return;
+        }
+        hasActiveSlot = true;
+      }
+      if (slot.afternoonEnabled) {
+        final startMinutes = slot.afternoonStart.hour * 60 + slot.afternoonStart.minute;
+        final endMinutes = slot.afternoonEnd.hour * 60 + slot.afternoonEnd.minute;
+        if (endMinutes <= startMinutes) {
+          CustomAlerts.showError(
+            context,
+            'Afternoon slot end time must be after start time for ${slot.type == "date" ? slot.date : slot.day}.',
+          );
+          return;
+        }
+        hasActiveSlot = true;
+      }
+      if (slot.eveningEnabled) {
+        final startMinutes = slot.eveningStart.hour * 60 + slot.eveningStart.minute;
+        final endMinutes = slot.eveningEnd.hour * 60 + slot.eveningEnd.minute;
+        if (endMinutes <= startMinutes) {
+          CustomAlerts.showError(
+            context,
+            'Evening slot end time must be after start time for ${slot.type == "date" ? slot.date : slot.day}.',
+          );
+          return;
+        }
+        hasActiveSlot = true;
+      }
     }
 
-    for (var day in activeDaysList) {
-      final start = _startTimes[day]!;
-      final end = _endTimes[day]!;
-      final startMinutes = start.hour * 60 + start.minute;
-      final endMinutes = end.hour * 60 + end.minute;
-      if (endMinutes <= startMinutes) {
-        CustomAlerts.showError(
-          context,
-          'On $day, the Visit End Time must be after the Visit Start Time.',
-        );
-        return;
-      }
+    if (!hasActiveSlot) {
+      CustomAlerts.showError(
+        context,
+        'Please configure at least one active visiting schedule slot (Morning, Afternoon, or Evening).',
+      );
+      return;
     }
 
     setState(() => _isLoading = true);
@@ -472,17 +576,27 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
         'partner_doctor_city': _cityController.text.trim(),
         'partner_doctor_google_map_link': _googleMapController.text.trim(),
         'partner_doctor_address': _addressController.text.trim(),
+        'schedule_data_json': jsonEncode(
+          _scheduleSlots.map((s) => s.toJson(_formatTimeOfDay)).toList(),
+        ),
       };
 
-      for (int i = 0; i < activeDaysList.length; i++) {
-        final day = activeDaysList[i];
-        body['partner_doctor_visit_day[$i]'] = day;
-        body['partner_doctor_visit_start_time[$i]'] = _formatTimeOfDay(
-          _startTimes[day]!,
-        );
-        body['partner_doctor_visit_end_time[$i]'] = _formatTimeOfDay(
-          _endTimes[day]!,
-        );
+      for (int i = 0; i < _scheduleSlots.length; i++) {
+        final slot = _scheduleSlots[i];
+        body['partner_doctor_visit_day[$i]'] =
+            slot.type == 'date' && slot.date != null ? slot.date! : slot.day;
+        final startStr = slot.morningEnabled
+            ? _formatTimeOfDay(slot.morningStart)
+            : (slot.afternoonEnabled
+                ? _formatTimeOfDay(slot.afternoonStart)
+                : _formatTimeOfDay(slot.eveningStart));
+        final endStr = slot.eveningEnabled
+            ? _formatTimeOfDay(slot.eveningEnd)
+            : (slot.afternoonEnabled
+                ? _formatTimeOfDay(slot.afternoonEnd)
+                : _formatTimeOfDay(slot.morningEnd));
+        body['partner_doctor_visit_start_time[$i]'] = startStr;
+        body['partner_doctor_visit_end_time[$i]'] = endStr;
       }
 
       final response = await ApiService.storeClinicProfile(
@@ -511,7 +625,7 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
             _designationController.text.trim().isNotEmpty;
         final double feeVal = double.tryParse(_feesController.text.trim()) ?? 0;
         final bool hasFee = feeVal > 0;
-        final bool hasSched = activeDaysList.isNotEmpty;
+        final bool hasSched = _scheduleSlots.isNotEmpty;
         final bool hasAddr = _addressController.text.trim().isNotEmpty &&
             _cityController.text.trim().isNotEmpty &&
             _pinCodeController.text.trim().isNotEmpty &&
@@ -922,24 +1036,41 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Section 4: Practice Schedule
+              // Section 4: Practice Schedule (Day-wise & Date-wise)
               FadeInUp(
                 duration: const Duration(milliseconds: 480),
                 child: _buildSectionCard(
-                  title: 'Visiting Hours Schedule',
-                  icon: Icons.event_available_rounded,
-                  iconColor: const Color(0xFFEA580C),
+                  title: 'Visiting Schedule (Date Wise)',
+                  icon: Icons.calendar_month_rounded,
+                  iconColor: const Color(0xFF0284C7),
                   children: [
                     Text(
-                      'Enable visiting days and specify practice timings for patients',
+                      'Configure practice dates on the calendar and set Morning, Afternoon, and Evening practice slots for online consultations',
                       style: GoogleFonts.manrope(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF64748B),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    ..._weekdays.map((day) => _buildCompactScheduleRow(day)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _addDateSlot,
+                        icon: const Icon(Icons.calendar_month_rounded, size: 16, color: Color(0xFF0284C7)),
+                        label: Text(
+                          '+ Add Visiting Date',
+                          style: GoogleFonts.manrope(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFF0284C7)),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF0284C7), width: 1.2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ..._scheduleSlots.asMap().entries.map((entry) => _buildScheduleSlotCard(entry.value, entry.key)),
                   ],
                 ),
               ),
@@ -1420,152 +1551,340 @@ class _DoctorContactScreenState extends State<DoctorContactScreen> {
     );
   }
 
-  Widget _buildCompactScheduleRow(String day) {
-    final isEnabled = _activeDays[day] ?? false;
-    final startTime = _startTimes[day]!;
-    final endTime = _endTimes[day]!;
+  // ignore: unused_element
+  void _addDaySlot() {
+    setState(() {
+      _scheduleSlots.add(DoctorScheduleSlot(
+        type: 'day',
+        day: 'Monday',
+        morningEnabled: true,
+        afternoonEnabled: true,
+        eveningEnabled: true,
+      ));
+    });
+  }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isEnabled ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isEnabled ? const Color(0xFF86EFAC) : const Color(0xFFE2E8F0),
-            width: 0.8,
+  Future<void> _addDateSlot() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 180)),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF0284C7),
+            onPrimary: Colors.white,
+            onSurface: Color(0xFF0F172A),
           ),
         ),
-        child: Row(
-          children: [
-            SizedBox(
-              height: 20,
-              width: 20,
-              child: Checkbox(
-                value: isEnabled,
-                activeColor: AppColors.teal,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                onChanged: (val) {
-                  setState(() {
-                    _activeDays[day] = val ?? false;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 75,
-              child: Text(
-                day,
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: isEnabled ? FontWeight.w800 : FontWeight.w600,
-                  color: isEnabled ? const Color(0xFF15803D) : const Color(0xFF64748B),
+        child: child!,
+      ),
+    );
+
+    if (picked != null) {
+      final dateStr =
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      final dayName = dayNames[picked.weekday - 1];
+
+      setState(() {
+        _scheduleSlots.add(DoctorScheduleSlot(
+          type: 'date',
+          date: dateStr,
+          day: dayName,
+          morningEnabled: true,
+          afternoonEnabled: true,
+          eveningEnabled: true,
+        ));
+      });
+    }
+  }
+
+  Future<void> _pickTime(
+    BuildContext context,
+    TimeOfDay initial,
+    ValueChanged<TimeOfDay> onPicked,
+  ) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.teal,
+            onPrimary: Colors.white,
+            onSurface: Color(0xFF0F172A),
+          ),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      onPicked(picked);
+    }
+  }
+
+  Widget _buildScheduleSlotCard(DoctorScheduleSlot slot, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFBAE6FD),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(4),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0F2FE),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-              ),
-            ),
-            if (isEnabled) ...[
-              const SizedBox(width: 4),
-              Expanded(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    InkWell(
-                      onTap: () => _selectTime(context, day, true),
-                      borderRadius: BorderRadius.circular(6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: const Color(0xFF86EFAC),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.access_time_rounded,
-                              size: 11,
-                              color: Color(0xFF16A34A),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              _formatTimeDisplay(startTime),
-                              style: GoogleFonts.manrope(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF166534),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        '➔',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Color(0xFF16A34A),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => _selectTime(context, day, false),
-                      borderRadius: BorderRadius.circular(6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: const Color(0xFF86EFAC),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.access_time_rounded,
-                              size: 11,
-                              color: Color(0xFF16A34A),
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              _formatTimeDisplay(endTime),
-                              style: GoogleFonts.manrope(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF166534),
-                              ),
-                            ),
-                          ],
-                        ),
+                    const Icon(Icons.event_available_rounded, size: 12, color: Color(0xFF0369A1)),
+                    const SizedBox(width: 4),
+                    Text(
+                      'VISITING DATE',
+                      style: GoogleFonts.manrope(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF0369A1),
+                        letterSpacing: 0.3,
                       ),
                     ),
                   ],
                 ),
               ),
-            ] else ...[
-              const Spacer(),
-              Text(
-                'Closed',
-                style: GoogleFonts.manrope(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF94A3B8),
+              const SizedBox(width: 8),
+              Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    final now = DateTime.now();
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.tryParse(slot.date ?? '') ?? now,
+                      firstDate: now,
+                      lastDate: now.add(const Duration(days: 180)),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        slot.date =
+                            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                        const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                        slot.day = dayNames[picked.weekday - 1];
+                      });
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today_rounded, size: 13.5, color: Color(0xFF0284C7)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            slot.date != null ? "${slot.date} (${slot.day})" : 'Select Date',
+                            maxLines: 1,
+                            style: GoogleFonts.manrope(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+              const SizedBox(width: 6),
+              IconButton(
+                onPressed: () {
+                  if (_scheduleSlots.length > 1) {
+                    setState(() {
+                      _scheduleSlots.removeAt(index);
+                    });
+                  } else {
+                    CustomAlerts.showError(context, 'At least one visiting date slot is required.');
+                  }
+                },
+                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
             ],
-          ],
+          ),
+          const Divider(height: 16, thickness: 0.8),
+
+          // 3 Slot Shifts (Using Icons, NO Emojis!)
+          _buildSlotShiftRow(
+            label: 'Morning Slot',
+            icon: Icons.wb_sunny_rounded,
+            iconColor: const Color(0xFFD97706),
+            enabled: slot.morningEnabled,
+            startTime: slot.morningStart,
+            endTime: slot.morningEnd,
+            onToggle: (val) => setState(() => slot.morningEnabled = val),
+            onPickStart: () => _pickTime(context, slot.morningStart, (t) => setState(() => slot.morningStart = t)),
+            onPickEnd: () => _pickTime(context, slot.morningEnd, (t) => setState(() => slot.morningEnd = t)),
+          ),
+          const SizedBox(height: 6),
+          _buildSlotShiftRow(
+            label: 'Afternoon Slot',
+            icon: Icons.cloud_queue_rounded,
+            iconColor: const Color(0xFFEA580C),
+            enabled: slot.afternoonEnabled,
+            startTime: slot.afternoonStart,
+            endTime: slot.afternoonEnd,
+            onToggle: (val) => setState(() => slot.afternoonEnabled = val),
+            onPickStart: () => _pickTime(context, slot.afternoonStart, (t) => setState(() => slot.afternoonStart = t)),
+            onPickEnd: () => _pickTime(context, slot.afternoonEnd, (t) => setState(() => slot.afternoonEnd = t)),
+          ),
+          const SizedBox(height: 6),
+          _buildSlotShiftRow(
+            label: 'Evening Slot',
+            icon: Icons.nightlight_round_rounded,
+            iconColor: const Color(0xFF7C3AED),
+            enabled: slot.eveningEnabled,
+            startTime: slot.eveningStart,
+            endTime: slot.eveningEnd,
+            onToggle: (val) => setState(() => slot.eveningEnabled = val),
+            onPickStart: () => _pickTime(context, slot.eveningStart, (t) => setState(() => slot.eveningStart = t)),
+            onPickEnd: () => _pickTime(context, slot.eveningEnd, (t) => setState(() => slot.eveningEnd = t)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSlotShiftRow({
+    required String label,
+    required IconData icon,
+    required Color iconColor,
+    required bool enabled,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    required ValueChanged<bool> onToggle,
+    required VoidCallback onPickStart,
+    required VoidCallback onPickEnd,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: enabled ? const Color(0xFFF0FAF7) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: enabled ? const Color(0xFFBFECE1) : const Color(0xFFE2E8F0),
+          width: 0.8,
         ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            height: 18,
+            width: 18,
+            child: Checkbox(
+              value: enabled,
+              activeColor: AppColors.teal,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              onChanged: (val) => onToggle(val ?? false),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Icon(icon, size: 15, color: enabled ? iconColor : const Color(0xFF94A3B8)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 11,
+                fontWeight: enabled ? FontWeight.w800 : FontWeight.w600,
+                color: enabled ? AppColors.navy : const Color(0xFF64748B),
+              ),
+            ),
+          ),
+          if (enabled) ...[
+            InkWell(
+              onTap: onPickStart,
+              borderRadius: BorderRadius.circular(6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFF86EFAC), width: 0.8),
+                ),
+                child: Text(
+                  _formatTimeDisplay(startTime),
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF166534),
+                  ),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 3),
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                size: 11,
+                color: Color(0xFF16A34A),
+              ),
+            ),
+            InkWell(
+              onTap: onPickEnd,
+              borderRadius: BorderRadius.circular(6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFF86EFAC), width: 0.8),
+                ),
+                child: Text(
+                  _formatTimeDisplay(endTime),
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF166534),
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            Text(
+              'Off',
+              style: GoogleFonts.manrope(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF94A3B8),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
