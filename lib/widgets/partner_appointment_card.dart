@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
@@ -511,6 +512,8 @@ class PartnerAppointmentCard extends StatelessWidget {
     final paymentAmount = (appt['payment_amount'] ?? '').toString().trim();
     final paymentStatus = (appt['payment_status'] ?? '').toString().trim();
     final userInquiry = (appt['user_inquiry'] ?? '').toString().trim();
+    final slotTimingInfo = _getSlotTimingInfo(appt);
+    final subSlotDetails = _getSubSlotDetails(appt);
 
     final bool isUpcomingGroup = normStatus == 'upcoming' ||
         normStatus == 'pending' ||
@@ -631,6 +634,14 @@ class PartnerAppointmentCard extends StatelessWidget {
                       _detailRow(Icons.calendar_today_outlined, 'Date', date, isHighlighted: true),
                       const SizedBox(height: 6),
                       _detailRow(Icons.access_time_rounded, 'Booking Time', time, isHighlighted: true),
+                      if (slotTimingInfo != null && slotTimingInfo.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        _detailRow(Icons.schedule_rounded, 'Slot Timing', slotTimingInfo, isHighlighted: true),
+                      ],
+                      if (subSlotDetails != null && subSlotDetails.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        _detailRow(Icons.timer_outlined, 'Slot Details', subSlotDetails, isHighlighted: true),
+                      ],
                       if (visitMode.isNotEmpty && visitMode != 'N/A') ...[
                         const SizedBox(height: 6),
                         _detailRow(
@@ -842,5 +853,189 @@ class PartnerAppointmentCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static int? _parseTimeToMinutes(String? timeStr) {
+    if (timeStr == null || timeStr.trim().isEmpty) return null;
+    try {
+      final raw = timeStr.trim();
+      final parts = raw.split(' ');
+      final hms = parts[0].split(':');
+      int h = int.parse(hms[0]);
+      int m = hms.length > 1 ? int.parse(hms[1]) : 0;
+      if (parts.length > 1) {
+        final period = parts[1].toUpperCase();
+        if (period == 'PM' && h < 12) h += 12;
+        if (period == 'AM' && h == 12) h = 0;
+      }
+      return h * 60 + m;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String? _getSlotTimingInfo(Map<String, dynamic> appt) {
+    // Check direct slot fields if present
+    final directSlot = (appt['slot_timing'] ?? appt['slot_details'] ?? appt['slot_name'] ?? '')
+        .toString()
+        .trim();
+    if (directSlot.isNotEmpty && directSlot != 'null' && directSlot != 'N/A') {
+      return directSlot;
+    }
+
+    final bookingDate = appt['booking_date']?.toString().trim();
+    final bookingTime = appt['booking_time']?.toString().trim();
+    final int? bookingMins = _parseTimeToMinutes(bookingTime);
+
+    final rawSchedule = appt['doctor_contact']?['visit_day_time'] ??
+        appt['doctor']?['visit_day_time'] ??
+        appt['test']?['test_day_time'];
+
+    List<dynamic> scheduleList = [];
+    if (rawSchedule is List) {
+      scheduleList = rawSchedule;
+    } else if (rawSchedule is String && rawSchedule.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawSchedule);
+        if (decoded is List) scheduleList = decoded;
+      } catch (_) {}
+    }
+
+    if (scheduleList.isEmpty) return null;
+
+    // 1. Date-based slot matching (Doctor / Others)
+    if (bookingDate != null && bookingDate.isNotEmpty) {
+      for (final entry in scheduleList) {
+        if (entry is! Map) continue;
+        final schedType = (entry['schedule_type'] ?? entry['type'] ?? '').toString().toLowerCase();
+        final entryDate = entry['date']?.toString().trim();
+        if (schedType == 'date' && entryDate == bookingDate) {
+          final slots = entry['slots'];
+          if (slots is List && slots.isNotEmpty) {
+            if (bookingMins != null) {
+              for (final s in slots) {
+                if (s is! Map) continue;
+                final sStart = s['start_time']?.toString();
+                final sEnd = s['end_time']?.toString();
+                final int startMin = _parseTimeToMinutes(sStart) ?? 0;
+                final int endMin = _parseTimeToMinutes(sEnd) ?? 1439;
+                if (bookingMins >= startMin && bookingMins <= endMin) {
+                  final sId = (s['id'] ?? '').toString();
+                  final sName = (s['name'] ??
+                          (sId.isNotEmpty ? '${sId[0].toUpperCase()}${sId.substring(1)}' : 'Slot'))
+                      .toString();
+                  if (sStart != null && sEnd != null) {
+                    return '$sName (${formatTime12h(sStart)} - ${formatTime12h(sEnd)})';
+                  }
+                  return '$sName (${formatTime12h(bookingTime)})';
+                }
+              }
+            }
+            // Fallback: list all slots configured for that date
+            final allLabels = slots.whereType<Map>().map((s) {
+              final sId = (s['id'] ?? '').toString();
+              final sName = (s['name'] ??
+                      (sId.isNotEmpty ? '${sId[0].toUpperCase()}${sId.substring(1)}' : 'Slot'))
+                  .toString();
+              final sStart = s['start_time']?.toString();
+              final sEnd = s['end_time']?.toString();
+              if (sStart != null && sEnd != null) {
+                return '$sName (${formatTime12h(sStart)} - ${formatTime12h(sEnd)})';
+              }
+              return sName;
+            }).join(', ');
+            if (allLabels.isNotEmpty) return allLabels;
+          }
+        }
+      }
+
+      // 2. Weekday-based schedule matching (OPD / Pathology)
+      try {
+        final parsedDate = DateTime.parse(bookingDate);
+        const weekdays = [
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
+          'sunday',
+        ];
+        final targetDay = weekdays[parsedDate.weekday - 1];
+        for (final entry in scheduleList) {
+          if (entry is! Map) continue;
+          final dayStr = (entry['doctor_visit_day'] ?? entry['day'] ?? '').toString().toLowerCase().trim();
+          if (dayStr.isNotEmpty && (dayStr == targetDay || targetDay.startsWith(dayStr) || dayStr.startsWith(targetDay.substring(0, 3)))) {
+            final start = (entry['doctor_visit_start_time'] ?? entry['start_time'] ?? '').toString().trim();
+            final end = (entry['doctor_visit_end_time'] ?? entry['end_time'] ?? '').toString().trim();
+            final dayLabel = (entry['doctor_visit_day'] ?? entry['day'] ?? '').toString().trim();
+            if (start.isNotEmpty && end.isNotEmpty) {
+              return '$dayLabel (${formatTime12h(start)} - ${formatTime12h(end)})';
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    return null;
+  }
+
+  static String? _getSubSlotDetails(Map<String, dynamic> appt) {
+    final bookingDate = appt['booking_date']?.toString().trim();
+    final bookingTime = appt['booking_time']?.toString().trim();
+    final int? bookingMins = _parseTimeToMinutes(bookingTime);
+    if (bookingMins == null || bookingDate == null || bookingDate.isEmpty) return null;
+
+    final rawSchedule = appt['doctor_contact']?['visit_day_time'] ??
+        appt['doctor']?['visit_day_time'] ??
+        appt['test']?['test_day_time'];
+
+    List<dynamic> scheduleList = [];
+    if (rawSchedule is List) {
+      scheduleList = rawSchedule;
+    } else if (rawSchedule is String && rawSchedule.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawSchedule);
+        if (decoded is List) scheduleList = decoded;
+      } catch (_) {}
+    }
+
+    for (final entry in scheduleList) {
+      if (entry is! Map) continue;
+      final schedType = (entry['schedule_type'] ?? entry['type'] ?? '').toString().toLowerCase();
+      final entryDate = entry['date']?.toString().trim();
+      if (schedType == 'date' && entryDate == bookingDate) {
+        final slots = entry['slots'];
+        if (slots is List) {
+          for (final s in slots) {
+            if (s is! Map) continue;
+            final sStart = s['start_time']?.toString();
+            final sEnd = s['end_time']?.toString();
+            if (sStart == null) continue;
+            final int? startMin = _parseTimeToMinutes(sStart);
+            if (startMin == null) continue;
+            int endMin = (sEnd != null ? _parseTimeToMinutes(sEnd) : null) ?? (startMin + 60);
+            if (endMin <= startMin) endMin = startMin + 60;
+
+            if (bookingMins >= startMin && bookingMins < endMin) {
+              final int slotIndex = ((bookingMins - startMin) ~/ 10) + 1;
+              final int subStart = startMin + (slotIndex - 1) * 10;
+              final int subEnd = (subStart + 10 <= endMin) ? (subStart + 10) : endMin;
+
+              String fmtMin(int mins) {
+                final h24 = mins ~/ 60;
+                final m = mins % 60;
+                final period = h24 >= 12 ? 'PM' : 'AM';
+                final h12 = h24 % 12 == 0 ? 12 : h24 % 12;
+                return '$h12:${m.toString().padLeft(2, '0')} $period';
+              }
+
+              return 'Slot $slotIndex (${fmtMin(subStart)} - ${fmtMin(subEnd)})';
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
 }
