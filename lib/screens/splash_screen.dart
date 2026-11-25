@@ -139,8 +139,19 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final size = MediaQuery.sizeOf(context);
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
+    final double horizontalMargin = (screenWidth * 0.045).clamp(12.0, 22.0);
+    final double cardPadH = (screenWidth * 0.042).clamp(12.0, 22.0);
+    final double cardPadV = (screenHeight * 0.024).clamp(14.0, 24.0);
+    final double logoSize = (screenWidth * 0.135).clamp(44.0, 60.0);
+    final double titleFontSize = (screenWidth * 0.052).clamp(17.0, 22.0);
+    final double gapAfterHeader = (screenHeight * 0.028).clamp(14.0, 28.0);
+    final double gapAfterBadges = (screenHeight * 0.024).clamp(12.0, 24.0);
+    final double ecgHeight = (screenHeight * 0.045).clamp(26.0, 40.0);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -152,13 +163,13 @@ class _SplashScreenState extends State<SplashScreen>
             child: Image.asset(
               AppAssets.splashBg,
               fit: BoxFit.cover,
-              alignment: const Alignment(0.45, 0.0),
+              alignment: const Alignment(0.45, -0.2),
             ),
           ),
 
-          // 2. PREMIUM TRANSLUCENT FADING BACKDROP (Starts at 48% height to make all texts 100% legible)
+          // 2. PREMIUM TRANSLUCENT FADING BACKDROP
           Positioned(
-            top: screenHeight * 0.48,
+            top: screenHeight * 0.45,
             bottom: 0,
             left: 0,
             right: 0,
@@ -178,7 +189,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // 3. FINE LIGHT GREY MEDICAL GRID (Reduced opacity to keep background fully visible)
+          // 3. FINE LIGHT GREY MEDICAL GRID
           Opacity(
             opacity: 0.06,
             child: GridPaper(
@@ -190,175 +201,212 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // 3. ALL SPLASH COMPONENTS ENCLOSED IN A FLOATING GLASSMEDIC CONTROL CARD DECK (Generous Spacing & Breathtaking Legibility)
+          // 4. RESPONSIVE FLOATING GLASSMEDIC CONTROL CARD DECK
           Positioned(
-            bottom: MediaQuery.of(context).padding.bottom + 20,
-            left: 18,
-            right: 18,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.90),
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 25,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 10),
-                  ),
-                  BoxShadow(
-                    color: AppColors.teal.withValues(alpha: 0.03),
-                    blurRadius: 40,
-                    spreadRadius: -5,
-                  ),
-                ],
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.70),
-                  width: 1.8,
+            bottom: bottomInset + (screenHeight * 0.02).clamp(12.0, 22.0),
+            left: horizontalMargin,
+            right: horizontalMargin,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 460,
+                  maxHeight: screenHeight * 0.56,
                 ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // A. THE BRAND LOGO & NAME (Sleek, compact, bottom-oriented)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Small glowing logo
-                      AnimatedBuilder(
-                        animation: _pulseController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _scaleAnimation.value,
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(18),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.teal.withValues(alpha: 0.22),
-                                    blurRadius: _glowAnimation.value * 0.5,
-                                    spreadRadius: 2,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: cardPadH,
+                    vertical: cardPadV,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.92),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 25,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 10),
+                      ),
+                      BoxShadow(
+                        color: AppColors.teal.withValues(alpha: 0.03),
+                        blurRadius: 40,
+                        spreadRadius: -5,
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.70),
+                      width: 1.8,
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // A. THE BRAND LOGO & NAME
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AnimatedBuilder(
+                              animation: _pulseController,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _scaleAnimation.value,
+                                  child: Container(
+                                    width: logoSize,
+                                    height: logoSize,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(logoSize * 0.3),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.teal.withValues(alpha: 0.22),
+                                          blurRadius: _glowAnimation.value * 0.5,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(logoSize * 0.3),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(1.0),
+                                        child: Image.asset(
+                                          AppAssets.logo,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(18),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(1.0),
-                                  child: Image.asset(
-                                    AppAssets.logo,
-                                    fit: BoxFit.contain,
-                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(width: (screenWidth * 0.032).clamp(10.0, 14.0)),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'DOCTORWALA',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: titleFontSize,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.navy,
+                                        letterSpacing: 2.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 1),
+                                    Text(
+                                      'PARTNER APP',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: (titleFontSize * 0.48).clamp(9.0, 11.0),
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.teal,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 14),
-                      // Brand Suite Typography
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'DOCTORWALA',
-                            style: GoogleFonts.manrope(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.navy,
-                              letterSpacing: 2.5,
+                          ],
+                        ),
+
+                        SizedBox(height: gapAfterHeader),
+
+                        // B. RESPONSIVE GLASS SERVICES ROW (No overlap on any screen width)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: _buildAnimatedServiceBadge(
+                                  index: 0,
+                                  icon: Icons.medical_services_rounded,
+                                  label: 'Doctor\nChambers',
+                                  glowColor: AppColors.teal,
+                                  screenWidth: screenWidth,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: _buildAnimatedServiceBadge(
+                                  index: 1,
+                                  icon: Icons.biotech_rounded,
+                                  label: 'Pathology\nLabs',
+                                  glowColor: const Color(0xFF0EA5E9),
+                                  screenWidth: screenWidth,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: _buildAnimatedServiceBadge(
+                                  index: 2,
+                                  icon: Icons.badge_rounded,
+                                  label: 'Individual\nDoctors',
+                                  glowColor: const Color(0xFF10B981),
+                                  screenWidth: screenWidth,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: gapAfterBadges),
+
+                        // C. ECG HEART RATE LINE
+                        SizedBox(
+                          height: ecgHeight,
+                          width: double.infinity,
+                          child: AnimatedBuilder(
+                            animation: _ecgController,
+                            builder: (context, child) {
+                              return CustomPaint(
+                                painter: ECGWavePainter(
+                                  progress: _ecgController.value,
+                                  color: AppColors.teal.withValues(alpha: 0.8),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
+                        SizedBox(height: gapAfterBadges),
+
+                        // D. BOTTOM SCANNING INDICATION & PROGRESS BAR
+                        SizedBox(
+                          width: (screenWidth * 0.45).clamp(130.0, 210.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              backgroundColor: Colors.black.withValues(alpha: 0.08),
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.teal),
+                              minHeight: 3.5,
                             ),
                           ),
-                          const SizedBox(height: 1),
-                          Text(
-                            'PARTNER APP',
-                            style: GoogleFonts.manrope(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.teal,
-                              letterSpacing: 1.5,
-                            ),
+                        ),
+                        SizedBox(height: (screenHeight * 0.012).clamp(8.0, 12.0)),
+                        Text(
+                          'Connecting to medical systems network...',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.manrope(
+                            fontSize: (screenWidth * 0.025).clamp(8.5, 10.5),
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.2,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // B. COMPACT GLASS SERVICES ROW (Now situated cleanly at bottom)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildAnimatedServiceBadge(
-                        index: 0,
-                        icon: Icons.medical_services_rounded,
-                        label: 'Doctor Chambers',
-                        glowColor: AppColors.teal,
-                      ),
-                      _buildAnimatedServiceBadge(
-                        index: 1,
-                        icon: Icons.biotech_rounded,
-                        label: 'Pathology Labs',
-                        glowColor: const Color(0xFF0EA5E9),
-                      ),
-                      _buildAnimatedServiceBadge(
-                        index: 2,
-                        icon: Icons.badge_rounded,
-                        label: 'Individual Doctors',
-                        glowColor: const Color(0xFF10B981),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // C. ECG HEART RATE LINE (Perfect height, clear background)
-                  SizedBox(
-                    height: 40,
-                    width: double.infinity,
-                    child: AnimatedBuilder(
-                      animation: _ecgController,
-                      builder: (context, child) {
-                        return CustomPaint(
-                          painter: ECGWavePainter(
-                            progress: _ecgController.value,
-                            color: AppColors.teal.withValues(alpha: 0.8),
-                          ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(height: 28),
-
-                  // D. BOTTOM SCANNING INDICATION & PROGRESS BAR
-                  SizedBox(
-                    width: screenWidth * 0.45,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        backgroundColor: Colors.black.withValues(alpha: 0.08),
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.teal),
-                        minHeight: 3.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Connecting to medical systems network...',
-                    style: GoogleFonts.manrope(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -373,43 +421,48 @@ class _SplashScreenState extends State<SplashScreen>
     required IconData icon,
     required String label,
     required Color glowColor,
+    required double screenWidth,
   }) {
     final bool isActive = _isHighlighted[index];
+    final double iconSize = (screenWidth * 0.056).clamp(18.0, 24.0);
+    final double iconPad = (screenWidth * 0.02).clamp(6.0, 9.0);
+    final double labelSize = (screenWidth * 0.024).clamp(8.0, 10.0);
 
     return AnimatedBuilder(
       animation: _floatController,
       builder: (context, child) {
-        // Subtle floating offset offsetted by index
-        final floatOffset = 5 * math.sin((_floatController.value + (index * 0.3)) * math.pi);
-        
+        final floatOffset = 4 * math.sin((_floatController.value + (index * 0.3)) * math.pi);
+
         return Transform.translate(
           offset: Offset(0, floatOffset),
           child: AnimatedScale(
-            scale: isActive ? 1.12 : 0.95,
+            scale: isActive ? 1.04 : 0.96,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutBack,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              width: 105,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: (screenWidth * 0.015).clamp(4.0, 8.0),
+                vertical: (screenWidth * 0.025).clamp(8.0, 12.0),
+              ),
               decoration: BoxDecoration(
-                color: isActive 
-                    ? Colors.white.withValues(alpha: 0.94) 
+                color: isActive
+                    ? Colors.white.withValues(alpha: 0.95)
                     : Colors.white.withValues(alpha: 0.78),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: isActive 
-                        ? glowColor.withValues(alpha: 0.20) 
+                    color: isActive
+                        ? glowColor.withValues(alpha: 0.20)
                         : Colors.black.withValues(alpha: 0.03),
-                    blurRadius: isActive ? 16 : 8,
-                    spreadRadius: isActive ? 2 : 0,
-                    offset: Offset(0, isActive ? 6 : 3),
+                    blurRadius: isActive ? 12 : 6,
+                    spreadRadius: isActive ? 1 : 0,
+                    offset: Offset(0, isActive ? 5 : 3),
                   )
                 ],
                 border: Border.all(
                   color: isActive ? glowColor : Colors.white.withValues(alpha: 0.40),
-                  width: isActive ? 2.0 : 1.2,
+                  width: isActive ? 1.8 : 1.2,
                 ),
               ),
               child: Column(
@@ -417,28 +470,32 @@ class _SplashScreenState extends State<SplashScreen>
                 children: [
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(iconPad),
                     decoration: BoxDecoration(
-                      color: isActive 
-                          ? glowColor.withValues(alpha: 0.15) 
+                      color: isActive
+                          ? glowColor.withValues(alpha: 0.15)
                           : Colors.grey.shade100.withValues(alpha: 0.50),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       icon,
                       color: isActive ? glowColor : Colors.grey.shade500,
-                      size: 24,
+                      size: iconSize,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.manrope(
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.w900,
-                      color: isActive ? AppColors.navy : Colors.grey.shade500,
-                      height: 1.2,
+                  const SizedBox(height: 6),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      style: GoogleFonts.manrope(
+                        fontSize: labelSize,
+                        fontWeight: FontWeight.w900,
+                        color: isActive ? AppColors.navy : Colors.grey.shade500,
+                        height: 1.2,
+                      ),
                     ),
                   ),
                 ],
