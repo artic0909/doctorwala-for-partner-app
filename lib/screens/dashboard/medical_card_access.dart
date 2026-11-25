@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../core/api_service.dart';
@@ -327,6 +328,13 @@ class _MedicalCardAccessTabState extends State<MedicalCardAccessTab> {
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _medicalCardController,
+                                textCapitalization: TextCapitalization.characters,
+                                inputFormatters: [
+                                  _GroupedCodeFormatter(
+                                    groupSizes: const [4, 4],
+                                    separator: ' ',
+                                  ),
+                                ],
                                 style: GoogleFonts.manrope(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -388,6 +396,13 @@ class _MedicalCardAccessTabState extends State<MedicalCardAccessTab> {
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _memberIdController,
+                                textCapitalization: TextCapitalization.characters,
+                                inputFormatters: [
+                                  _GroupedCodeFormatter(
+                                    groupSizes: const [2, 4],
+                                    separator: '-',
+                                  ),
+                                ],
                                 style: GoogleFonts.manrope(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -661,6 +676,72 @@ class _MedicalCardAccessTabState extends State<MedicalCardAccessTab> {
                   ],
                 ),
               ),
+    );
+  }
+}
+
+class _GroupedCodeFormatter extends TextInputFormatter {
+  final List<int> groupSizes;
+  final String separator;
+
+  const _GroupedCodeFormatter({
+    required this.groupSizes,
+    required this.separator,
+  });
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final alnumRegex = RegExp(r'[A-Za-z0-9]');
+    final raw = newValue.text.toUpperCase();
+
+    // Count alphanumeric characters before the new cursor position
+    final int selectionEnd = newValue.selection.end.clamp(0, raw.length);
+    int alnumBeforeCursor = 0;
+    for (int i = 0; i < selectionEnd; i++) {
+      if (alnumRegex.hasMatch(raw[i])) {
+        alnumBeforeCursor++;
+      }
+    }
+
+    // Extract only uppercase alphanumeric characters
+    final clean = raw.replaceAll(RegExp(r'[^A-Z0-9]'), '');
+
+    // Build formatted text according to groupSizes
+    final buffer = StringBuffer();
+    int groupIdx = 0;
+    int countInGroup = 0;
+    int newCursorOffset = 0;
+    int alnumSeen = 0;
+
+    for (int i = 0; i < clean.length; i++) {
+      if (groupIdx < groupSizes.length && countInGroup == groupSizes[groupIdx]) {
+        buffer.write(separator);
+        groupIdx++;
+        countInGroup = 0;
+      }
+      buffer.write(clean[i]);
+      countInGroup++;
+      alnumSeen++;
+      if (alnumSeen == alnumBeforeCursor) {
+        newCursorOffset = buffer.length;
+      }
+    }
+
+    if (alnumBeforeCursor == 0) {
+      newCursorOffset = 0;
+    } else if (alnumBeforeCursor >= clean.length) {
+      newCursorOffset = buffer.length;
+    }
+
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(
+        offset: newCursorOffset.clamp(0, formatted.length),
+      ),
     );
   }
 }
